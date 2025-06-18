@@ -9,8 +9,6 @@ const navigation = [
   { name: 'Categories', href: '/admin/categories', icon: '🏷️' },
   { name: 'Orders', href: '/admin/orders', icon: '📋' },
   { name: 'Users', href: '/admin/users', icon: '👥' },
-  { name: 'Reviews', href: '/admin/reviews', icon: '⭐' },
-  { name: 'Inventory', href: '/admin/inventory', icon: '📦' },
 ]
 
 export default function AdminSidebar() {
