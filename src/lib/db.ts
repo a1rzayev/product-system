@@ -14,6 +14,15 @@ import type {
   PaginatedResponse
 } from '../types'
 
+// Helper to parse dimensions
+function parseProductDimensions(product: any): any {
+  if (!product) return product
+  return {
+    ...product,
+    dimensions: product.dimensions ? JSON.parse(product.dimensions) : undefined
+  }
+}
+
 // Product operations
 export const productService = {
   // Get all products with pagination
@@ -52,8 +61,11 @@ export const productService = {
       prisma.product.count({ where })
     ])
 
+    // Parse dimensions for all products
+    const parsedProducts = products.map((product: any) => parseProductDimensions(product))
+
     return {
-      data: products as Product[],
+      data: parsedProducts as Product[],
       pagination: {
         page,
         limit,
@@ -78,7 +90,8 @@ export const productService = {
         }
       }
     })
-    return product as Product | null
+    if (!product) return null
+    return parseProductDimensions(product) as Product
   },
 
   // Get product by slug
@@ -96,7 +109,8 @@ export const productService = {
         }
       }
     })
-    return product as Product | null
+    if (!product) return null
+    return parseProductDimensions(product) as Product
   },
 
   // Create new product
@@ -115,7 +129,7 @@ export const productService = {
         inventory: true
       }
     })
-    return product as Product
+    return parseProductDimensions(product) as Product
   },
 
   // Update product
@@ -135,7 +149,7 @@ export const productService = {
         inventory: true
       }
     })
-    return product as Product
+    return parseProductDimensions(product) as Product
   },
 
   // Delete product
@@ -272,7 +286,16 @@ export const orderService = {
       },
       orderBy: { createdAt: 'desc' }
     })
-    return orders as Order[]
+    // Parse shippingAddress, billingAddress, and product dimensions
+    return orders.map((order: any) => ({
+      ...order,
+      shippingAddress: order.shippingAddress ? JSON.parse(order.shippingAddress) : undefined,
+      billingAddress: order.billingAddress ? JSON.parse(order.billingAddress) : undefined,
+      items: order.items.map((item: any) => ({
+        ...item,
+        product: parseProductDimensions(item.product)
+      }))
+    })) as Order[]
   },
 
   // Get order by ID
@@ -289,7 +312,16 @@ export const orderService = {
         }
       }
     })
-    return order as Order | null
+    if (!order) return null
+    return {
+      ...order,
+      shippingAddress: order.shippingAddress ? JSON.parse(order.shippingAddress) : undefined,
+      billingAddress: order.billingAddress ? JSON.parse(order.billingAddress) : undefined,
+      items: order.items.map((item: any) => ({
+        ...item,
+        product: parseProductDimensions(item.product)
+      }))
+    } as Order
   },
 
   // Create order
@@ -421,7 +453,11 @@ export const cartService = {
       },
       orderBy: { createdAt: 'desc' }
     })
-    return cartItems as CartItem[]
+    // Parse product dimensions
+    return cartItems.map((item: any) => ({
+      ...item,
+      product: parseProductDimensions(item.product)
+    })) as CartItem[]
   },
 
   // Add item to cart
