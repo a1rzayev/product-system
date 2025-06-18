@@ -4,6 +4,7 @@ import { signOut } from 'next-auth/react'
 import { User } from 'next-auth'
 import { useState } from 'react'
 import { useLanguage } from '@/contexts/LanguageContext'
+import LanguageSwitcher from '../LanguageSwitcher'
 
 interface AdminHeaderProps {
   user: User
@@ -39,6 +40,7 @@ export default function AdminHeader({ user }: AdminHeaderProps) {
           <h1 className="text-xl font-semibold text-gray-900">{t('admin.dashboard')}</h1>
         </div>
         <div className="flex items-center space-x-4">
+          <LanguageSwitcher />
           <div className="text-sm text-gray-700">
             {t('auth.welcome')}, {user.name || user.email}
           </div>
