@@ -1,0 +1,227 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model for authentication and user management
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String
+  role      UserRole @default(CUSTOMER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  orders   Order[]
+  reviews  Review[]
+  cart     CartItem[]
+
+  @@map("users")
+}
+
+// Product categories
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  slug        String   @unique
+  parentId    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryHierarchy")
+  products Product[]
+
+  @@map("categories")
+}
+
+// Main product model
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  slug        String   @unique
+  sku         String   @unique
+  price       Decimal  @db.Decimal(10, 2)
+  comparePrice Decimal? @db.Decimal(10, 2)
+  isActive    Boolean  @default(true)
+  isFeatured  Boolean  @default(false)
+  weight      Float?
+  dimensions  Json?    // { length, width, height }
+  categoryId  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  category     Category        @relation(fields: [categoryId], references: [id])
+  images       ProductImage[]
+  variants     ProductVariant[]
+  inventory    Inventory?
+  reviews      Review[]
+  orderItems   OrderItem[]
+  cartItems    CartItem[]
+
+  @@map("products")
+}
+
+// Product images
+model ProductImage {
+  id        String   @id @default(cuid())
+  url       String
+  alt       String?
+  isPrimary Boolean  @default(false)
+  order     Int      @default(0)
+  productId String
+  createdAt DateTime @default(now())
+
+  // Relations
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_images")
+}
+
+// Product variants (size, color, etc.)
+model ProductVariant {
+  id        String   @id @default(cuid())
+  name      String   // e.g., "Size", "Color"
+  value     String   // e.g., "Large", "Red"
+  sku       String   @unique
+  price     Decimal? @db.Decimal(10, 2) // Override product price if different
+  productId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  orderItems OrderItem[]
+  cartItems  CartItem[]
+
+  @@map("product_variants")
+}
+
+// Inventory management
+model Inventory {
+  id        String   @id @default(cuid())
+  quantity  Int      @default(0)
+  reserved  Int      @default(0) // Items in cart/orders
+  productId String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("inventory")
+}
+
+// Customer orders
+model Order {
+  id            String      @id @default(cuid())
+  orderNumber   String      @unique
+  status        OrderStatus @default(PENDING)
+  total         Decimal     @db.Decimal(10, 2)
+  subtotal      Decimal     @db.Decimal(10, 2)
+  tax           Decimal     @db.Decimal(10, 2) @default(0)
+  shipping      Decimal     @db.Decimal(10, 2) @default(0)
+  discount      Decimal     @db.Decimal(10, 2) @default(0)
+  customerId    String
+  shippingAddress Json      // { street, city, state, zip, country }
+  billingAddress  Json      // { street, city, state, zip, country }
+  notes         String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  // Relations
+  customer  User        @relation(fields: [customerId], references: [id])
+  items     OrderItem[]
+
+  @@map("orders")
+}
+
+// Individual items in orders
+model OrderItem {
+  id        String   @id @default(cuid())
+  quantity  Int
+  price     Decimal  @db.Decimal(10, 2)
+  orderId   String
+  productId String
+  variantId String?
+  createdAt DateTime @default(now())
+
+  // Relations
+  order   Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product       @relation(fields: [productId], references: [id])
+  variant ProductVariant? @relation(fields: [variantId], references: [id])
+
+  @@map("order_items")
+}
+
+// Product reviews and ratings
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int      // 1-5 stars
+  title     String?
+  comment   String?
+  isVerified Boolean @default(false)
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId]) // One review per user per product
+  @@map("reviews")
+}
+
+// Shopping cart items
+model CartItem {
+  id        String   @id @default(cuid())
+  quantity  Int      @default(1)
+  userId    String
+  productId String
+  variantId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product      @relation(fields: [productId], references: [id])
+  variant ProductVariant? @relation(fields: [variantId], references: [id])
+
+  @@unique([userId, productId, variantId]) // One cart item per user per product variant
+  @@map("cart_items")
+}
+
+// Enums
+enum UserRole {
+  ADMIN
+  CUSTOMER
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
