@@ -7,15 +7,21 @@ export default withAuth(
     const isAdmin = token?.role === 'ADMIN'
     const pathname = req.nextUrl.pathname
 
-    // Allow access to login and error pages without any checks
-    if (pathname === '/admin/login' || pathname === '/admin/error') {
+    // Allow access to login page without any checks
+    if (pathname === '/admin/login') {
       return NextResponse.next()
     }
 
     // For all other admin routes, check if user is admin
     if (pathname.startsWith('/admin')) {
-      if (!isAdmin) {
+      if (!token) {
+        // No token, redirect to login
         return NextResponse.redirect(new URL('/admin/login', req.url))
+      }
+      
+      if (!isAdmin) {
+        // User is authenticated but not admin, redirect to login with error
+        return NextResponse.redirect(new URL('/admin/login?error=unauthorized', req.url))
       }
     }
 
@@ -24,8 +30,8 @@ export default withAuth(
   {
     callbacks: {
       authorized: ({ req, token }) => {
-        // Always allow access to login and error pages
-        if (req.nextUrl.pathname === '/admin/login' || req.nextUrl.pathname === '/admin/error') {
+        // Always allow access to login page
+        if (req.nextUrl.pathname === '/admin/login') {
           return true
         }
         // For other admin routes, require authentication

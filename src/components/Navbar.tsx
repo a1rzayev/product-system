@@ -12,7 +12,6 @@ export default function Navbar() {
     { name: 'Home', href: '/' },
     { name: 'Products', href: '/products' },
     { name: 'Categories', href: '/categories' },
-    { name: 'Admin', href: '/admin' },
   ]
 
   return (

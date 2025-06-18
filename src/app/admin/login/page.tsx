@@ -1,18 +1,30 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { signIn, getSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [isRedirecting, setIsRedirecting] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // Check for error parameter from URL
+  useEffect(() => {
+    const errorParam = searchParams.get('error')
+    if (errorParam === 'unauthorized') {
+      setError('Access denied. Admin privileges required.')
+    }
+  }, [searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (loading || isRedirecting) return
+    
     setLoading(true)
     setError('')
 
@@ -28,12 +40,15 @@ export default function AdminLogin() {
       } else {
         const session = await getSession()
         if (session?.user.role === 'ADMIN') {
-          router.push('/admin')
+          setIsRedirecting(true)
+          // Use window.location instead of router.push to avoid history issues
+          window.location.href = '/admin'
         } else {
           setError('Access denied. Admin privileges required.')
         }
       }
     } catch (error) {
+      console.error('Login error:', error)
       setError('An error occurred. Please try again.')
     } finally {
       setLoading(false)
@@ -94,10 +109,10 @@ export default function AdminLogin() {
           <div>
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || isRedirecting}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
             >
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading ? 'Signing in...' : isRedirecting ? 'Redirecting...' : 'Sign in'}
             </button>
           </div>
         </form>

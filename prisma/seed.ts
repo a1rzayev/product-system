@@ -6,65 +6,60 @@ const prisma = new PrismaClient()
 async function main() {
   console.log('Starting database seed...')
 
-  // Create categories
-  const electronics = await prisma.category.create({
-    data: {
-      name: 'Electronics',
-      description: 'Electronic devices and gadgets',
-      slug: 'electronics'
-    }
-  })
-
-  const clothing = await prisma.category.create({
-    data: {
-      name: 'Clothing',
-      description: 'Fashion and apparel',
-      slug: 'clothing'
-    }
-  })
-
-  const home = await prisma.category.create({
-    data: {
-      name: 'Home & Garden',
-      description: 'Home improvement and garden supplies',
-      slug: 'home-garden'
-    }
-  })
-
-  // Create subcategories
-  const smartphones = await prisma.category.create({
-    data: {
-      name: 'Smartphones',
-      description: 'Mobile phones and accessories',
-      slug: 'smartphones',
-      parentId: electronics.id
-    }
-  })
-
+  // Create computer goods categories
   const laptops = await prisma.category.create({
     data: {
       name: 'Laptops',
-      description: 'Portable computers',
-      slug: 'laptops',
-      parentId: electronics.id
+      description: 'Portable computers for work and play',
+      slug: 'laptops'
     }
   })
 
-  const mensClothing = await prisma.category.create({
+  const desktops = await prisma.category.create({
     data: {
-      name: "Men's Clothing",
-      description: 'Clothing for men',
-      slug: 'mens-clothing',
-      parentId: clothing.id
+      name: 'Desktops',
+      description: 'Powerful desktop computers',
+      slug: 'desktops'
     }
   })
 
-  const womensClothing = await prisma.category.create({
+  const monitors = await prisma.category.create({
     data: {
-      name: "Women's Clothing",
-      description: 'Clothing for women',
-      slug: 'womens-clothing',
-      parentId: clothing.id
+      name: 'Monitors',
+      description: 'High-resolution computer monitors',
+      slug: 'monitors'
+    }
+  })
+
+  const keyboards = await prisma.category.create({
+    data: {
+      name: 'Keyboards',
+      description: 'Mechanical and membrane keyboards',
+      slug: 'keyboards'
+    }
+  })
+
+  const mice = await prisma.category.create({
+    data: {
+      name: 'Mice',
+      description: 'Wired and wireless computer mice',
+      slug: 'mice'
+    }
+  })
+
+  const components = await prisma.category.create({
+    data: {
+      name: 'Components',
+      description: 'PC parts and upgrades',
+      slug: 'components'
+    }
+  })
+
+  const accessories = await prisma.category.create({
+    data: {
+      name: 'Accessories',
+      description: 'Computer accessories and peripherals',
+      slug: 'accessories'
     }
   })
 
@@ -92,65 +87,115 @@ async function main() {
   })
 
   // Create products
-  const iphone = await prisma.product.create({
-    data: {
-      name: 'iPhone 15 Pro',
-      description: 'The latest iPhone with advanced features and powerful performance.',
-      slug: 'iphone-15-pro',
-      sku: 'IPHONE-15-PRO-128',
-      price: 999.99,
-      comparePrice: 1099.99,
-      isActive: true,
-      isFeatured: true,
-      weight: 187,
-      dimensions: JSON.stringify({ length: 147.6, width: 71.6, height: 8.25 }),
-      categoryId: smartphones.id
-    }
-  })
-
   const macbook = await prisma.product.create({
     data: {
-      name: 'MacBook Pro 14"',
-      description: 'Professional laptop with M3 chip for ultimate performance.',
-      slug: 'macbook-pro-14',
-      sku: 'MBP-14-M3-512',
-      price: 1999.99,
-      comparePrice: 2199.99,
+      name: 'MacBook Pro 16"',
+      description: 'Apple M3 Pro, 16GB RAM, 1TB SSD',
+      slug: 'macbook-pro-16',
+      sku: 'MBP-16-M3-1TB',
+      price: 2999.99,
+      comparePrice: 3199.99,
       isActive: true,
       isFeatured: true,
-      weight: 1600,
-      dimensions: JSON.stringify({ length: 312.6, width: 221.2, height: 15.5 }),
+      weight: 2100,
+      dimensions: JSON.stringify({ length: 355.7, width: 248.1, height: 16.8 }),
       categoryId: laptops.id
     }
   })
 
-  const tshirt = await prisma.product.create({
+  const dellDesktop = await prisma.product.create({
     data: {
-      name: 'Premium Cotton T-Shirt',
-      description: 'Comfortable and stylish cotton t-shirt for everyday wear.',
-      slug: 'premium-cotton-tshirt',
-      sku: 'TSHIRT-COTTON-M',
-      price: 29.99,
-      comparePrice: 39.99,
+      name: 'Dell XPS Desktop',
+      description: 'Intel i9, 32GB RAM, RTX 4070, 2TB SSD',
+      slug: 'dell-xps-desktop',
+      sku: 'DELL-XPS-I9-4070',
+      price: 2499.99,
+      comparePrice: 2699.99,
       isActive: true,
-      isFeatured: false,
-      weight: 180,
-      categoryId: mensClothing.id
+      isFeatured: true,
+      weight: 8000,
+      dimensions: JSON.stringify({ length: 400, width: 180, height: 420 }),
+      categoryId: desktops.id
     }
   })
 
-  const dress = await prisma.product.create({
+  const lgMonitor = await prisma.product.create({
     data: {
-      name: 'Summer Floral Dress',
-      description: 'Beautiful floral print dress perfect for summer occasions.',
-      slug: 'summer-floral-dress',
-      sku: 'DRESS-FLORAL-M',
-      price: 89.99,
+      name: 'LG UltraFine 4K Monitor',
+      description: '27-inch, 4K UHD, USB-C',
+      slug: 'lg-ultrafine-4k',
+      sku: 'LG-4K-27',
+      price: 599.99,
+      comparePrice: 699.99,
+      isActive: true,
+      isFeatured: false,
+      weight: 4500,
+      dimensions: JSON.stringify({ length: 613, width: 230, height: 464 }),
+      categoryId: monitors.id
+    }
+  })
+
+  const logitechKeyboard = await prisma.product.create({
+    data: {
+      name: 'Logitech MX Keys',
+      description: 'Wireless illuminated keyboard',
+      slug: 'logitech-mx-keys',
+      sku: 'LOGI-MX-KEYS',
+      price: 119.99,
+      comparePrice: 139.99,
+      isActive: true,
+      isFeatured: false,
+      weight: 800,
+      dimensions: JSON.stringify({ length: 430, width: 131, height: 20 }),
+      categoryId: keyboards.id
+    }
+  })
+
+  const logitechMouse = await prisma.product.create({
+    data: {
+      name: 'Logitech MX Master 3S',
+      description: 'Wireless ergonomic mouse',
+      slug: 'logitech-mx-master-3s',
+      sku: 'LOGI-MX-MASTER-3S',
+      price: 99.99,
       comparePrice: 119.99,
       isActive: true,
-      isFeatured: true,
-      weight: 250,
-      categoryId: womensClothing.id
+      isFeatured: false,
+      weight: 141,
+      dimensions: JSON.stringify({ length: 124.9, width: 84.3, height: 51 }),
+      categoryId: mice.id
+    }
+  })
+
+  const samsungSSD = await prisma.product.create({
+    data: {
+      name: 'Samsung 990 PRO SSD',
+      description: '2TB NVMe PCIe Gen4 SSD',
+      slug: 'samsung-990-pro-2tb',
+      sku: 'SAMSUNG-990PRO-2TB',
+      price: 179.99,
+      comparePrice: 199.99,
+      isActive: true,
+      isFeatured: false,
+      weight: 30,
+      dimensions: JSON.stringify({ length: 80, width: 22, height: 2.3 }),
+      categoryId: components.id
+    }
+  })
+
+  const usbHub = await prisma.product.create({
+    data: {
+      name: 'Anker USB-C Hub',
+      description: '7-in-1 USB-C hub with HDMI, SD, and more',
+      slug: 'anker-usb-c-hub',
+      sku: 'ANKER-USB-C-HUB',
+      price: 49.99,
+      comparePrice: 59.99,
+      isActive: true,
+      isFeatured: false,
+      weight: 120,
+      dimensions: JSON.stringify({ length: 115, width: 45, height: 14 }),
+      categoryId: accessories.id
     }
   })
 
@@ -158,94 +203,53 @@ async function main() {
   await prisma.productImage.createMany({
     data: [
       {
-        url: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=800',
-        alt: 'iPhone 15 Pro',
-        isPrimary: true,
-        order: 0,
-        productId: iphone.id
-      },
-      {
         url: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800',
-        alt: 'MacBook Pro 14"',
+        alt: 'MacBook Pro 16"',
         isPrimary: true,
         order: 0,
         productId: macbook.id
       },
       {
-        url: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800',
-        alt: 'Premium Cotton T-Shirt',
+        url: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?w=800',
+        alt: 'Dell XPS Desktop',
         isPrimary: true,
         order: 0,
-        productId: tshirt.id
+        productId: dellDesktop.id
       },
       {
-        url: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=800',
-        alt: 'Summer Floral Dress',
+        url: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800',
+        alt: 'LG UltraFine 4K Monitor',
         isPrimary: true,
         order: 0,
-        productId: dress.id
-      }
-    ]
-  })
-
-  // Create product variants
-  await prisma.productVariant.createMany({
-    data: [
-      {
-        name: 'Storage',
-        value: '128GB',
-        sku: 'IPHONE-15-PRO-128',
-        productId: iphone.id
+        productId: lgMonitor.id
       },
       {
-        name: 'Storage',
-        value: '256GB',
-        sku: 'IPHONE-15-PRO-256',
-        price: 1099.99,
-        productId: iphone.id
+        url: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800',
+        alt: 'Logitech MX Keys',
+        isPrimary: true,
+        order: 0,
+        productId: logitechKeyboard.id
       },
       {
-        name: 'Storage',
-        value: '512GB',
-        sku: 'IPHONE-15-PRO-512',
-        price: 1299.99,
-        productId: iphone.id
+        url: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800',
+        alt: 'Logitech MX Master 3S',
+        isPrimary: true,
+        order: 0,
+        productId: logitechMouse.id
       },
       {
-        name: 'Size',
-        value: 'Small',
-        sku: 'TSHIRT-COTTON-S',
-        productId: tshirt.id
+        url: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800',
+        alt: 'Samsung 990 PRO SSD',
+        isPrimary: true,
+        order: 0,
+        productId: samsungSSD.id
       },
       {
-        name: 'Size',
-        value: 'Medium',
-        sku: 'TSHIRT-COTTON-M',
-        productId: tshirt.id
-      },
-      {
-        name: 'Size',
-        value: 'Large',
-        sku: 'TSHIRT-COTTON-L',
-        productId: tshirt.id
-      },
-      {
-        name: 'Size',
-        value: 'Small',
-        sku: 'DRESS-FLORAL-S',
-        productId: dress.id
-      },
-      {
-        name: 'Size',
-        value: 'Medium',
-        sku: 'DRESS-FLORAL-M',
-        productId: dress.id
-      },
-      {
-        name: 'Size',
-        value: 'Large',
-        sku: 'DRESS-FLORAL-L',
-        productId: dress.id
+        url: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800',
+        alt: 'Anker USB-C Hub',
+        isPrimary: true,
+        order: 0,
+        productId: usbHub.id
       }
     ]
   })
@@ -253,60 +257,17 @@ async function main() {
   // Create inventory
   await prisma.inventory.createMany({
     data: [
-      {
-        quantity: 50,
-        reserved: 0,
-        productId: iphone.id
-      },
-      {
-        quantity: 25,
-        reserved: 0,
-        productId: macbook.id
-      },
-      {
-        quantity: 100,
-        reserved: 0,
-        productId: tshirt.id
-      },
-      {
-        quantity: 75,
-        reserved: 0,
-        productId: dress.id
-      }
+      { quantity: 20, reserved: 0, productId: macbook.id },
+      { quantity: 10, reserved: 0, productId: dellDesktop.id },
+      { quantity: 30, reserved: 0, productId: lgMonitor.id },
+      { quantity: 50, reserved: 0, productId: logitechKeyboard.id },
+      { quantity: 40, reserved: 0, productId: logitechMouse.id },
+      { quantity: 100, reserved: 0, productId: samsungSSD.id },
+      { quantity: 60, reserved: 0, productId: usbHub.id }
     ]
   })
 
-  // Create reviews
-  await prisma.review.createMany({
-    data: [
-      {
-        rating: 5,
-        title: 'Excellent phone!',
-        comment: 'The iPhone 15 Pro is amazing. Great camera and performance.',
-        isVerified: true,
-        userId: customer.id,
-        productId: iphone.id
-      },
-      {
-        rating: 4,
-        title: 'Great laptop',
-        comment: 'Very fast and reliable. Perfect for work and development.',
-        isVerified: true,
-        userId: customer.id,
-        productId: macbook.id
-      },
-      {
-        rating: 5,
-        title: 'Comfortable t-shirt',
-        comment: 'High quality cotton, very comfortable to wear.',
-        isVerified: true,
-        userId: customer.id,
-        productId: tshirt.id
-      }
-    ]
-  })
-
-  console.log('✅ Database seeded successfully!')
+  console.log('✅ Database seeded with computer goods!')
   console.log('📧 Admin email: admin@example.com')
   console.log('📧 Customer email: customer@example.com')
   console.log('🔑 Password: admin123 / customer123')
