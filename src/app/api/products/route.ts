@@ -32,12 +32,16 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
+    console.log('Creating product with data:', body)
     
     const newProduct = await productService.create(body)
     
     return NextResponse.json(newProduct, { status: 201 })
   } catch (error) {
     console.error('Error creating product:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ 
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
   }
 } 

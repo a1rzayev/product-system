@@ -2,17 +2,34 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { Category } from '@/types'
 
 export default function NewProductPage() {
   const router = useRouter()
+  const { data: session, status } = useSession()
   const { t } = useLanguage()
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+
+  // Redirect if not authenticated or not admin
+  useEffect(() => {
+    if (status === 'loading') return
+    
+    if (!session) {
+      router.push('/login')
+      return
+    }
+    
+    if (session.user.role !== 'ADMIN') {
+      router.push('/')
+      return
+    }
+  }, [session, status, router])
 
   const [formData, setFormData] = useState({
     name: '',
@@ -48,13 +65,42 @@ export default function NewProductPage() {
       }
     }
 
-    fetchCategories()
-  }, [t])
+    if (session?.user.role === 'ADMIN') {
+      fetchCategories()
+    }
+  }, [t, session])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setSaving(true)
     setError('')
+
+    // Client-side validation
+    if (!formData.name.trim()) {
+      setError('Product name is required')
+      setSaving(false)
+      return
+    }
+    if (!formData.slug.trim()) {
+      setError('Slug is required')
+      setSaving(false)
+      return
+    }
+    if (!formData.sku.trim()) {
+      setError('SKU is required')
+      setSaving(false)
+      return
+    }
+    if (!formData.categoryId) {
+      setError('Category is required')
+      setSaving(false)
+      return
+    }
+    if (!formData.price || parseFloat(formData.price) <= 0) {
+      setError('Valid price is required')
+      setSaving(false)
+      return
+    }
 
     try {
       const response = await fetch('/api/products', {
@@ -67,22 +113,29 @@ export default function NewProductPage() {
           price: parseFloat(formData.price) || 0,
           comparePrice: formData.comparePrice ? parseFloat(formData.comparePrice) : null,
           weight: formData.weight ? parseInt(formData.weight) : null,
-          dimensions: JSON.stringify({
+          dimensions: {
             length: parseFloat(formData.dimensions.length) || 0,
             width: parseFloat(formData.dimensions.width) || 0,
             height: parseFloat(formData.dimensions.height) || 0,
-          })
+          }
         }),
       })
 
       if (!response.ok) {
-        throw new Error('Failed to create product')
+        const errorData = await response.json()
+        if (response.status === 401) {
+          throw new Error('You are not authorized. Please log in as an admin.')
+        } else if (response.status === 400) {
+          throw new Error(errorData.error || 'Invalid data provided')
+        } else {
+          throw new Error(errorData.error || 'Failed to create product')
+        }
       }
 
       router.push('/admin/products')
     } catch (error) {
       console.error('Error creating product:', error)
-      setError(t('errors.somethingWentWrong'))
+      setError(error instanceof Error ? error.message : t('errors.somethingWentWrong'))
     } finally {
       setSaving(false)
     }
@@ -109,7 +162,7 @@ export default function NewProductPage() {
     }))
   }
 
-  if (loading) {
+  if (loading || status === 'loading') {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -118,6 +171,11 @@ export default function NewProductPage() {
         </div>
       </div>
     )
+  }
+
+  // Don't render if not authenticated
+  if (!session || session.user.role !== 'ADMIN') {
+    return null
   }
 
   return (
@@ -190,13 +248,14 @@ export default function NewProductPage() {
 
           <div>
             <label htmlFor="categoryId" className="block text-sm font-medium text-black">
-              {t('products.productCategory')}
+              {t('products.productCategory')} *
             </label>
             <select
               id="categoryId"
               name="categoryId"
               value={formData.categoryId}
               onChange={handleInputChange}
+              required
               className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">{t('common.select')} {t('categories.title').toLowerCase()}</option>
