@@ -1,19 +1,9 @@
 'use client'
 
 import { useLanguage } from '@/contexts/LanguageContext'
-import { productService } from '@/lib/db'
-import Link from 'next/link'
 
 export default function ProductsPage() {
   const { t } = useLanguage()
-  const products = await productService.getAll(1, 20)
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(price)
-  }
 
   return (
     <div className="min-h-screen bg-gray-50">

@@ -1,12 +1,9 @@
 'use client'
 
 import { useLanguage } from '@/contexts/LanguageContext'
-import { categoryService } from '@/lib/db'
-import Link from 'next/link'
 
 export default function CategoriesPage() {
   const { t } = useLanguage()
-  const categories = await categoryService.getAll()
 
   return (
     <div className="min-h-screen bg-gray-50">
