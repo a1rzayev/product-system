@@ -1,35 +1,32 @@
-import { productService, categoryService, orderService, userService } from '@/lib/db'
+'use client'
 
-export default async function AdminDashboard() {
-  // Fetch dashboard statistics
-  const [products, categories, orders, users] = await Promise.all([
-    productService.getAll(1, 1), 
-    categoryService.getAll(),
-    orderService.getByUser(''), 
-    userService.getById(''), 
-  ])
+import { useLanguage } from '@/contexts/LanguageContext'
+import Link from 'next/link'
+
+export default function AdminDashboard() {
+  const { t } = useLanguage()
 
   const stats = [
     {
-      name: 'Total Products',
-      value: products.pagination.total,
+      name: t('products.title'),
+      value: '0',
       icon: '📦',
       color: 'bg-blue-500'
     },
     {
-      name: 'Categories',
-      value: categories.length,
+      name: t('categories.title'),
+      value: '0',
       icon: '🏷️',
       color: 'bg-green-500'
     },
     {
-      name: 'Total Orders',
+      name: t('orders.title'),
       value: '0', 
       icon: '📋',
       color: 'bg-yellow-500'
     },
     {
-      name: 'Users',
+      name: t('users.title'),
       value: '0', 
       icon: '👥',
       color: 'bg-purple-500'
@@ -39,8 +36,8 @@ export default async function AdminDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600">Welcome to your product system admin panel</p>
+        <h1 className="text-2xl font-bold text-gray-900">{t('admin.dashboard')}</h1>
+        <p className="text-gray-600">{t('auth.welcome')} {t('admin.dashboard').toLowerCase()}</p>
       </div>
 
       {/* Stats Grid */}
@@ -62,40 +59,40 @@ export default async function AdminDashboard() {
 
       <div className="bg-white rounded-lg shadow">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-medium text-gray-900">Quick Actions</h2>
+          <h2 className="text-lg font-medium text-gray-900">{t('common.actions')}</h2>
         </div>
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <a
+            <Link
               href="/admin/products/new"
               className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <span className="text-2xl mr-3">➕</span>
               <div>
-                <h3 className="font-medium text-gray-900">Add Product</h3>
-                <p className="text-sm text-gray-600">Create a new product</p>
+                <h3 className="font-medium text-gray-900">{t('products.addProduct')}</h3>
+                <p className="text-sm text-gray-600">{t('products.addProduct')}</p>
               </div>
-            </a>
-            <a
+            </Link>
+            <Link
               href="/admin/categories/new"
               className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <span className="text-2xl mr-3">🏷️</span>
               <div>
-                <h3 className="font-medium text-gray-900">Add Category</h3>
-                <p className="text-sm text-gray-600">Create a new category</p>
+                <h3 className="font-medium text-gray-900">{t('categories.addCategory')}</h3>
+                <p className="text-sm text-gray-600">{t('categories.addCategory')}</p>
               </div>
-            </a>
-            <a
+            </Link>
+            <Link
               href="/admin/orders"
               className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <span className="text-2xl mr-3">📋</span>
               <div>
-                <h3 className="font-medium text-gray-900">View Orders</h3>
-                <p className="text-sm text-gray-600">Manage customer orders</p>
+                <h3 className="font-medium text-gray-900">{t('orders.title')}</h3>
+                <p className="text-sm text-gray-600">{t('orders.title')}</p>
               </div>
-            </a>
+            </Link>
           </div>
         </div>
       </div>
@@ -103,12 +100,12 @@ export default async function AdminDashboard() {
       {/* Recent Activity */}
       <div className="bg-white rounded-lg shadow">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-medium text-gray-900">Recent Activity</h2>
+          <h2 className="text-lg font-medium text-gray-900">{t('common.actions')}</h2>
         </div>
         <div className="p-6">
           <div className="text-center text-gray-500 py-8">
-            <p>No recent activity to display</p>
-            <p className="text-sm">Activity will appear here as you use the system</p>
+            <p>{t('common.loading')}</p>
+            <p className="text-sm">{t('common.loading')}</p>
           </div>
         </div>
       </div>

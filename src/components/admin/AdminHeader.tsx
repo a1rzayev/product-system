@@ -4,7 +4,6 @@ import { signOut } from 'next-auth/react'
 import { User } from 'next-auth'
 import { useState } from 'react'
 import { useLanguage } from '@/contexts/LanguageContext'
-import { addLanguageToPathname } from '@/lib/i18n'
 
 interface AdminHeaderProps {
   user: User
@@ -12,7 +11,7 @@ interface AdminHeaderProps {
 
 export default function AdminHeader({ user }: AdminHeaderProps) {
   const [isLoggingOut, setIsLoggingOut] = useState(false)
-  const { t, language } = useLanguage()
+  const { t } = useLanguage()
 
   const handleLogout = async () => {
     if (isLoggingOut) return
@@ -26,7 +25,7 @@ export default function AdminHeader({ user }: AdminHeaderProps) {
       })
       
       // Manually redirect to ensure correct port
-      window.location.href = addLanguageToPathname('/login', language)
+      window.location.href = '/login'
     } catch (error) {
       console.error('Logout error:', error)
       setIsLoggingOut(false)

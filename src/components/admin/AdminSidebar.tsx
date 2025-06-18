@@ -3,18 +3,17 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useLanguage } from '@/contexts/LanguageContext'
-import { addLanguageToPathname } from '@/lib/i18n'
 
 export default function AdminSidebar() {
   const pathname = usePathname()
-  const { t, language } = useLanguage()
+  const { t } = useLanguage()
 
   const navigation = [
-    { name: t('admin.dashboard'), href: addLanguageToPathname('/admin', language), icon: '📊' },
-    { name: t('admin.products'), href: addLanguageToPathname('/admin/products', language), icon: '📦' },
-    { name: t('admin.categories'), href: addLanguageToPathname('/admin/categories', language), icon: '🏷️' },
-    { name: t('admin.orders'), href: addLanguageToPathname('/admin/orders', language), icon: '📋' },
-    { name: t('admin.users'), href: addLanguageToPathname('/admin/users', language), icon: '👥' },
+    { name: t('admin.dashboard'), href: '/admin', icon: '📊' },
+    { name: t('admin.products'), href: '/admin/products', icon: '📦' },
+    { name: t('admin.categories'), href: '/admin/categories', icon: '🏷️' },
+    { name: t('admin.orders'), href: '/admin/orders', icon: '📋' },
+    { name: t('admin.users'), href: '/admin/users', icon: '👥' },
   ]
 
   return (

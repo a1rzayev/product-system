@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { signIn, getSession, useSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -14,6 +15,7 @@ export default function Login() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { data: session, status } = useSession()
+  const { t } = useLanguage()
 
   // Redirect if already authenticated as admin
   useEffect(() => {
@@ -27,9 +29,9 @@ export default function Login() {
   useEffect(() => {
     const errorParam = searchParams.get('error')
     if (errorParam === 'unauthorized') {
-      setError('Access denied. Admin privileges required.')
+      setError(t('errors.unauthorized'))
     }
-  }, [searchParams])
+  }, [searchParams, t])
 
   // Don't render the form if already authenticated
   if (status === 'loading' || (status === 'authenticated' && session?.user?.role === 'ADMIN')) {
@@ -37,7 +39,7 @@ export default function Login() {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Loading...</p>
+          <p className="mt-2 text-gray-600">{t('common.loading')}</p>
         </div>
       </div>
     )
@@ -58,7 +60,7 @@ export default function Login() {
       })
 
       if (result?.error) {
-        setError('Invalid credentials')
+        setError(t('auth.invalidCredentials'))
       } else {
         const session = await getSession()
         if (session?.user.role === 'ADMIN') {
@@ -66,12 +68,12 @@ export default function Login() {
           // Use window.location instead of router.push to avoid history issues
           window.location.href = '/admin'
         } else {
-          setError('Access denied. Admin privileges required.')
+          setError(t('errors.unauthorized'))
         }
       }
     } catch (error) {
       console.error('Login error:', error)
-      setError('An error occurred. Please try again.')
+      setError(t('errors.somethingWentWrong'))
     } finally {
       setLoading(false)
     }
@@ -82,17 +84,17 @@ export default function Login() {
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-black">
-            Admin Login
+            {t('auth.login')}
           </h2>
           <p className="mt-2 text-center text-sm text-black">
-            Sign in to access the admin panel
+            {t('auth.signIn')} {t('admin.dashboard').toLowerCase()}
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-black mb-1">
-                Email address
+                {t('auth.email')}
               </label>
               <input
                 id="email"
@@ -103,12 +105,12 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-black rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Enter your email"
+                placeholder={t('auth.email')}
               />
             </div>
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-black mb-1">
-                Password
+                {t('auth.password')}
               </label>
               <div className="relative">
                 <input
@@ -120,7 +122,7 @@ export default function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="appearance-none relative block w-full px-3 py-2 pr-10 border border-gray-300 placeholder-gray-500 text-black rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                  placeholder="Enter your password"
+                  placeholder={t('auth.password')}
                 />
                 <button
                   type="button"
@@ -152,7 +154,7 @@ export default function Login() {
               disabled={loading || isRedirecting}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
             >
-              {loading ? 'Signing in...' : isRedirecting ? 'Redirecting...' : 'Sign in'}
+              {loading ? t('common.loading') : isRedirecting ? t('common.loading') : t('auth.signIn')}
             </button>
           </div>
         </form>

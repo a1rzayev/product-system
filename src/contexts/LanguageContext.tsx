@@ -1,8 +1,7 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
-import { Language, getLanguageFromPathname, addLanguageToPathname, getTranslation } from '@/lib/i18n';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { Language, getTranslation } from '@/lib/i18n';
 
 interface LanguageContextType {
   language: Language;
@@ -13,19 +12,10 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const pathname = usePathname();
-  const router = useRouter();
   const [language, setLanguageState] = useState<Language>('en-us');
-
-  useEffect(() => {
-    const langFromPath = getLanguageFromPathname(pathname);
-    setLanguageState(langFromPath);
-  }, [pathname]);
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
-    const newPath = addLanguageToPathname(pathname, lang);
-    router.push(newPath);
   };
 
   const t = (key: string): string => {

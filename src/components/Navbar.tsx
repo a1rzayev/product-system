@@ -5,19 +5,18 @@ import { usePathname } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
 import { useState } from 'react'
 import { useLanguage } from '@/contexts/LanguageContext'
-import { addLanguageToPathname } from '@/lib/i18n'
 import LanguageSwitcher from './LanguageSwitcher'
 
 export default function Navbar() {
   const pathname = usePathname()
   const { data: session } = useSession()
   const [isLoggingOut, setIsLoggingOut] = useState(false)
-  const { t, language } = useLanguage()
+  const { t } = useLanguage()
 
   const navigation = [
-    { name: t('navigation.home'), href: addLanguageToPathname('/', language) },
-    { name: t('navigation.products'), href: addLanguageToPathname('/products', language) },
-    { name: t('navigation.categories'), href: addLanguageToPathname('/categories', language) },
+    { name: t('navigation.home'), href: '/' },
+    { name: t('navigation.products'), href: '/products' },
+    { name: t('navigation.categories'), href: '/categories' },
   ]
 
   const handleLogout = async () => {
@@ -32,7 +31,7 @@ export default function Navbar() {
       })
       
       // Manually redirect to ensure correct port
-      window.location.href = addLanguageToPathname('/login', language)
+      window.location.href = '/login'
     } catch (error) {
       console.error('Logout error:', error)
       setIsLoggingOut(false)
@@ -45,7 +44,7 @@ export default function Navbar() {
         <div className="flex justify-between h-16 items-center">
           <div className="flex items-center">
             <div className="flex-shrink-0 flex items-center">
-              <Link href={addLanguageToPathname('/', language)} className="text-xl font-bold text-black">
+              <Link href="/" className="text-xl font-bold text-black">
                 Product System
               </Link>
             </div>
@@ -74,7 +73,7 @@ export default function Navbar() {
               <div className="flex items-center space-x-4">
                 {session.user?.role === 'ADMIN' && (
                   <Link
-                    href={addLanguageToPathname('/admin', language)}
+                    href="/admin"
                     className="text-sm text-blue-600 hover:text-blue-700 font-medium"
                   >
                   {t('auth.welcome')}, {session.user?.name || session.user?.email}
@@ -90,7 +89,7 @@ export default function Navbar() {
               </div>
             ) : (
               <Link
-                href={addLanguageToPathname('/login', language)}
+                href="/login"
                 className="text-sm text-black hover:text-gray-700"
               >
                 {t('auth.login')}

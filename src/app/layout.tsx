@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Providers from "@/components/Providers";
+import ConditionalNavbar from "@/components/ConditionalNavbar";
+import AuthRedirect from "@/components/AuthRedirect";
 
 const geist = Geist({
   variable: "--font-geist-sans",
@@ -27,7 +30,11 @@ export default function RootLayout({
       <body
         className={`${geist.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <Providers>
+          <AuthRedirect />
+          <ConditionalNavbar />
+          {children}
+        </Providers>
       </body>
     </html>
   );
