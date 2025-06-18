@@ -3,16 +3,33 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
+import { useState } from 'react'
 
 export default function Navbar() {
   const pathname = usePathname()
   const { data: session } = useSession()
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
 
   const navigation = [
     { name: 'Home', href: '/' },
     { name: 'Products', href: '/products' },
     { name: 'Categories', href: '/categories' },
   ]
+
+  const handleLogout = async () => {
+    if (isLoggingOut) return
+    
+    setIsLoggingOut(true)
+    try {
+      await signOut({ 
+        callbackUrl: '/',
+        redirect: true 
+      })
+    } catch (error) {
+      console.error('Logout error:', error)
+      setIsLoggingOut(false)
+    }
+  }
 
   return (
     <nav className="bg-white shadow-sm border-b">
@@ -56,10 +73,11 @@ export default function Navbar() {
                   </Link>
                 )}
                 <button
-                  onClick={() => signOut({ callbackUrl: '/' })}
-                  className="text-sm text-gray-500 hover:text-gray-700"
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
+                  className="text-sm text-gray-500 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Logout
+                  {isLoggingOut ? 'Logging out...' : 'Logout'}
                 </button>
               </div>
             ) : (

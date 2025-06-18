@@ -2,12 +2,17 @@
 
 import Link from 'next/link'
 import { Product } from '@/types'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 interface ProductTableProps {
   products: Product[]
 }
 
 export default function ProductTable({ products }: ProductTableProps) {
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const router = useRouter()
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -25,6 +30,32 @@ export default function ProductTable({ products }: ProductTableProps) {
         Inactive
       </span>
     )
+  }
+
+  const handleDelete = async (productId: string, productName: string) => {
+    if (!confirm(`Are you sure you want to delete "${productName}"? This action cannot be undone.`)) {
+      return
+    }
+
+    setDeletingId(productId)
+    
+    try {
+      const response = await fetch(`/api/products/${productId}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete product')
+      }
+
+      // Refresh the page to show updated data
+      router.refresh()
+    } catch (error) {
+      console.error('Error deleting product:', error)
+      alert('Failed to delete product. Please try again.')
+    } finally {
+      setDeletingId(null)
+    }
   }
 
   return (
@@ -106,14 +137,13 @@ export default function ProductTable({ products }: ProductTableProps) {
                     Edit
                   </Link>
                   <button
-                    onClick={() => {
-                      if (confirm('Are you sure you want to delete this product?')) {
-                        // Handle delete
-                      }
-                    }}
-                    className="text-red-600 hover:text-red-900"
+                    onClick={() => handleDelete(product.id, product.name)}
+                    disabled={deletingId === product.id}
+                    className={`text-red-600 hover:text-red-900 disabled:opacity-50 disabled:cursor-not-allowed ${
+                      deletingId === product.id ? 'cursor-not-allowed' : ''
+                    }`}
                   >
-                    Delete
+                    {deletingId === product.id ? 'Deleting...' : 'Delete'}
                   </button>
                 </div>
               </td>
