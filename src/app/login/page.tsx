@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { signIn, getSession } from 'next-auth/react'
+import { signIn, getSession, useSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
-export default function AdminLogin() {
+export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -12,6 +12,15 @@ export default function AdminLogin() {
   const [isRedirecting, setIsRedirecting] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { data: session, status } = useSession()
+
+  // Redirect if already authenticated as admin
+  useEffect(() => {
+    if (status === 'authenticated' && session?.user?.role === 'ADMIN') {
+      console.log('Already authenticated as admin, redirecting...')
+      window.location.href = '/admin'
+    }
+  }, [session, status])
 
   // Check for error parameter from URL
   useEffect(() => {
@@ -20,6 +29,18 @@ export default function AdminLogin() {
       setError('Access denied. Admin privileges required.')
     }
   }, [searchParams])
+
+  // Don't render the form if already authenticated
+  if (status === 'loading' || (status === 'authenticated' && session?.user?.role === 'ADMIN')) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

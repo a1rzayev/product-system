@@ -59,7 +59,7 @@ export default function Navbar() {
               </div>
             ) : (
               <Link
-                href="/admin/login"
+                href="/login"
                 className="text-sm text-gray-500 hover:text-gray-700"
               >
                 Login

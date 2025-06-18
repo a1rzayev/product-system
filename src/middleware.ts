@@ -1,48 +1,40 @@
-import { withAuth } from 'next-auth/middleware'
 import { NextResponse } from 'next/server'
+import { getToken } from 'next-auth/jwt'
+import type { NextRequest } from 'next/server'
 
-export default withAuth(
-  function middleware(req) {
-    const token = req.nextauth.token
-    const isAdmin = token?.role === 'ADMIN'
-    const pathname = req.nextUrl.pathname
-
-    // Allow access to login page without any checks
-    if (pathname === '/admin/login') {
-      return NextResponse.next()
-    }
-
-    // For all other admin routes, check if user is admin
-    if (pathname.startsWith('/admin')) {
-      if (!token) {
-        // No token, redirect to login
-        return NextResponse.redirect(new URL('/admin/login', req.url))
-      }
-      
-      if (!isAdmin) {
-        // User is authenticated but not admin, redirect to login with error
-        return NextResponse.redirect(new URL('/admin/login?error=unauthorized', req.url))
-      }
-    }
-
+export async function middleware(req: NextRequest) {
+  const pathname = req.nextUrl.pathname
+  
+  // Always allow access to login page and auth API routes
+  if (pathname === '/login' || pathname.startsWith('/api/auth')) {
     return NextResponse.next()
-  },
-  {
-    callbacks: {
-      authorized: ({ req, token }) => {
-        // Always allow access to login page
-        if (req.nextUrl.pathname === '/admin/login') {
-          return true
-        }
-        // For other admin routes, require authentication
-        if (req.nextUrl.pathname.startsWith('/admin')) {
-          return !!token
-        }
-        return true
+  }
+
+  // Only check admin routes
+  if (pathname.startsWith('/admin')) {
+    try {
+      const token = await getToken({ 
+        req, 
+        secret: process.env.NEXTAUTH_SECRET 
+      })
+
+      // If no token, redirect to login
+      if (!token) {
+        return NextResponse.redirect(new URL('/login', req.url))
       }
+
+      // If user is not admin, redirect to login with error
+      if (token.role !== 'ADMIN') {
+        return NextResponse.redirect(new URL('/login?error=unauthorized', req.url))
+      }
+    } catch (error) {
+      console.error('Middleware error:', error)
+      return NextResponse.redirect(new URL('/login', req.url))
     }
   }
-)
+
+  return NextResponse.next()
+}
 
 export const config = {
   matcher: ['/admin/:path*']

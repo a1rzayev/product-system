@@ -1,5 +1,4 @@
 import { getServerSession } from 'next-auth'
-import { redirect } from 'next/navigation'
 import { authOptions } from '@/lib/auth'
 import AdminSidebar from '@/components/admin/AdminSidebar'
 import AdminHeader from '@/components/admin/AdminHeader'
@@ -11,8 +10,9 @@ export default async function AdminLayout({
 }) {
   const session = await getServerSession(authOptions)
 
-  if (!session || !session.user || session.user.role !== 'ADMIN') {
-    redirect('/admin/login')
+  // Safety check - this shouldn't happen due to middleware, but just in case
+  if (!session || !session.user) {
+    throw new Error('Unauthorized access to admin area')
   }
 
   return (
