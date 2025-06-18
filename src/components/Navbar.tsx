@@ -4,16 +4,19 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
 import { useState } from 'react'
+import { useLanguage } from '@/contexts/LanguageContext'
+import LanguageSwitcher from './LanguageSwitcher'
 
 export default function Navbar() {
   const pathname = usePathname()
   const { data: session } = useSession()
   const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const { t } = useLanguage()
 
   const navigation = [
-    { name: 'Home', href: '/' },
-    { name: 'Products', href: '/products' },
-    { name: 'Categories', href: '/categories' },
+    { name: t('navigation.home'), href: '/' },
+    { name: t('navigation.products'), href: '/products' },
+    { name: t('navigation.categories'), href: '/categories' },
   ]
 
   const handleLogout = async () => {
@@ -38,10 +41,10 @@ export default function Navbar() {
   return (
     <nav className="bg-white shadow-sm border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex">
+        <div className="flex justify-between h-16 items-center">
+          <div className="flex items-center">
             <div className="flex-shrink-0 flex items-center">
-              <Link href="/" className="text-xl font-bold text-gray-900">
+              <Link href="/" className="text-xl font-bold text-black">
                 Product System
               </Link>
             </div>
@@ -54,8 +57,8 @@ export default function Navbar() {
                     href={item.href}
                     className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
                       isActive
-                        ? 'border-blue-500 text-gray-900'
-                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                        ? 'border-blue-500 text-black'
+                        : 'border-transparent text-black hover:border-gray-300 hover:text-gray-700'
                     }`}
                   >
                     {item.name}
@@ -64,8 +67,8 @@ export default function Navbar() {
               })}
             </div>
           </div>
-          
           <div className="flex items-center space-x-4">
+            <LanguageSwitcher />
             {session ? (
               <div className="flex items-center space-x-4">
                 {session.user?.role === 'ADMIN' && (
@@ -73,23 +76,23 @@ export default function Navbar() {
                     href="/admin"
                     className="text-sm text-blue-600 hover:text-blue-700 font-medium"
                   >
-                  Welcome, {session.user?.name || session.user?.email}
+                  {t('auth.welcome')}, {session.user?.name || session.user?.email}
                   </Link>
                 )}
                 <button
                   onClick={handleLogout}
                   disabled={isLoggingOut}
-                  className="text-sm text-gray-500 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="text-sm text-black hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isLoggingOut ? 'Logging out...' : 'Logout'}
+                  {isLoggingOut ? t('common.loading') : t('auth.logout')}
                 </button>
               </div>
             ) : (
               <Link
                 href="/login"
-                className="text-sm text-gray-500 hover:text-gray-700"
+                className="text-sm text-black hover:text-gray-700"
               >
-                Login
+                {t('auth.login')}
               </Link>
             )}
           </div>

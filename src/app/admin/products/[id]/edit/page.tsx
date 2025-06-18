@@ -2,20 +2,41 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import Link from 'next/link'
+import { useLanguage } from '@/contexts/LanguageContext'
+import { use } from 'react'
 import { Product, Category } from '@/types'
 
 interface EditProductPageProps {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 export default function EditProductPage({ params }: EditProductPageProps) {
+  const { id } = use(params)
   const router = useRouter()
+  const { data: session, status } = useSession()
+  const { t } = useLanguage()
   const [product, setProduct] = useState<Product | null>(null)
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+
+  // Redirect if not authenticated or not admin
+  useEffect(() => {
+    if (status === 'loading') return
+    
+    if (!session) {
+      router.push('/login')
+      return
+    }
+    
+    if (session.user.role !== 'ADMIN') {
+      router.push('/')
+      return
+    }
+  }, [session, status, router])
 
   const [formData, setFormData] = useState({
     name: '',
@@ -39,7 +60,7 @@ export default function EditProductPage({ params }: EditProductPageProps) {
     const fetchData = async () => {
       try {
         // Fetch product data
-        const productResponse = await fetch(`/api/products/${params.id}`)
+        const productResponse = await fetch(`/api/products/${id}`)
         if (!productResponse.ok) {
           throw new Error('Product not found')
         }
@@ -73,22 +94,51 @@ export default function EditProductPage({ params }: EditProductPageProps) {
         })
       } catch (error) {
         console.error('Error fetching data:', error)
-        setError('Failed to load product data')
+        setError(t('errors.somethingWentWrong'))
       } finally {
         setLoading(false)
       }
     }
 
-    fetchData()
-  }, [params.id])
+    if (session?.user.role === 'ADMIN') {
+      fetchData()
+    }
+  }, [id, t, session])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setSaving(true)
     setError('')
 
+    // Client-side validation
+    if (!formData.name.trim()) {
+      setError('Product name is required')
+      setSaving(false)
+      return
+    }
+    if (!formData.slug.trim()) {
+      setError('Slug is required')
+      setSaving(false)
+      return
+    }
+    if (!formData.sku.trim()) {
+      setError('SKU is required')
+      setSaving(false)
+      return
+    }
+    if (!formData.categoryId) {
+      setError('Category is required')
+      setSaving(false)
+      return
+    }
+    if (!formData.price || parseFloat(formData.price) <= 0) {
+      setError('Valid price is required')
+      setSaving(false)
+      return
+    }
+
     try {
-      const response = await fetch(`/api/products/${params.id}`, {
+      const response = await fetch(`/api/products/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -98,22 +148,29 @@ export default function EditProductPage({ params }: EditProductPageProps) {
           price: parseFloat(formData.price) || 0,
           comparePrice: formData.comparePrice ? parseFloat(formData.comparePrice) : null,
           weight: formData.weight ? parseInt(formData.weight) : null,
-          dimensions: JSON.stringify({
+          dimensions: {
             length: parseFloat(formData.dimensions.length) || 0,
             width: parseFloat(formData.dimensions.width) || 0,
             height: parseFloat(formData.dimensions.height) || 0,
-          })
+          }
         }),
       })
 
       if (!response.ok) {
-        throw new Error('Failed to update product')
+        const errorData = await response.json()
+        if (response.status === 401) {
+          throw new Error('You are not authorized. Please log in as an admin.')
+        } else if (response.status === 400) {
+          throw new Error(errorData.error || 'Invalid data provided')
+        } else {
+          throw new Error(errorData.error || 'Failed to update product')
+        }
       }
 
       router.push('/admin/products')
     } catch (error) {
       console.error('Error updating product:', error)
-      setError('Failed to update product. Please try again.')
+      setError(error instanceof Error ? error.message : t('errors.somethingWentWrong'))
     } finally {
       setSaving(false)
     }
@@ -140,15 +197,20 @@ export default function EditProductPage({ params }: EditProductPageProps) {
     }))
   }
 
-  if (loading) {
+  if (loading || status === 'loading') {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Loading product...</p>
+          <p className="mt-2 text-gray-600">{t('common.loading')}</p>
         </div>
       </div>
     )
+  }
+
+  // Don't render if not authenticated
+  if (!session || session.user.role !== 'ADMIN') {
+    return null
   }
 
   if (error && !product) {
@@ -157,7 +219,7 @@ export default function EditProductPage({ params }: EditProductPageProps) {
         <div className="text-center">
           <p className="text-red-600">{error}</p>
           <Link href="/admin/products" className="mt-4 inline-block text-blue-600 hover:text-blue-700">
-            Back to Products
+            {t('common.back')} {t('products.title')}
           </Link>
         </div>
       </div>
@@ -168,14 +230,14 @@ export default function EditProductPage({ params }: EditProductPageProps) {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-black">Edit Product</h1>
-          <p className="text-black">Update product information</p>
+          <h1 className="text-2xl font-bold text-black">{t('products.editProduct')}</h1>
+          <p className="text-black">{t('products.editProduct')}</p>
         </div>
         <Link
           href="/admin/products"
           className="px-4 py-2 text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          Back to Products
+          {t('common.back')} {t('products.title')}
         </Link>
       </div>
 
@@ -189,7 +251,7 @@ export default function EditProductPage({ params }: EditProductPageProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-black">
-              Product Name *
+              {t('products.productName')} *
             </label>
             <input
               type="text"
@@ -234,16 +296,17 @@ export default function EditProductPage({ params }: EditProductPageProps) {
 
           <div>
             <label htmlFor="categoryId" className="block text-sm font-medium text-black">
-              Category
+              {t('products.productCategory')} *
             </label>
             <select
               id="categoryId"
               name="categoryId"
               value={formData.categoryId}
               onChange={handleInputChange}
+              required
               className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="">Select a category</option>
+              <option value="">{t('common.loading')} {t('categories.title').toLowerCase()}</option>
               {categories.map((category) => (
                 <option key={category.id} value={category.id}>
                   {category.name}
@@ -254,16 +317,15 @@ export default function EditProductPage({ params }: EditProductPageProps) {
 
           <div>
             <label htmlFor="price" className="block text-sm font-medium text-black">
-              Price *
+              {t('products.productPrice')} *
             </label>
             <input
               type="number"
+              step="0.01"
               id="price"
               name="price"
               value={formData.price}
               onChange={handleInputChange}
-              step="0.01"
-              min="0"
               required
               className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             />
@@ -275,12 +337,11 @@ export default function EditProductPage({ params }: EditProductPageProps) {
             </label>
             <input
               type="number"
+              step="0.01"
               id="comparePrice"
               name="comparePrice"
               value={formData.comparePrice}
               onChange={handleInputChange}
-              step="0.01"
-              min="0"
               className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
@@ -295,7 +356,6 @@ export default function EditProductPage({ params }: EditProductPageProps) {
               name="weight"
               value={formData.weight}
               onChange={handleInputChange}
-              min="0"
               className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
@@ -303,63 +363,59 @@ export default function EditProductPage({ params }: EditProductPageProps) {
 
         <div>
           <label htmlFor="description" className="block text-sm font-medium text-black">
-            Description
+            {t('products.productDescription')}
           </label>
           <textarea
             id="description"
             name="description"
+            rows={4}
             value={formData.description}
             onChange={handleInputChange}
-            rows={4}
             className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
 
-        <div>
-          <h3 className="text-lg font-medium text-black mb-4">Dimensions</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label htmlFor="length" className="block text-sm font-medium text-black">
-                Length (mm)
-              </label>
-              <input
-                type="number"
-                id="length"
-                value={formData.dimensions.length}
-                onChange={(e) => handleDimensionChange('length', e.target.value)}
-                step="0.1"
-                min="0"
-                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label htmlFor="width" className="block text-sm font-medium text-black">
-                Width (mm)
-              </label>
-              <input
-                type="number"
-                id="width"
-                value={formData.dimensions.width}
-                onChange={(e) => handleDimensionChange('width', e.target.value)}
-                step="0.1"
-                min="0"
-                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label htmlFor="height" className="block text-sm font-medium text-black">
-                Height (mm)
-              </label>
-              <input
-                type="number"
-                id="height"
-                value={formData.dimensions.height}
-                onChange={(e) => handleDimensionChange('height', e.target.value)}
-                step="0.1"
-                min="0"
-                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
+            <label htmlFor="length" className="block text-sm font-medium text-black">
+              Length (cm)
+            </label>
+            <input
+              type="number"
+              step="0.1"
+              id="length"
+              value={formData.dimensions.length}
+              onChange={(e) => handleDimensionChange('length', e.target.value)}
+              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="width" className="block text-sm font-medium text-black">
+              Width (cm)
+            </label>
+            <input
+              type="number"
+              step="0.1"
+              id="width"
+              value={formData.dimensions.width}
+              onChange={(e) => handleDimensionChange('width', e.target.value)}
+              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="height" className="block text-sm font-medium text-black">
+              Height (cm)
+            </label>
+            <input
+              type="number"
+              step="0.1"
+              id="height"
+              value={formData.dimensions.height}
+              onChange={(e) => handleDimensionChange('height', e.target.value)}
+              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            />
           </div>
         </div>
 
@@ -377,6 +433,7 @@ export default function EditProductPage({ params }: EditProductPageProps) {
               Active
             </label>
           </div>
+
           <div className="flex items-center">
             <input
               type="checkbox"
@@ -397,14 +454,14 @@ export default function EditProductPage({ params }: EditProductPageProps) {
             href="/admin/products"
             className="px-4 py-2 text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            Cancel
+            {t('common.cancel')}
           </Link>
           <button
             type="submit"
             disabled={saving}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
           >
-            {saving ? 'Saving...' : 'Save Changes'}
+            {saving ? t('common.loading') : t('common.save')}
           </button>
         </div>
       </form>

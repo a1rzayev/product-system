@@ -1,6 +1,11 @@
+'use client'
+
+import { useLanguage } from '@/contexts/LanguageContext'
 import { userService } from '@/lib/db'
 
-export default async function AdminUsers() {
+export default function AdminUsersPage() {
+  const { t } = useLanguage()
+
   // For now, we'll show a placeholder since we don't have many users
   const users: any[] = []
 
@@ -21,8 +26,19 @@ export default async function AdminUsers() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Users</h1>
-        <p className="text-gray-600">Manage user accounts</p>
+        <h1 className="text-2xl font-bold text-gray-900">{t('users.title')}</h1>
+        <p className="text-gray-600">{t('users.noUsers')}</p>
+      </div>
+
+      <div className="bg-white rounded-lg shadow">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <h2 className="text-lg font-medium text-gray-900">{t('users.title')}</h2>
+        </div>
+        <div className="p-6">
+          <div className="text-center text-gray-500 py-8">
+            <p>{t('users.noUsers')}</p>
+          </div>
+        </div>
       </div>
 
       <div className="bg-white shadow rounded-lg">
