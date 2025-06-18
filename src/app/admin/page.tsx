@@ -3,10 +3,10 @@ import { productService, categoryService, orderService, userService } from '@/li
 export default async function AdminDashboard() {
   // Fetch dashboard statistics
   const [products, categories, orders, users] = await Promise.all([
-    productService.getAll(1, 1), // Just get count
+    productService.getAll(1, 1), 
     categoryService.getAll(),
-    orderService.getByUser(''), // This will be updated with proper stats
-    userService.getById(''), // This will be updated with proper stats
+    orderService.getByUser(''), 
+    userService.getById(''), 
   ])
 
   const stats = [
@@ -24,13 +24,13 @@ export default async function AdminDashboard() {
     },
     {
       name: 'Total Orders',
-      value: '0', // Will be updated with proper stats
+      value: '0', 
       icon: '📋',
       color: 'bg-yellow-500'
     },
     {
       name: 'Users',
-      value: '0', // Will be updated with proper stats
+      value: '0', 
       icon: '👥',
       color: 'bg-purple-500'
     }
@@ -60,7 +60,6 @@ export default async function AdminDashboard() {
         ))}
       </div>
 
-      {/* Quick Actions */}
       <div className="bg-white rounded-lg shadow">
         <div className="px-6 py-4 border-b border-gray-200">
           <h2 className="text-lg font-medium text-gray-900">Quick Actions</h2>

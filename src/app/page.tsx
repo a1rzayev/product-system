@@ -11,21 +11,6 @@ export default function Home() {
           <p className="text-xl text-gray-600 mb-8">
             A comprehensive e-commerce product management system
           </p>
-          
-          <div className="flex justify-center space-x-4">
-            <Link
-              href="/admin"
-              className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              Admin Panel
-            </Link>
-            <Link
-              href="/admin/login"
-              className="px-6 py-3 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              Admin Login
-            </Link>
-          </div>
         </div>
 
         <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
