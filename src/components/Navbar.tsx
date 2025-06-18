@@ -21,10 +21,14 @@ export default function Navbar() {
     
     setIsLoggingOut(true)
     try {
+      console.log('Logging out, redirecting to login page')
+      
       await signOut({ 
-        callbackUrl: '/',
-        redirect: true 
+        redirect: false 
       })
+      
+      // Manually redirect to ensure correct port
+      window.location.href = '/login'
     } catch (error) {
       console.error('Logout error:', error)
       setIsLoggingOut(false)

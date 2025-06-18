@@ -125,8 +125,8 @@ export default function EditCategoryPage({ params }: EditCategoryPageProps) {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Edit Category</h1>
-          <p className="text-gray-600">Update category information</p>
+          <h1 className="text-2xl font-bold text-black">Edit Category</h1>
+          <p className="text-black">Update category information</p>
         </div>
         <Link
           href="/admin/categories"
@@ -145,7 +145,7 @@ export default function EditCategoryPage({ params }: EditCategoryPageProps) {
       <form onSubmit={handleSubmit} className="bg-white shadow rounded-lg p-6 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="name" className="block text-sm font-medium text-black">
               Category Name *
             </label>
             <input
@@ -155,12 +155,12 @@ export default function EditCategoryPage({ params }: EditCategoryPageProps) {
               value={formData.name}
               onChange={handleInputChange}
               required
-              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
           <div>
-            <label htmlFor="slug" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="slug" className="block text-sm font-medium text-black">
               Slug *
             </label>
             <input
@@ -170,12 +170,12 @@ export default function EditCategoryPage({ params }: EditCategoryPageProps) {
               value={formData.slug}
               onChange={handleInputChange}
               required
-              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
           <div className="md:col-span-2">
-            <label htmlFor="parentId" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="parentId" className="block text-sm font-medium text-black">
               Parent Category
             </label>
             <select
@@ -183,7 +183,7 @@ export default function EditCategoryPage({ params }: EditCategoryPageProps) {
               name="parentId"
               value={formData.parentId}
               onChange={handleInputChange}
-              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">No parent (top-level category)</option>
               {categories.map((cat) => (
@@ -196,7 +196,7 @@ export default function EditCategoryPage({ params }: EditCategoryPageProps) {
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="description" className="block text-sm font-medium text-black">
             Description
           </label>
           <textarea
@@ -205,7 +205,7 @@ export default function EditCategoryPage({ params }: EditCategoryPageProps) {
             value={formData.description}
             onChange={handleInputChange}
             rows={4}
-            className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
 

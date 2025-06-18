@@ -122,8 +122,8 @@ export default function NewProductPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Add New Product</h1>
-          <p className="text-gray-600">Create a new product in your catalog</p>
+          <h1 className="text-2xl font-bold text-black">Add New Product</h1>
+          <p className="text-black">Create a new product in your catalog</p>
         </div>
         <Link
           href="/admin/products"
@@ -142,7 +142,7 @@ export default function NewProductPage() {
       <form onSubmit={handleSubmit} className="bg-white shadow rounded-lg p-6 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="name" className="block text-sm font-medium text-black">
               Product Name *
             </label>
             <input
@@ -152,12 +152,12 @@ export default function NewProductPage() {
               value={formData.name}
               onChange={handleInputChange}
               required
-              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
           <div>
-            <label htmlFor="slug" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="slug" className="block text-sm font-medium text-black">
               Slug *
             </label>
             <input
@@ -167,12 +167,12 @@ export default function NewProductPage() {
               value={formData.slug}
               onChange={handleInputChange}
               required
-              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
           <div>
-            <label htmlFor="sku" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="sku" className="block text-sm font-medium text-black">
               SKU *
             </label>
             <input
@@ -182,12 +182,12 @@ export default function NewProductPage() {
               value={formData.sku}
               onChange={handleInputChange}
               required
-              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
           <div>
-            <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="categoryId" className="block text-sm font-medium text-black">
               Category
             </label>
             <select
@@ -195,7 +195,7 @@ export default function NewProductPage() {
               name="categoryId"
               value={formData.categoryId}
               onChange={handleInputChange}
-              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">Select a category</option>
               {categories.map((category) => (
@@ -207,7 +207,7 @@ export default function NewProductPage() {
           </div>
 
           <div>
-            <label htmlFor="price" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="price" className="block text-sm font-medium text-black">
               Price *
             </label>
             <input
@@ -219,12 +219,12 @@ export default function NewProductPage() {
               step="0.01"
               min="0"
               required
-              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
           <div>
-            <label htmlFor="comparePrice" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="comparePrice" className="block text-sm font-medium text-black">
               Compare Price
             </label>
             <input
@@ -235,12 +235,12 @@ export default function NewProductPage() {
               onChange={handleInputChange}
               step="0.01"
               min="0"
-              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
           <div>
-            <label htmlFor="weight" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="weight" className="block text-sm font-medium text-black">
               Weight (grams)
             </label>
             <input
@@ -250,13 +250,13 @@ export default function NewProductPage() {
               value={formData.weight}
               onChange={handleInputChange}
               min="0"
-              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="description" className="block text-sm font-medium text-black">
             Description
           </label>
           <textarea
@@ -265,15 +265,15 @@ export default function NewProductPage() {
             value={formData.description}
             onChange={handleInputChange}
             rows={4}
-            className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
 
         <div>
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Dimensions</h3>
+          <h3 className="text-lg font-medium text-black mb-4">Dimensions</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label htmlFor="length" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="length" className="block text-sm font-medium text-black">
                 Length (mm)
               </label>
               <input
@@ -283,11 +283,11 @@ export default function NewProductPage() {
                 onChange={(e) => handleDimensionChange('length', e.target.value)}
                 step="0.1"
                 min="0"
-                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
             <div>
-              <label htmlFor="width" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="width" className="block text-sm font-medium text-black">
                 Width (mm)
               </label>
               <input
@@ -297,11 +297,11 @@ export default function NewProductPage() {
                 onChange={(e) => handleDimensionChange('width', e.target.value)}
                 step="0.1"
                 min="0"
-                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
             <div>
-              <label htmlFor="height" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="height" className="block text-sm font-medium text-black">
                 Height (mm)
               </label>
               <input
@@ -311,7 +311,7 @@ export default function NewProductPage() {
                 onChange={(e) => handleDimensionChange('height', e.target.value)}
                 step="0.1"
                 min="0"
-                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
           </div>
@@ -327,7 +327,7 @@ export default function NewProductPage() {
               onChange={handleInputChange}
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
-            <label htmlFor="isActive" className="ml-2 block text-sm text-gray-900">
+            <label htmlFor="isActive" className="ml-2 block text-sm text-black">
               Active
             </label>
           </div>
@@ -340,7 +340,7 @@ export default function NewProductPage() {
               onChange={handleInputChange}
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
-            <label htmlFor="isFeatured" className="ml-2 block text-sm text-gray-900">
+            <label htmlFor="isFeatured" className="ml-2 block text-sm text-black">
               Featured
             </label>
           </div>

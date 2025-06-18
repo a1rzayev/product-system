@@ -64,31 +64,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="mt-12 text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Getting Started</h2>
-          <div className="bg-white rounded-lg shadow p-6 max-w-2xl mx-auto">
-            <div className="text-left space-y-4">
-              <div>
-                <h3 className="font-semibold text-gray-900">1. Database Setup</h3>
-                <p className="text-gray-600 text-sm">
-                  Run <code className="bg-gray-100 px-2 py-1 rounded">npm run db:generate</code> and <code className="bg-gray-100 px-2 py-1 rounded">npm run db:seed</code>
-                </p>
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900">2. Admin Access</h3>
-                <p className="text-gray-600 text-sm">
-                  Login with <strong>admin@mail.com</strong> / <strong>admin123</strong>
-                </p>
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900">3. Start Managing</h3>
-                <p className="text-gray-600 text-sm">
-                  Add products, categories, and manage your inventory through the admin panel.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+        
       </div>
     </div>
   )
