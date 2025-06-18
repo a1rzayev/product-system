@@ -14,7 +14,8 @@
     "close": "Закрыть",
     "yes": "Да",
     "no": "Нет",
-    "actions": "Действия"
+    "actions": "Действия",
+    "select": "Выбрать"
   },
   "navigation": {
     "home": "Главная",
@@ -53,7 +54,10 @@
   "products": {
     "title": "Товары",
     "addProduct": "Добавить товар",
+    "addNewProduct": "Добавить новый товар",
+    "createNewProduct": "Создать новый товар в каталоге",
     "editProduct": "Редактировать товар",
+    "updateProductInfo": "Обновить информацию о товаре",
     "productName": "Название товара",
     "productDescription": "Описание товара",
     "productPrice": "Цена товара",
@@ -71,9 +75,14 @@
   "categories": {
     "title": "Категории",
     "addCategory": "Добавить категорию",
+    "addNewCategory": "Добавить новую категорию",
+    "createNewCategory": "Создать новую категорию товаров",
     "editCategory": "Редактировать категорию",
+    "updateCategoryInfo": "Обновить информацию о категории",
     "categoryName": "Название категории",
     "categoryDescription": "Описание категории",
+    "parentCategory": "Родительская категория",
+    "noParent": "Без родителя (категория верхнего уровня)",
     "noCategories": "Категории не найдены",
     "categoryDetails": "Детали категории",
     "name": "Название",

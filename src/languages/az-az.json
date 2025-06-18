@@ -14,7 +14,8 @@
     "close": "Bağla",
     "yes": "Bəli",
     "no": "Xeyr",
-    "actions": "Əməliyyatlar"
+    "actions": "Əməliyyatlar",
+    "select": "Seç"
   },
   "navigation": {
     "home": "Ana Səhifə",
@@ -53,7 +54,10 @@
   "products": {
     "title": "Məhsullar",
     "addProduct": "Məhsul əlavə et",
+    "addNewProduct": "Yeni məhsul əlavə et",
+    "createNewProduct": "Kataloqda yeni məhsul yarat",
     "editProduct": "Məhsulu redaktə et",
+    "updateProductInfo": "Məhsul məlumatını yenilə",
     "productName": "Məhsul adı",
     "productDescription": "Məhsul təsviri",
     "productPrice": "Məhsul qiyməti",
@@ -71,9 +75,14 @@
   "categories": {
     "title": "Kateqoriyalar",
     "addCategory": "Kateqoriya əlavə et",
+    "addNewCategory": "Yeni kateqoriya əlavə et",
+    "createNewCategory": "Yeni məhsul kateqoriyası yarat",
     "editCategory": "Kateqoriyanı redaktə et",
+    "updateCategoryInfo": "Kateqoriya məlumatını yenilə",
     "categoryName": "Kateqoriya adı",
     "categoryDescription": "Kateqoriya təsviri",
+    "parentCategory": "Ana kateqoriya",
+    "noParent": "Ana yoxdur (yuxarı səviyyə kateqoriyası)",
     "noCategories": "Kateqoriya tapılmadı",
     "categoryDetails": "Kateqoriya detalları",
     "name": "Ad",

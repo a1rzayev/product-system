@@ -3,10 +3,12 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useLanguage } from '@/contexts/LanguageContext'
 import { Category } from '@/types'
 
 export default function NewProductPage() {
   const router = useRouter()
+  const { t } = useLanguage()
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -40,14 +42,14 @@ export default function NewProductPage() {
         }
       } catch (error) {
         console.error('Error fetching categories:', error)
-        setError('Failed to load categories')
+        setError(t('errors.somethingWentWrong'))
       } finally {
         setLoading(false)
       }
     }
 
     fetchCategories()
-  }, [])
+  }, [t])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -80,7 +82,7 @@ export default function NewProductPage() {
       router.push('/admin/products')
     } catch (error) {
       console.error('Error creating product:', error)
-      setError('Failed to create product. Please try again.')
+      setError(t('errors.somethingWentWrong'))
     } finally {
       setSaving(false)
     }
@@ -112,7 +114,7 @@ export default function NewProductPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Loading...</p>
+          <p className="mt-2 text-gray-600">{t('common.loading')}</p>
         </div>
       </div>
     )
@@ -122,14 +124,14 @@ export default function NewProductPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-black">Add New Product</h1>
-          <p className="text-black">Create a new product in your catalog</p>
+          <h1 className="text-2xl font-bold text-black">{t('products.addNewProduct')}</h1>
+          <p className="text-black">{t('products.createNewProduct')}</p>
         </div>
         <Link
           href="/admin/products"
           className="px-4 py-2 text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          Back to Products
+          {t('common.back')} {t('products.title')}
         </Link>
       </div>
 
@@ -143,7 +145,7 @@ export default function NewProductPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-black">
-              Product Name *
+              {t('products.productName')} *
             </label>
             <input
               type="text"
@@ -188,7 +190,7 @@ export default function NewProductPage() {
 
           <div>
             <label htmlFor="categoryId" className="block text-sm font-medium text-black">
-              Category
+              {t('products.productCategory')}
             </label>
             <select
               id="categoryId"
@@ -197,7 +199,7 @@ export default function NewProductPage() {
               onChange={handleInputChange}
               className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="">Select a category</option>
+              <option value="">{t('common.select')} {t('categories.title').toLowerCase()}</option>
               {categories.map((category) => (
                 <option key={category.id} value={category.id}>
                   {category.name}
@@ -208,16 +210,15 @@ export default function NewProductPage() {
 
           <div>
             <label htmlFor="price" className="block text-sm font-medium text-black">
-              Price *
+              {t('products.productPrice')} *
             </label>
             <input
               type="number"
+              step="0.01"
               id="price"
               name="price"
               value={formData.price}
               onChange={handleInputChange}
-              step="0.01"
-              min="0"
               required
               className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             />
@@ -229,12 +230,11 @@ export default function NewProductPage() {
             </label>
             <input
               type="number"
+              step="0.01"
               id="comparePrice"
               name="comparePrice"
               value={formData.comparePrice}
               onChange={handleInputChange}
-              step="0.01"
-              min="0"
               className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
@@ -249,7 +249,6 @@ export default function NewProductPage() {
               name="weight"
               value={formData.weight}
               onChange={handleInputChange}
-              min="0"
               className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
@@ -257,63 +256,59 @@ export default function NewProductPage() {
 
         <div>
           <label htmlFor="description" className="block text-sm font-medium text-black">
-            Description
+            {t('products.productDescription')}
           </label>
           <textarea
             id="description"
             name="description"
+            rows={4}
             value={formData.description}
             onChange={handleInputChange}
-            rows={4}
             className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
 
-        <div>
-          <h3 className="text-lg font-medium text-black mb-4">Dimensions</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label htmlFor="length" className="block text-sm font-medium text-black">
-                Length (mm)
-              </label>
-              <input
-                type="number"
-                id="length"
-                value={formData.dimensions.length}
-                onChange={(e) => handleDimensionChange('length', e.target.value)}
-                step="0.1"
-                min="0"
-                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label htmlFor="width" className="block text-sm font-medium text-black">
-                Width (mm)
-              </label>
-              <input
-                type="number"
-                id="width"
-                value={formData.dimensions.width}
-                onChange={(e) => handleDimensionChange('width', e.target.value)}
-                step="0.1"
-                min="0"
-                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label htmlFor="height" className="block text-sm font-medium text-black">
-                Height (mm)
-              </label>
-              <input
-                type="number"
-                id="height"
-                value={formData.dimensions.height}
-                onChange={(e) => handleDimensionChange('height', e.target.value)}
-                step="0.1"
-                min="0"
-                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
+            <label htmlFor="length" className="block text-sm font-medium text-black">
+              Length (cm)
+            </label>
+            <input
+              type="number"
+              step="0.1"
+              id="length"
+              value={formData.dimensions.length}
+              onChange={(e) => handleDimensionChange('length', e.target.value)}
+              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="width" className="block text-sm font-medium text-black">
+              Width (cm)
+            </label>
+            <input
+              type="number"
+              step="0.1"
+              id="width"
+              value={formData.dimensions.width}
+              onChange={(e) => handleDimensionChange('width', e.target.value)}
+              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="height" className="block text-sm font-medium text-black">
+              Height (cm)
+            </label>
+            <input
+              type="number"
+              step="0.1"
+              id="height"
+              value={formData.dimensions.height}
+              onChange={(e) => handleDimensionChange('height', e.target.value)}
+              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            />
           </div>
         </div>
 
@@ -331,6 +326,7 @@ export default function NewProductPage() {
               Active
             </label>
           </div>
+
           <div className="flex items-center">
             <input
               type="checkbox"
@@ -351,14 +347,14 @@ export default function NewProductPage() {
             href="/admin/products"
             className="px-4 py-2 text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            Cancel
+            {t('common.cancel')}
           </Link>
           <button
             type="submit"
             disabled={saving}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
           >
-            {saving ? 'Creating...' : 'Create Product'}
+            {saving ? t('common.loading') : t('common.save')}
           </button>
         </div>
       </form>

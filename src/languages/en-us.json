@@ -14,7 +14,8 @@
     "close": "Close",
     "yes": "Yes",
     "no": "No",
-    "actions": "Actions"
+    "actions": "Actions",
+    "select": "Select"
   },
   "navigation": {
     "home": "Home",
@@ -53,7 +54,10 @@
   "products": {
     "title": "Products",
     "addProduct": "Add Product",
+    "addNewProduct": "Add New Product",
+    "createNewProduct": "Create a new product in your catalog",
     "editProduct": "Edit Product",
+    "updateProductInfo": "Update product information",
     "productName": "Product Name",
     "productDescription": "Product Description",
     "productPrice": "Product Price",
@@ -71,9 +75,14 @@
   "categories": {
     "title": "Categories",
     "addCategory": "Add Category",
+    "addNewCategory": "Add New Category",
+    "createNewCategory": "Create a new product category",
     "editCategory": "Edit Category",
+    "updateCategoryInfo": "Update category information",
     "categoryName": "Category Name",
     "categoryDescription": "Category Description",
+    "parentCategory": "Parent Category",
+    "noParent": "No parent (top-level category)",
     "noCategories": "No categories found",
     "categoryDetails": "Category Details",
     "name": "Name",

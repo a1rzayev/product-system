@@ -3,10 +3,12 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useLanguage } from '@/contexts/LanguageContext'
 import { Category } from '@/types'
 
 export default function NewCategoryPage() {
   const router = useRouter()
+  const { t } = useLanguage()
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -29,14 +31,14 @@ export default function NewCategoryPage() {
         }
       } catch (error) {
         console.error('Error fetching categories:', error)
-        setError('Failed to load categories')
+        setError(t('errors.somethingWentWrong'))
       } finally {
         setLoading(false)
       }
     }
 
     fetchCategories()
-  }, [])
+  }, [t])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -62,7 +64,7 @@ export default function NewCategoryPage() {
       router.push('/admin/categories')
     } catch (error) {
       console.error('Error creating category:', error)
-      setError('Failed to create category. Please try again.')
+      setError(t('errors.somethingWentWrong'))
     } finally {
       setSaving(false)
     }
@@ -78,7 +80,7 @@ export default function NewCategoryPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Loading...</p>
+          <p className="mt-2 text-gray-600">{t('common.loading')}</p>
         </div>
       </div>
     )
@@ -88,14 +90,14 @@ export default function NewCategoryPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-black">Add New Category</h1>
-          <p className="text-black">Create a new product category</p>
+          <h1 className="text-2xl font-bold text-black">{t('categories.addNewCategory')}</h1>
+          <p className="text-black">{t('categories.createNewCategory')}</p>
         </div>
         <Link
           href="/admin/categories"
           className="px-4 py-2 text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          Back to Categories
+          {t('common.back')} {t('categories.title')}
         </Link>
       </div>
 
@@ -109,7 +111,7 @@ export default function NewCategoryPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-black">
-              Category Name *
+              {t('categories.categoryName')} *
             </label>
             <input
               type="text"
@@ -139,7 +141,7 @@ export default function NewCategoryPage() {
 
           <div className="md:col-span-2">
             <label htmlFor="parentId" className="block text-sm font-medium text-black">
-              Parent Category
+              {t('categories.parentCategory')}
             </label>
             <select
               id="parentId"
@@ -148,7 +150,7 @@ export default function NewCategoryPage() {
               onChange={handleInputChange}
               className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="">No parent (top-level category)</option>
+              <option value="">{t('categories.noParent')}</option>
               {categories.map((category) => (
                 <option key={category.id} value={category.id}>
                   {category.name}
@@ -160,7 +162,7 @@ export default function NewCategoryPage() {
 
         <div>
           <label htmlFor="description" className="block text-sm font-medium text-black">
-            Description
+            {t('categories.description')}
           </label>
           <textarea
             id="description"
@@ -177,14 +179,14 @@ export default function NewCategoryPage() {
             href="/admin/categories"
             className="px-4 py-2 text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            Cancel
+            {t('common.cancel')}
           </Link>
           <button
             type="submit"
             disabled={saving}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
           >
-            {saving ? 'Creating...' : 'Create Category'}
+            {saving ? t('common.loading') : t('common.save')}
           </button>
         </div>
       </form>
