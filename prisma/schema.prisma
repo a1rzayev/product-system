@@ -10,8 +10,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 // User model for authentication and user management
@@ -20,7 +20,7 @@ model User {
   email     String   @unique
   name      String?
   password  String
-  role      UserRole @default(CUSTOMER)
+  role      String   @default("CUSTOMER")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -57,12 +57,12 @@ model Product {
   description String
   slug        String   @unique
   sku         String   @unique
-  price       Decimal  @db.Decimal(10, 2)
-  comparePrice Decimal? @db.Decimal(10, 2)
+  price       Float
+  comparePrice Float?
   isActive    Boolean  @default(true)
   isFeatured  Boolean  @default(false)
   weight      Float?
-  dimensions  Json?    // { length, width, height }
+  dimensions  String?  // JSON string for SQLite
   categoryId  String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -101,7 +101,7 @@ model ProductVariant {
   name      String   // e.g., "Size", "Color"
   value     String   // e.g., "Large", "Red"
   sku       String   @unique
-  price     Decimal? @db.Decimal(10, 2) // Override product price if different
+  price     Float?   // Override product price if different
   productId String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -133,15 +133,15 @@ model Inventory {
 model Order {
   id            String      @id @default(cuid())
   orderNumber   String      @unique
-  status        OrderStatus @default(PENDING)
-  total         Decimal     @db.Decimal(10, 2)
-  subtotal      Decimal     @db.Decimal(10, 2)
-  tax           Decimal     @db.Decimal(10, 2) @default(0)
-  shipping      Decimal     @db.Decimal(10, 2) @default(0)
-  discount      Decimal     @db.Decimal(10, 2) @default(0)
+  status        String      @default("PENDING")
+  total         Float
+  subtotal      Float
+  tax           Float       @default(0)
+  shipping      Float       @default(0)
+  discount      Float       @default(0)
   customerId    String
-  shippingAddress Json      // { street, city, state, zip, country }
-  billingAddress  Json      // { street, city, state, zip, country }
+  shippingAddress String    // JSON string for SQLite
+  billingAddress  String    // JSON string for SQLite
   notes         String?
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
@@ -157,7 +157,7 @@ model Order {
 model OrderItem {
   id        String   @id @default(cuid())
   quantity  Int
-  price     Decimal  @db.Decimal(10, 2)
+  price     Float
   orderId   String
   productId String
   variantId String?
@@ -208,20 +208,4 @@ model CartItem {
 
   @@unique([userId, productId, variantId]) // One cart item per user per product variant
   @@map("cart_items")
-}
-
-// Enums
-enum UserRole {
-  ADMIN
-  CUSTOMER
-}
-
-enum OrderStatus {
-  PENDING
-  CONFIRMED
-  PROCESSING
-  SHIPPED
-  DELIVERED
-  CANCELLED
-  REFUNDED
 }
