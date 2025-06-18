@@ -1,6 +1,31 @@
+'use client'
+
 import Link from 'next/link'
+import { useSession } from 'next-auth/react'
+import { useEffect } from 'react'
 
 export default function Home() {
+  const { data: session, status } = useSession()
+
+  // Redirect admin users to admin dashboard
+  useEffect(() => {
+    if (status === 'authenticated' && session?.user?.role === 'ADMIN') {
+      window.location.href = '/admin'
+    }
+  }, [session, status])
+
+  // Show loading for admin users
+  if (status === 'loading' || (status === 'authenticated' && session?.user?.role === 'ADMIN')) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Redirecting to admin dashboard...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -52,7 +77,7 @@ export default function Home() {
               <div>
                 <h3 className="font-semibold text-gray-900">2. Admin Access</h3>
                 <p className="text-gray-600 text-sm">
-                  Login with <strong>admin@example.com</strong> / <strong>admin123</strong>
+                  Login with <strong>admin@mail.com</strong> / <strong>admin123</strong>
                 </p>
               </div>
               <div>

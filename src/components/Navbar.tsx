@@ -47,9 +47,14 @@ export default function Navbar() {
           <div className="flex items-center space-x-4">
             {session ? (
               <div className="flex items-center space-x-4">
-                <span className="text-sm text-gray-700">
+                {session.user?.role === 'ADMIN' && (
+                  <Link
+                    href="/admin"
+                    className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                  >
                   Welcome, {session.user?.name || session.user?.email}
-                </span>
+                  </Link>
+                )}
                 <button
                   onClick={() => signOut({ callbackUrl: '/' })}
                   className="text-sm text-gray-500 hover:text-gray-700"
