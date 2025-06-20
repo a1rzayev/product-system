@@ -18,11 +18,15 @@ export default function Login() {
   const { data: session, status } = useSession()
   const { t } = useLanguage()
 
-  // Redirect if already authenticated as admin
+  // Redirect if already authenticated
   useEffect(() => {
-    if (status === 'authenticated' && session?.user?.role === 'ADMIN') {
-      console.log('Already authenticated as admin, redirecting...')
-      window.location.href = '/admin'
+    if (status === 'authenticated' && session?.user) {
+      console.log('Already authenticated, redirecting...')
+      if (session.user.role === 'ADMIN') {
+        window.location.href = '/admin'
+      } else {
+        window.location.href = '/'
+      }
     }
   }, [session, status])
 
@@ -35,7 +39,7 @@ export default function Login() {
   }, [searchParams, t])
 
   // Don't render the form if already authenticated
-  if (status === 'loading' || (status === 'authenticated' && session?.user?.role === 'ADMIN')) {
+  if (status === 'loading' || status === 'authenticated') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
@@ -64,12 +68,16 @@ export default function Login() {
         setError(t('auth.invalidCredentials'))
       } else {
         const session = await getSession()
-        if (session?.user.role === 'ADMIN') {
+        if (session?.user) {
           setIsRedirecting(true)
-          // Use window.location instead of router.push to avoid history issues
-          window.location.href = '/admin'
+          // Redirect based on user role
+          if (session.user.role === 'ADMIN') {
+            window.location.href = '/admin'
+          } else {
+            window.location.href = '/'
+          }
         } else {
-          setError(t('errors.unauthorized'))
+          setError(t('errors.somethingWentWrong'))
         }
       }
     } catch (error) {
@@ -88,7 +96,7 @@ export default function Login() {
             {t('auth.login')}
           </h2>
           <p className="mt-2 text-center text-sm text-black">
-            {t('auth.signIn')} {t('admin.dashboard').toLowerCase()}
+            {t('auth.signInToAccount')}
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>

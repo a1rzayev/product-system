@@ -36,7 +36,8 @@
     "welcome": "Добро пожаловать",
     "loginError": "Ошибка входа",
     "invalidCredentials": "Неверный email или пароль",
-    "dontHaveAccount": "Нет аккаунта?"
+    "dontHaveAccount": "Нет аккаунта?",
+    "signInToAccount": "Войдите в свой аккаунт"
   },
   "profile": {
     "title": "Профиль",

@@ -36,7 +36,8 @@
     "welcome": "Xoş gəlmisiniz",
     "loginError": "Giriş xətası",
     "invalidCredentials": "Yanlış e-poçt və ya şifrə",
-    "dontHaveAccount": "Hesabınız yoxdur?"
+    "dontHaveAccount": "Hesabınız yoxdur?",
+    "signInToAccount": "Hesabınıza daxil olun"
   },
   "profile": {
     "title": "Profil",

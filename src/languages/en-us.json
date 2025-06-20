@@ -36,7 +36,8 @@
     "welcome": "Welcome",
     "loginError": "Login Error",
     "invalidCredentials": "Invalid email or password",
-    "dontHaveAccount": "Don't have an account?"
+    "dontHaveAccount": "Don't have an account?",
+    "signInToAccount": "Sign in to your account"
   },
   "profile": {
     "title": "Profile",
