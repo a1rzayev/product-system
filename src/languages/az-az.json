@@ -37,6 +37,19 @@
     "loginError": "Giriş xətası",
     "invalidCredentials": "Yanlış e-poçt və ya şifrə"
   },
+  "profile": {
+    "title": "Profil",
+    "subtitle": "Hesab məlumatlarını idarə et",
+    "personalInfo": "Şəxsi məlumatlar",
+    "name": "Ad",
+    "email": "E-poçt",
+    "role": "Rol",
+    "memberSince": "Üzvlük tarixi",
+    "accountActions": "Hesab əməliyyatları",
+    "accountActionsDesc": "Hesab parametrlərini idarə et",
+    "editProfile": "Profili redaktə et",
+    "changePassword": "Şifrəni dəyiş"
+  },
   "admin": {
     "dashboard": "İdarəetmə Paneli",
     "users": "İstifadəçilər",

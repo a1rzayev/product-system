@@ -37,6 +37,19 @@
     "loginError": "Ошибка входа",
     "invalidCredentials": "Неверный email или пароль"
   },
+  "profile": {
+    "title": "Профиль",
+    "subtitle": "Управление информацией аккаунта",
+    "personalInfo": "Личная информация",
+    "name": "Имя",
+    "email": "Электронная почта",
+    "role": "Роль",
+    "memberSince": "Участник с",
+    "accountActions": "Действия с аккаунтом",
+    "accountActionsDesc": "Управление настройками аккаунта",
+    "editProfile": "Редактировать профиль",
+    "changePassword": "Изменить пароль"
+  },
   "admin": {
     "dashboard": "Панель управления",
     "users": "Пользователи",

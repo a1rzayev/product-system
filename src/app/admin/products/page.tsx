@@ -23,19 +23,19 @@ export default function AdminProducts() {
   const [totalProducts, setTotalProducts] = useState(0)
 
   const fetchProducts = useCallback(async () => {
-    try {
-      const response = await fetch('/api/products?page=1&limit=50')
-      if (!response.ok) {
-        throw new Error('Failed to fetch products')
+      try {
+        const response = await fetch('/api/products?page=1&limit=50')
+        if (!response.ok) {
+          throw new Error('Failed to fetch products')
+        }
+        const result = await response.json()
+        setProducts(result.data || [])
+        setTotalProducts(result.pagination?.total || 0)
+      } catch (error) {
+        console.error('Error fetching products:', error)
+      } finally {
+        setLoading(false)
       }
-      const result = await response.json()
-      setProducts(result.data || [])
-      setTotalProducts(result.pagination?.total || 0)
-    } catch (error) {
-      console.error('Error fetching products:', error)
-    } finally {
-      setLoading(false)
-    }
   }, [])
 
   useEffect(() => {

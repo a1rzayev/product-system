@@ -37,6 +37,19 @@
     "loginError": "Login Error",
     "invalidCredentials": "Invalid email or password"
   },
+  "profile": {
+    "title": "Profile",
+    "subtitle": "Manage your account information",
+    "personalInfo": "Personal Information",
+    "name": "Name",
+    "email": "Email",
+    "role": "Role",
+    "memberSince": "Member Since",
+    "accountActions": "Account Actions",
+    "accountActionsDesc": "Manage your account settings",
+    "editProfile": "Edit Profile",
+    "changePassword": "Change Password"
+  },
   "admin": {
     "dashboard": "Dashboard",
     "users": "Users",
