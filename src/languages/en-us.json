@@ -69,7 +69,13 @@
     "invalidEmail": "Invalid email format",
     "currentPasswordIncorrect": "Current password is incorrect",
     "refreshData": "Refresh Data",
-    "refreshing": "Refreshing..."
+    "refreshing": "Refreshing...",
+    "nameRequired": "Name is required",
+    "emailRequired": "Email is required",
+    "newPasswordRequired": "New password is required",
+    "confirmPasswordRequired": "Please confirm your new password",
+    "passwordTooLong": "Password must be less than 128 characters",
+    "newPasswordSameAsCurrent": "New password must be different from current password"
   },
   "admin": {
     "dashboard": "Dashboard",

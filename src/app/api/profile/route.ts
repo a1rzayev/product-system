@@ -13,11 +13,6 @@ export async function GET() {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
     }
 
-    if (session.user.role !== 'ADMIN') {
-      console.log('Profile GET: User is not admin', { role: session.user.role })
-      return NextResponse.json({ message: 'Forbidden' }, { status: 403 })
-    }
-
     console.log('Profile GET: Fetching user data for ID:', session.user.id)
 
     // Fetch current user data from database
@@ -57,11 +52,6 @@ export async function PUT(request: NextRequest) {
     if (!session || !session.user) {
       console.log('Profile update: No session or user')
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
-    }
-
-    if (session.user.role !== 'ADMIN') {
-      console.log('Profile update: User is not admin', { role: session.user.role })
-      return NextResponse.json({ message: 'Forbidden' }, { status: 403 })
     }
 
     const body = await request.json()

@@ -69,7 +69,13 @@
     "invalidEmail": "Неверный формат электронной почты",
     "currentPasswordIncorrect": "Текущий пароль неверный",
     "refreshData": "Обновить данные",
-    "refreshing": "Обновление..."
+    "refreshing": "Обновление...",
+    "nameRequired": "Имя обязательно",
+    "emailRequired": "Email обязателен",
+    "newPasswordRequired": "Новый пароль обязателен",
+    "confirmPasswordRequired": "Пожалуйста, подтвердите новый пароль",
+    "passwordTooLong": "Пароль должен содержать менее 128 символов",
+    "newPasswordSameAsCurrent": "Новый пароль должен отличаться от текущего"
   },
   "admin": {
     "dashboard": "Панель управления",
