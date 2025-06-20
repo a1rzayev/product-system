@@ -3,7 +3,6 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
-// GET - Fetch categories
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -25,27 +24,27 @@ export async function GET(request: NextRequest) {
     // For exports, use a larger limit but still reasonable
     const actualLimit = isExport ? Math.min(limit, 5000) : limit
 
-    // Fetch categories with parent and children data
-    const categories = await prisma.category.findMany({
+    // Fetch orders with customer and items data
+    const orders = await prisma.order.findMany({
       skip,
       take: actualLimit,
       include: {
-        parent: {
+        customer: {
           select: {
             id: true,
-            name: true
+            name: true,
+            email: true
           }
         },
-        children: {
-          select: {
-            id: true,
-            name: true
-          }
-        },
-        _count: {
-          select: {
-            products: true,
-            children: true
+        items: {
+          include: {
+            product: {
+              select: {
+                id: true,
+                name: true,
+                sku: true
+              }
+            }
           }
         }
       },
@@ -55,10 +54,10 @@ export async function GET(request: NextRequest) {
     })
 
     // Get total count for pagination
-    const total = await prisma.category.count()
+    const total = await prisma.order.count()
 
     return NextResponse.json({
-      data: categories,
+      data: orders,
       pagination: {
         page,
         limit: actualLimit,
@@ -68,7 +67,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Categories fetch error:', error)
+    console.error('Orders fetch error:', error)
     return NextResponse.json(
       { message: 'Internal server error' },
       { status: 500 }
@@ -76,7 +75,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST - Create a new category
+// New endpoint specifically for large exports
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -94,36 +93,42 @@ export async function POST(request: NextRequest) {
 
     if (action === 'export-large') {
       // Get total count first
-      const total = await prisma.category.count()
+      const total = await prisma.order.count()
       
       if (total > 10000) {
         return NextResponse.json({
           error: 'Dataset too large',
-          message: 'Cannot export more than 10,000 categories at once. Please use filters or contact support.',
+          message: 'Cannot export more than 10,000 orders at once. Please use filters or contact support.',
           total
         }, { status: 413 })
       }
 
-      // Fetch all categories in chunks to avoid memory issues
+      // Fetch all orders in chunks to avoid memory issues
       const chunkSize = 1000
       const chunks = Math.ceil(total / chunkSize)
-      let allCategories: any[] = []
+      let allOrders: any[] = []
 
       for (let i = 0; i < chunks; i++) {
-        const categories = await prisma.category.findMany({
+        const orders = await prisma.order.findMany({
           skip: i * chunkSize,
           take: chunkSize,
           include: {
-            parent: {
+            customer: {
               select: {
                 id: true,
-                name: true
+                name: true,
+                email: true
               }
             },
-            _count: {
-              select: {
-                products: true,
-                children: true
+            items: {
+              include: {
+                product: {
+                  select: {
+                    id: true,
+                    name: true,
+                    sku: true
+                  }
+                }
               }
             }
           },
@@ -131,34 +136,41 @@ export async function POST(request: NextRequest) {
             createdAt: 'desc'
           }
         })
-        allCategories = allCategories.concat(categories)
+        allOrders = allOrders.concat(orders)
       }
 
       // Prepare data for Excel
-      const excelData = allCategories.map((category) => ({
-        'ID': category.id,
-        'Name': category.name,
-        'Description': category.description || 'No Description',
-        'Slug': category.slug,
-        'Parent Category': category.parent?.name || 'No Parent',
-        'Products Count': category._count?.products || 0,
-        'Subcategories Count': category._count?.children || 0,
-        'Created At': new Date(category.createdAt).toLocaleDateString(),
-        'Updated At': new Date(category.updatedAt).toLocaleDateString()
+      const excelData = allOrders.map((order) => ({
+        'Order ID': order.id,
+        'Order Number': order.orderNumber,
+        'Customer Name': order.customer?.name || 'No Name',
+        'Customer Email': order.customer?.email || 'No Email',
+        'Status': order.status,
+        'Total': order.total,
+        'Subtotal': order.subtotal,
+        'Tax': order.tax,
+        'Shipping': order.shipping,
+        'Discount': order.discount,
+        'Items Count': order.items?.length || 0,
+        'Shipping City': order.shippingAddress?.city || 'N/A',
+        'Shipping Country': order.shippingAddress?.country || 'N/A',
+        'Notes': order.notes || 'No Notes',
+        'Created At': new Date(order.createdAt).toLocaleDateString(),
+        'Updated At': new Date(order.updatedAt).toLocaleDateString()
       }))
 
       return NextResponse.json({
         success: true,
         data: excelData,
         total,
-        message: `Successfully prepared ${total} categories for export`
+        message: `Successfully prepared ${total} orders for export`
       })
     }
 
     return NextResponse.json({ message: 'Invalid action' }, { status: 400 })
 
   } catch (error) {
-    console.error('Categories export error:', error)
+    console.error('Orders export error:', error)
     return NextResponse.json(
       { message: 'Internal server error' },
       { status: 500 }

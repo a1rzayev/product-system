@@ -4,9 +4,12 @@ export interface User {
   id: string
   email: string
   name?: string
-  role: 'ADMIN' | 'CUSTOMER'
+  role: 'ADMIN' | 'USER' | 'CUSTOMER'
   createdAt: Date
   updatedAt: Date
+  _count?: {
+    orders: number
+  }
 }
 
 export interface Category {

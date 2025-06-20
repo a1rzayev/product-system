@@ -15,7 +15,8 @@
     "yes": "Yes",
     "no": "No",
     "actions": "Actions",
-    "select": "Select"
+    "select": "Select",
+    "total": "total"
   },
   "navigation": {
     "home": "Home",
@@ -110,7 +111,14 @@
     "description": "Description",
     "image": "Image",
     "createdAt": "Created At",
-    "updatedAt": "Updated At"
+    "updatedAt": "Updated At",
+    "exportToExcel": "Export to Excel",
+    "exporting": "Exporting...",
+    "deleteProduct": "Delete Product",
+    "confirmDelete": "Are you sure you want to delete this product?",
+    "productDeleted": "Product deleted successfully",
+    "productUpdated": "Product updated successfully",
+    "productCreated": "Product created successfully"
   },
   "categories": {
     "title": "Categories",
@@ -128,34 +136,49 @@
     "name": "Name",
     "description": "Description",
     "createdAt": "Created At",
-    "updatedAt": "Updated At"
+    "updatedAt": "Updated At",
+    "exportToExcel": "Export to Excel",
+    "exporting": "Exporting...",
+    "deleteCategory": "Delete Category",
+    "confirmDelete": "Are you sure you want to delete this category?",
+    "categoryDeleted": "Category deleted successfully",
+    "categoryUpdated": "Category updated successfully",
+    "categoryCreated": "Category created successfully"
   },
   "users": {
     "title": "Users",
+    "subtitle": "Manage user accounts",
     "userName": "User Name",
     "userEmail": "User Email",
     "userRole": "User Role",
     "noUsers": "No users found",
+    "noUsersDescription": "No users have registered yet.",
     "userDetails": "User Details",
     "name": "Name",
     "email": "Email",
     "role": "Role",
     "createdAt": "Created At",
-    "updatedAt": "Updated At"
+    "updatedAt": "Updated At",
+    "exportToExcel": "Export to Excel",
+    "exporting": "Exporting..."
   },
   "orders": {
     "title": "Orders",
+    "subtitle": "Manage customer orders",
     "orderNumber": "Order Number",
     "orderStatus": "Order Status",
     "orderDate": "Order Date",
     "orderTotal": "Order Total",
     "noOrders": "No orders found",
+    "noOrdersDescription": "No orders have been placed yet.",
     "orderDetails": "Order Details",
     "status": "Status",
     "date": "Date",
     "total": "Total",
     "customer": "Customer",
-    "items": "Items"
+    "items": "Items",
+    "exportToExcel": "Export to Excel",
+    "exporting": "Exporting..."
   },
   "home": {
     "welcome": "Welcome to Product System",
