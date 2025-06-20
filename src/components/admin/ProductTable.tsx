@@ -3,15 +3,14 @@
 import Link from 'next/link'
 import { Product } from '@/types'
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 
 interface ProductTableProps {
   products: Product[]
+  onProductDeleted?: () => void
 }
 
-export default function ProductTable({ products }: ProductTableProps) {
+export default function ProductTable({ products, onProductDeleted }: ProductTableProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null)
-  const router = useRouter()
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -48,8 +47,10 @@ export default function ProductTable({ products }: ProductTableProps) {
         throw new Error('Failed to delete product')
       }
 
-      // Refresh the page to show updated data
-      router.refresh()
+      // Call the callback to refresh the data
+      if (onProductDeleted) {
+        onProductDeleted()
+      }
     } catch (error) {
       console.error('Error deleting product:', error)
       alert('Failed to delete product. Please try again.')

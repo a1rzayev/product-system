@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useLanguage } from '@/contexts/LanguageContext'
 import CategoryTable from '@/components/admin/CategoryTable'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 interface Category {
   id: string
@@ -19,24 +19,29 @@ export default function AdminCategories() {
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await fetch('/api/categories')
-        if (!response.ok) {
-          throw new Error('Failed to fetch categories')
-        }
-        const result = await response.json()
-        setCategories(result || [])
-      } catch (error) {
-        console.error('Error fetching categories:', error)
-      } finally {
-        setLoading(false)
+  const fetchCategories = useCallback(async () => {
+    try {
+      const response = await fetch('/api/categories')
+      if (!response.ok) {
+        throw new Error('Failed to fetch categories')
       }
+      const result = await response.json()
+      setCategories(result || [])
+    } catch (error) {
+      console.error('Error fetching categories:', error)
+    } finally {
+      setLoading(false)
     }
-
-    fetchCategories()
   }, [])
+
+  useEffect(() => {
+    fetchCategories()
+  }, [fetchCategories])
+
+  const handleCategoryDeleted = useCallback(() => {
+    // Refresh the categories list after deletion
+    fetchCategories()
+  }, [fetchCategories])
 
   if (loading) {
     return (
@@ -79,7 +84,7 @@ export default function AdminCategories() {
             {categories.length} {t('categories.title').toLowerCase()} {t('common.loading')}
           </p>
         </div>
-        <CategoryTable categories={categories} />
+        <CategoryTable categories={categories} onCategoryDeleted={handleCategoryDeleted} />
       </div>
     </div>
   )

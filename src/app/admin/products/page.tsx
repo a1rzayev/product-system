@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useLanguage } from '@/contexts/LanguageContext'
 import ProductTable from '@/components/admin/ProductTable'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 interface Product {
   id: string
@@ -22,25 +22,30 @@ export default function AdminProducts() {
   const [loading, setLoading] = useState(true)
   const [totalProducts, setTotalProducts] = useState(0)
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await fetch('/api/products?page=1&limit=50')
-        if (!response.ok) {
-          throw new Error('Failed to fetch products')
-        }
-        const result = await response.json()
-        setProducts(result.data || [])
-        setTotalProducts(result.pagination?.total || 0)
-      } catch (error) {
-        console.error('Error fetching products:', error)
-      } finally {
-        setLoading(false)
+  const fetchProducts = useCallback(async () => {
+    try {
+      const response = await fetch('/api/products?page=1&limit=50')
+      if (!response.ok) {
+        throw new Error('Failed to fetch products')
       }
+      const result = await response.json()
+      setProducts(result.data || [])
+      setTotalProducts(result.pagination?.total || 0)
+    } catch (error) {
+      console.error('Error fetching products:', error)
+    } finally {
+      setLoading(false)
     }
-
-    fetchProducts()
   }, [])
+
+  useEffect(() => {
+    fetchProducts()
+  }, [fetchProducts])
+
+  const handleProductDeleted = useCallback(() => {
+    // Refresh the products list after deletion
+    fetchProducts()
+  }, [fetchProducts])
 
   if (loading) {
     return (
@@ -83,7 +88,7 @@ export default function AdminProducts() {
             {totalProducts} {t('products.title').toLowerCase()} {t('common.loading')}
           </p>
         </div>
-        <ProductTable products={products} />
+        <ProductTable products={products} onProductDeleted={handleProductDeleted} />
       </div>
     </div>
   )

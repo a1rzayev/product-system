@@ -3,15 +3,14 @@
 import Link from 'next/link'
 import { Category } from '@/types'
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 
 interface CategoryTableProps {
   categories: Category[]
+  onCategoryDeleted?: () => void
 }
 
-export default function CategoryTable({ categories }: CategoryTableProps) {
+export default function CategoryTable({ categories, onCategoryDeleted }: CategoryTableProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null)
-  const router = useRouter()
 
   const handleDelete = async (categoryId: string, categoryName: string) => {
     if (!confirm(`Are you sure you want to delete "${categoryName}"? This action cannot be undone.`)) {
@@ -29,8 +28,10 @@ export default function CategoryTable({ categories }: CategoryTableProps) {
         throw new Error('Failed to delete category')
       }
 
-      // Refresh the page to show updated data
-      router.refresh()
+      // Call the callback to refresh the data
+      if (onCategoryDeleted) {
+        onCategoryDeleted()
+      }
     } catch (error) {
       console.error('Error deleting category:', error)
       alert('Failed to delete category. Please try again.')
