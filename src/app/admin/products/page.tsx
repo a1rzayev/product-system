@@ -42,13 +42,42 @@ export default function AdminProducts() {
   const exportToExcel = async () => {
     setExporting(true)
     try {
-      // Fetch all products for export (not just the first 50)
-      const response = await fetch('/api/products?page=1&limit=1000')
+      // First, check if we have a large dataset
+      const response = await fetch('/api/products?page=1&limit=1')
       if (!response.ok) {
-        throw new Error('Failed to fetch products for export')
+        throw new Error('Failed to check product count')
       }
       const result = await response.json()
-      const allProducts = result.data || []
+      const totalProducts = result.pagination?.total || 0
+
+      let allProducts: any[] = []
+
+      if (totalProducts > 1000) {
+        // For large datasets, use the optimized endpoint
+        const exportResponse = await fetch('/api/products?action=export-large', {
+          method: 'POST'
+        })
+        
+        if (!exportResponse.ok) {
+          const errorData = await exportResponse.json()
+          if (exportResponse.status === 413) {
+            alert(`Export failed: ${errorData.message}`)
+            return
+          }
+          throw new Error('Failed to export large dataset')
+        }
+        
+        const exportResult = await exportResponse.json()
+        allProducts = exportResult.data
+      } else {
+        // For smaller datasets, use the regular endpoint
+        const response = await fetch('/api/products?page=1&limit=5000')
+        if (!response.ok) {
+          throw new Error('Failed to fetch products for export')
+        }
+        const result = await response.json()
+        allProducts = result.data || []
+      }
 
       // Prepare data for Excel
       const excelData = allProducts.map((product: Product) => ({
@@ -94,6 +123,9 @@ export default function AdminProducts() {
 
       // Save the file
       XLSX.writeFile(workbook, filename)
+
+      // Show success message
+      alert(`Successfully exported ${allProducts.length} products to Excel!`)
 
     } catch (error) {
       console.error('Error exporting to Excel:', error)

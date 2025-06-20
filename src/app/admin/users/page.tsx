@@ -35,13 +35,42 @@ export default function AdminUsersPage() {
   const exportToExcel = async () => {
     setExporting(true)
     try {
-      // Fetch all users for export
-      const response = await fetch('/api/users?page=1&limit=1000')
+      // First, check if we have a large dataset
+      const response = await fetch('/api/users?page=1&limit=1')
       if (!response.ok) {
-        throw new Error('Failed to fetch users for export')
+        throw new Error('Failed to check user count')
       }
       const result = await response.json()
-      const allUsers = result.data || []
+      const totalUsers = result.pagination?.total || 0
+
+      let allUsers: any[] = []
+
+      if (totalUsers > 1000) {
+        // For large datasets, use the optimized endpoint
+        const exportResponse = await fetch('/api/users?action=export-large', {
+          method: 'POST'
+        })
+        
+        if (!exportResponse.ok) {
+          const errorData = await exportResponse.json()
+          if (exportResponse.status === 413) {
+            alert(`Export failed: ${errorData.message}`)
+            return
+          }
+          throw new Error('Failed to export large dataset')
+        }
+        
+        const exportResult = await exportResponse.json()
+        allUsers = exportResult.data
+      } else {
+        // For smaller datasets, use the regular endpoint
+        const response = await fetch('/api/users?page=1&limit=5000')
+        if (!response.ok) {
+          throw new Error('Failed to fetch users for export')
+        }
+        const result = await response.json()
+        allUsers = result.data || []
+      }
 
       // Prepare data for Excel
       const excelData = allUsers.map((user: any) => ({
@@ -79,6 +108,9 @@ export default function AdminUsersPage() {
 
       // Save the file
       XLSX.writeFile(workbook, filename)
+
+      // Show success message
+      alert(`Successfully exported ${allUsers.length} users to Excel!`)
 
     } catch (error) {
       console.error('Error exporting to Excel:', error)

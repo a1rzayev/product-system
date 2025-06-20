@@ -40,22 +40,52 @@ export default function AdminCategories() {
   const exportToExcel = async () => {
     setExporting(true)
     try {
-      // Fetch all categories for export
-      const response = await fetch('/api/categories')
+      // First, check if we have a large dataset
+      const response = await fetch('/api/categories?page=1&limit=1')
       if (!response.ok) {
-        throw new Error('Failed to fetch categories for export')
+        throw new Error('Failed to check category count')
       }
       const result = await response.json()
-      const allCategories = result || []
+      const totalCategories = result.pagination?.total || 0
+
+      let allCategories: any[] = []
+
+      if (totalCategories > 1000) {
+        // For large datasets, use the optimized endpoint
+        const exportResponse = await fetch('/api/categories?action=export-large', {
+          method: 'POST'
+        })
+        
+        if (!exportResponse.ok) {
+          const errorData = await exportResponse.json()
+          if (exportResponse.status === 413) {
+            alert(`Export failed: ${errorData.message}`)
+            return
+          }
+          throw new Error('Failed to export large dataset')
+        }
+        
+        const exportResult = await exportResponse.json()
+        allCategories = exportResult.data
+      } else {
+        // For smaller datasets, use the regular endpoint
+        const response = await fetch('/api/categories?page=1&limit=5000')
+        if (!response.ok) {
+          throw new Error('Failed to fetch categories for export')
+        }
+        const result = await response.json()
+        allCategories = result.data || []
+      }
 
       // Prepare data for Excel
-      const excelData = allCategories.map((category: Category) => ({
+      const excelData = allCategories.map((category: any) => ({
         'ID': category.id,
         'Name': category.name,
         'Description': category.description || 'No Description',
         'Slug': category.slug,
         'Parent Category': category.parent?.name || 'No Parent',
-        'Products Count': category.products?.length || 0,
+        'Products Count': category._count?.products || 0,
+        'Subcategories Count': category._count?.children || 0,
         'Created At': new Date(category.createdAt).toLocaleDateString(),
         'Updated At': new Date(category.updatedAt).toLocaleDateString()
       }))
@@ -71,7 +101,8 @@ export default function AdminCategories() {
         { wch: 50 }, // Description
         { wch: 30 }, // Slug
         { wch: 25 }, // Parent Category
-        { wch: 15 }, // Products Count
+        { wch: 20 }, // Products Count
+        { wch: 25 }, // Subcategories Count
         { wch: 15 }, // Created At
         { wch: 15 }  // Updated At
       ]
@@ -86,6 +117,9 @@ export default function AdminCategories() {
 
       // Save the file
       XLSX.writeFile(workbook, filename)
+
+      // Show success message
+      alert(`Successfully exported ${allCategories.length} categories to Excel!`)
 
     } catch (error) {
       console.error('Error exporting to Excel:', error)
