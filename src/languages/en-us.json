@@ -35,7 +35,8 @@
     "signOut": "Sign Out",
     "welcome": "Welcome",
     "loginError": "Login Error",
-    "invalidCredentials": "Invalid email or password"
+    "invalidCredentials": "Invalid email or password",
+    "dontHaveAccount": "Don't have an account?"
   },
   "profile": {
     "title": "Profile",
@@ -54,18 +55,20 @@
     "accountInfo": "Account Information",
     "currentPassword": "Current Password",
     "newPassword": "New Password",
-    "confirmPassword": "Confirm New Password",
-    "passwordChangeNote": "Leave password fields empty if you don't want to change your password.",
+    "confirmPassword": "Confirm Password",
+    "passwordChangeNote": "Leave password fields empty if you don't want to change your password",
     "backToProfile": "Back to Profile",
     "saveChanges": "Save Changes",
     "saving": "Saving...",
-    "profileUpdated": "Profile updated successfully",
+    "profileUpdated": "Profile updated successfully!",
     "currentPasswordRequired": "Current password is required to change password",
-    "passwordsDoNotMatch": "New passwords do not match",
-    "passwordTooShort": "New password must be at least 6 characters long",
+    "passwordsDoNotMatch": "Passwords do not match",
+    "passwordTooShort": "Password must be at least 6 characters long",
     "emailAlreadyTaken": "Email is already taken",
     "invalidEmail": "Invalid email format",
-    "currentPasswordIncorrect": "Current password is incorrect"
+    "currentPasswordIncorrect": "Current password is incorrect",
+    "refreshData": "Refresh Data",
+    "refreshing": "Refreshing..."
   },
   "admin": {
     "dashboard": "Dashboard",
@@ -159,5 +162,27 @@
     "unauthorized": "Unauthorized access",
     "forbidden": "Access forbidden",
     "somethingWentWrong": "Something went wrong"
+  },
+  "register": {
+    "title": "Create Account",
+    "subtitle": "Sign up for a new account",
+    "name": "Name",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "namePlaceholder": "Enter your full name",
+    "emailPlaceholder": "Enter your email address",
+    "passwordPlaceholder": "Enter your password",
+    "confirmPasswordPlaceholder": "Confirm your password",
+    "createAccount": "Create Account",
+    "creating": "Creating Account...",
+    "alreadyHaveAccount": "Already have an account?",
+    "signIn": "Sign In",
+    "nameRequired": "Name is required",
+    "emailRequired": "Email is required",
+    "passwordRequired": "Password is required",
+    "passwordTooShort": "Password must be at least 6 characters long",
+    "passwordsDoNotMatch": "Passwords do not match",
+    "loginAfterRegistrationFailed": "Account created but automatic login failed. Please sign in manually."
   }
 } 

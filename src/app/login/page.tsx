@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { signIn, getSession, useSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useLanguage } from '@/contexts/LanguageContext'
+import Link from 'next/link'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -156,6 +157,18 @@ export default function Login() {
             >
               {loading ? t('common.loading') : isRedirecting ? t('common.loading') : t('auth.signIn')}
             </button>
+          </div>
+
+          <div className="text-center">
+            <p className="text-sm text-gray-600">
+              {t('auth.dontHaveAccount')}{' '}
+              <Link
+                href="/register"
+                className="font-medium text-blue-600 hover:text-blue-500"
+              >
+                {t('register.createAccount')}
+              </Link>
+            </p>
           </div>
         </form>
       </div>
