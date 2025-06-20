@@ -26,7 +26,7 @@ export default function CategoriesPage() {
           throw new Error('Failed to fetch categories')
         }
         const result = await response.json()
-        setCategories(result || [])
+        setCategories(result.data || [])
       } catch (error) {
         console.error('Error fetching categories:', error)
       } finally {

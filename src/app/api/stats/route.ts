@@ -1,21 +1,21 @@
 import { NextResponse } from 'next/server'
-import { productService, categoryService, orderService, userService } from '@/lib/db'
+import { prisma } from '@/lib/prisma'
 
 export async function GET() {
   try {
-    // Fetch all statistics in parallel
+    // Fetch all statistics in parallel using Prisma
     const [products, categories, orders, users] = await Promise.all([
-      productService.getAll(1, 1), // Just get pagination info
-      categoryService.getAll(),
-      orderService.getByUser(''), // This might need adjustment based on your service
-      userService.getById(''), // This might need adjustment based on your service
+      prisma.product.count(),
+      prisma.category.count(),
+      prisma.order.count(),
+      prisma.user.count(),
     ])
 
     const stats = {
-      products: products.pagination?.total || 0,
-      categories: categories.length || 0,
-      orders: 0, // Set to 0 for now, adjust based on your order service
-      users: 0, // Set to 0 for now, adjust based on your user service
+      products,
+      categories,
+      orders,
+      users,
     }
 
     return NextResponse.json(stats)

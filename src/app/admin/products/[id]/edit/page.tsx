@@ -71,7 +71,7 @@ export default function EditProductPage({ params }: EditProductPageProps) {
         const categoriesResponse = await fetch('/api/categories')
         if (categoriesResponse.ok) {
           const categoriesData = await categoriesResponse.json()
-          setCategories(categoriesData)
+          setCategories(categoriesData.data || [])
         }
 
         // Set form data

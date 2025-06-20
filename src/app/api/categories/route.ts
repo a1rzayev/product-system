@@ -3,24 +3,22 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
-// GET - Fetch categories
+// GET - Fetch categories (public access)
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-
-    if (!session || !session.user) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
-    }
-
-    if (session.user.role !== 'ADMIN') {
-      return NextResponse.json({ message: 'Forbidden' }, { status: 403 })
-    }
-
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '50')
     const skip = (page - 1) * limit
     const isExport = searchParams.get('export') === 'true'
+
+    // Check if this is an export request (admin only)
+    if (isExport) {
+      const session = await getServerSession(authOptions)
+      if (!session || !session.user || session.user.role !== 'ADMIN') {
+        return NextResponse.json({ message: 'Forbidden' }, { status: 403 })
+      }
+    }
 
     // For exports, use a larger limit but still reasonable
     const actualLimit = isExport ? Math.min(limit, 5000) : limit
@@ -76,7 +74,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST - Create a new category
+// POST - Create a new category (admin only)
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
