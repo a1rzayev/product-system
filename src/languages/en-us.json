@@ -118,7 +118,21 @@
     "confirmDelete": "Are you sure you want to delete this product?",
     "productDeleted": "Product deleted successfully",
     "productUpdated": "Product updated successfully",
-    "productCreated": "Product created successfully"
+    "productCreated": "Product created successfully",
+    "productNotFound": "Product Not Found",
+    "productUnavailable": "Product Unavailable",
+    "productNotAvailable": "This product is currently not available.",
+    "backToProducts": "Back to Products",
+    "viewDetails": "View Details",
+    "addToCart": "Add to Cart",
+    "addToWishlist": "Add to Wishlist",
+    "productInformation": "Product Information",
+    "weight": "Weight",
+    "dimensions": "Dimensions",
+    "status": "Status",
+    "active": "Active",
+    "inactive": "Inactive",
+    "featured": "Featured"
   },
   "categories": {
     "title": "Categories",

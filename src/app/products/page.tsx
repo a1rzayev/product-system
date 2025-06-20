@@ -72,7 +72,11 @@ export default function ProductsPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {products.map((product) => (
-              <div key={product.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+              <Link
+                key={product.id}
+                href={`/products/${product.id}`}
+                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow block"
+              >
                 <div className="aspect-w-1 aspect-h-1 w-full">
                   {product.images && product.images.length > 0 ? (
                     <img
@@ -107,12 +111,9 @@ export default function ProductsPage() {
                       )}
                     </div>
                     
-                    <Link
-                      href={`/products/${product.slug}`}
-                      className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
-                    >
-                      {t('common.actions')}
-                    </Link>
+                    <span className="px-3 py-1 bg-blue-600 text-white text-sm rounded">
+                      {t('products.viewDetails')}
+                    </span>
                   </div>
                   
                   {product.category && (
@@ -123,7 +124,7 @@ export default function ProductsPage() {
                     </div>
                   )}
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
