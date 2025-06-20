@@ -93,9 +93,17 @@ export default function AdminProfilePage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">{t('profile.title')}</h1>
-        <p className="text-gray-600">{t('profile.subtitle')}</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">{t('profile.title')}</h1>
+          <p className="text-gray-600">{t('profile.subtitle')}</p>
+        </div>
+        <Link
+          href="/admin/profile/edit"
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          Edit Profile
+        </Link>
       </div>
 
       <div className="bg-white shadow rounded-lg">
@@ -138,7 +146,6 @@ export default function AdminProfilePage() {
               </div>
             </div>
           </div>
-
           
         </div>
       </div>
