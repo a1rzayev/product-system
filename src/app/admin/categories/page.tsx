@@ -4,20 +4,14 @@ import Link from 'next/link'
 import { useLanguage } from '@/contexts/LanguageContext'
 import CategoryTable from '@/components/admin/CategoryTable'
 import { useState, useEffect, useCallback } from 'react'
-
-interface Category {
-  id: string
-  name: string
-  description?: string
-  slug: string
-  createdAt: string
-  updatedAt: string
-}
+import * as XLSX from 'xlsx'
+import { Category } from '@/types'
 
 export default function AdminCategories() {
   const { t } = useLanguage()
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
+  const [exporting, setExporting] = useState(false)
 
   const fetchCategories = useCallback(async () => {
       try {
@@ -42,6 +36,64 @@ export default function AdminCategories() {
     // Refresh the categories list after deletion
     fetchCategories()
   }, [fetchCategories])
+
+  const exportToExcel = async () => {
+    setExporting(true)
+    try {
+      // Fetch all categories for export
+      const response = await fetch('/api/categories')
+      if (!response.ok) {
+        throw new Error('Failed to fetch categories for export')
+      }
+      const result = await response.json()
+      const allCategories = result || []
+
+      // Prepare data for Excel
+      const excelData = allCategories.map((category: Category) => ({
+        'ID': category.id,
+        'Name': category.name,
+        'Description': category.description || 'No Description',
+        'Slug': category.slug,
+        'Parent Category': category.parent?.name || 'No Parent',
+        'Products Count': category.products?.length || 0,
+        'Created At': new Date(category.createdAt).toLocaleDateString(),
+        'Updated At': new Date(category.updatedAt).toLocaleDateString()
+      }))
+
+      // Create workbook and worksheet
+      const workbook = XLSX.utils.book_new()
+      const worksheet = XLSX.utils.json_to_sheet(excelData)
+
+      // Set column widths
+      const columnWidths = [
+        { wch: 36 }, // ID
+        { wch: 30 }, // Name
+        { wch: 50 }, // Description
+        { wch: 30 }, // Slug
+        { wch: 25 }, // Parent Category
+        { wch: 15 }, // Products Count
+        { wch: 15 }, // Created At
+        { wch: 15 }  // Updated At
+      ]
+      worksheet['!cols'] = columnWidths
+
+      // Add worksheet to workbook
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Categories')
+
+      // Generate filename with current date
+      const date = new Date().toISOString().split('T')[0]
+      const filename = `categories_export_${date}.xlsx`
+
+      // Save the file
+      XLSX.writeFile(workbook, filename)
+
+    } catch (error) {
+      console.error('Error exporting to Excel:', error)
+      alert('Failed to export categories to Excel')
+    } finally {
+      setExporting(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -69,12 +121,33 @@ export default function AdminCategories() {
           <h1 className="text-2xl font-bold text-gray-900">{t('categories.title')}</h1>
           <p className="text-gray-600">{t('categories.title')}</p>
         </div>
-        <Link
-          href="/admin/categories/new"
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          {t('categories.addCategory')}
-        </Link>
+        <div className="flex space-x-3">
+          <button
+            onClick={exportToExcel}
+            disabled={exporting}
+            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+          >
+            {exporting ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <span>{t('categories.exporting') || 'Exporting...'}</span>
+              </>
+            ) : (
+              <>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>{t('categories.exportToExcel') || 'Export to Excel'}</span>
+              </>
+            )}
+          </button>
+          <Link
+            href="/admin/categories/new"
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            {t('categories.addCategory')}
+          </Link>
+        </div>
       </div>
 
       <div className="bg-white shadow rounded-lg">

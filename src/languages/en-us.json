@@ -135,7 +135,14 @@
     "name": "Name",
     "description": "Description",
     "createdAt": "Created At",
-    "updatedAt": "Updated At"
+    "updatedAt": "Updated At",
+    "exportToExcel": "Export to Excel",
+    "exporting": "Exporting...",
+    "deleteCategory": "Delete Category",
+    "confirmDelete": "Are you sure you want to delete this category?",
+    "categoryDeleted": "Category deleted successfully",
+    "categoryUpdated": "Category updated successfully",
+    "categoryCreated": "Category created successfully"
   },
   "users": {
     "title": "Users",

@@ -135,7 +135,14 @@
     "name": "Название",
     "description": "Описание",
     "createdAt": "Дата создания",
-    "updatedAt": "Дата обновления"
+    "updatedAt": "Дата обновления",
+    "exportToExcel": "Экспорт в Excel",
+    "exporting": "Экспорт...",
+    "deleteCategory": "Удалить категорию",
+    "confirmDelete": "Вы уверены, что хотите удалить эту категорию?",
+    "categoryDeleted": "Категория успешно удалена",
+    "categoryUpdated": "Категория успешно обновлена",
+    "categoryCreated": "Категория успешно создана"
   },
   "users": {
     "title": "Пользователи",
