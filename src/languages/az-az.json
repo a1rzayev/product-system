@@ -1,7 +1,7 @@
 {
   "common": {
     "loading": "Yüklənir...",
-    "save": "Saxla",
+    "save": "Yadda saxla",
     "cancel": "Ləğv et",
     "edit": "Redaktə et",
     "delete": "Sil",
@@ -15,7 +15,8 @@
     "yes": "Bəli",
     "no": "Xeyr",
     "actions": "Əməliyyatlar",
-    "select": "Seç"
+    "select": "Seç",
+    "total": "cəmi"
   },
   "navigation": {
     "home": "Ana Səhifə",
@@ -144,30 +145,38 @@
   },
   "users": {
     "title": "İstifadəçilər",
+    "subtitle": "İstifadəçi hesablarını idarə et",
     "userName": "İstifadəçi adı",
-    "userEmail": "İstifadəçi e-poçtu",
+    "userEmail": "İstifadəçi emaili",
     "userRole": "İstifadəçi rolu",
     "noUsers": "İstifadəçi tapılmadı",
-    "userDetails": "İstifadəçi detalları",
+    "noUsersDescription": "Hələ heç bir istifadəçi qeydiyyatdan keçməyib.",
+    "userDetails": "İstifadəçi məlumatları",
     "name": "Ad",
-    "email": "E-poçt",
+    "email": "Email",
     "role": "Rol",
     "createdAt": "Yaradılma tarixi",
-    "updatedAt": "Yenilənmə tarixi"
+    "updatedAt": "Yenilənmə tarixi",
+    "exportToExcel": "Excel-ə ixrac et",
+    "exporting": "İxrac edilir..."
   },
   "orders": {
     "title": "Sifarişlər",
+    "subtitle": "Müştəri sifarişlərini idarə et",
     "orderNumber": "Sifariş nömrəsi",
     "orderStatus": "Sifariş statusu",
     "orderDate": "Sifariş tarixi",
-    "orderTotal": "Sifariş məbləği",
+    "orderTotal": "Sifarişin ümumi məbləği",
     "noOrders": "Sifariş tapılmadı",
-    "orderDetails": "Sifariş detalları",
+    "noOrdersDescription": "Hələ heç bir sifariş verilməyib.",
+    "orderDetails": "Sifariş məlumatları",
     "status": "Status",
     "date": "Tarix",
     "total": "Ümumi",
     "customer": "Müştəri",
-    "items": "Elementlər"
+    "items": "Məhsullar",
+    "exportToExcel": "Excel-ə ixrac et",
+    "exporting": "İxrac edilir..."
   },
   "home": {
     "welcome": "Məhsul Sisteminə Xoş Gəlmisiniz",

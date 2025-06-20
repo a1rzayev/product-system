@@ -8,14 +8,15 @@
     "create": "Создать",
     "search": "Поиск",
     "back": "Назад",
-    "next": "Следующий",
+    "next": "Далее",
     "previous": "Предыдущий",
     "submit": "Отправить",
     "close": "Закрыть",
     "yes": "Да",
     "no": "Нет",
     "actions": "Действия",
-    "select": "Выбрать"
+    "select": "Выбрать",
+    "total": "всего"
   },
   "navigation": {
     "home": "Главная",
@@ -146,30 +147,38 @@
   },
   "users": {
     "title": "Пользователи",
+    "subtitle": "Управление учетными записями пользователей",
     "userName": "Имя пользователя",
     "userEmail": "Email пользователя",
     "userRole": "Роль пользователя",
     "noUsers": "Пользователи не найдены",
+    "noUsersDescription": "Пользователи еще не зарегистрировались.",
     "userDetails": "Детали пользователя",
     "name": "Имя",
     "email": "Email",
     "role": "Роль",
-    "createdAt": "Дата создания",
-    "updatedAt": "Дата обновления"
+    "createdAt": "Создан",
+    "updatedAt": "Обновлен",
+    "exportToExcel": "Экспорт в Excel",
+    "exporting": "Экспорт..."
   },
   "orders": {
     "title": "Заказы",
+    "subtitle": "Управление заказами клиентов",
     "orderNumber": "Номер заказа",
     "orderStatus": "Статус заказа",
     "orderDate": "Дата заказа",
-    "orderTotal": "Сумма заказа",
+    "orderTotal": "Общая сумма заказа",
     "noOrders": "Заказы не найдены",
+    "noOrdersDescription": "Заказы еще не были размещены.",
     "orderDetails": "Детали заказа",
     "status": "Статус",
     "date": "Дата",
     "total": "Итого",
     "customer": "Клиент",
-    "items": "Товары"
+    "items": "Товары",
+    "exportToExcel": "Экспорт в Excel",
+    "exporting": "Экспорт..."
   },
   "home": {
     "welcome": "Добро пожаловать в Систему Товаров",
