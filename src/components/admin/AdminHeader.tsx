@@ -5,6 +5,7 @@ import { User } from 'next-auth'
 import { useState } from 'react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import LanguageSwitcher from '../LanguageSwitcher'
+import Link from 'next/link'
 
 interface AdminHeaderProps {
   user: User
@@ -41,9 +42,12 @@ export default function AdminHeader({ user }: AdminHeaderProps) {
         </div>
         <div className="flex items-center space-x-4">
           <LanguageSwitcher />
-          <div className="text-sm text-gray-700">
+          <Link
+            href="/admin/profile"
+            className="text-sm text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
+          >
             {t('auth.welcome')}, {user.name || user.email}
-          </div>
+          </Link>
           <button
             onClick={handleLogout}
             disabled={isLoggingOut}

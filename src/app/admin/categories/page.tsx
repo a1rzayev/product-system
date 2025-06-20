@@ -20,18 +20,18 @@ export default function AdminCategories() {
   const [loading, setLoading] = useState(true)
 
   const fetchCategories = useCallback(async () => {
-    try {
-      const response = await fetch('/api/categories')
-      if (!response.ok) {
-        throw new Error('Failed to fetch categories')
+      try {
+        const response = await fetch('/api/categories')
+        if (!response.ok) {
+          throw new Error('Failed to fetch categories')
+        }
+        const result = await response.json()
+        setCategories(result || [])
+      } catch (error) {
+        console.error('Error fetching categories:', error)
+      } finally {
+        setLoading(false)
       }
-      const result = await response.json()
-      setCategories(result || [])
-    } catch (error) {
-      console.error('Error fetching categories:', error)
-    } finally {
-      setLoading(false)
-    }
   }, [])
 
   useEffect(() => {
