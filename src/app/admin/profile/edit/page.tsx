@@ -154,10 +154,18 @@ export default function EditProfilePage() {
           console.log('Session updated successfully')
         } catch (updateError) {
           console.error('Failed to update session:', updateError)
-          // Fallback to page reload
-          window.location.reload()
         }
       }
+
+      // Trigger profile page refresh by setting localStorage
+      localStorage.setItem('profile-updated', Date.now().toString())
+      
+      // Also trigger the event for the current window
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: 'profile-updated',
+        newValue: Date.now().toString()
+      }))
+
     } catch (error) {
       console.error('Profile update error:', error)
       setError(error instanceof Error ? error.message : 'Failed to update profile')

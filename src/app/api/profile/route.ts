@@ -4,6 +4,52 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 
+export async function GET() {
+  try {
+    const session = await getServerSession(authOptions)
+
+    if (!session || !session.user) {
+      console.log('Profile GET: No session or user')
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
+    }
+
+    if (session.user.role !== 'ADMIN') {
+      console.log('Profile GET: User is not admin', { role: session.user.role })
+      return NextResponse.json({ message: 'Forbidden' }, { status: 403 })
+    }
+
+    console.log('Profile GET: Fetching user data for ID:', session.user.id)
+
+    // Fetch current user data from database
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true
+      }
+    })
+
+    if (!user) {
+      console.log('Profile GET: User not found in database')
+      return NextResponse.json({ message: 'User not found' }, { status: 404 })
+    }
+
+    console.log('Profile GET: User data fetched successfully:', user)
+
+    return NextResponse.json({
+      user
+    })
+
+  } catch (error) {
+    console.error('Profile GET error:', error)
+    return NextResponse.json({ message: 'Internal server error' }, { status: 500 })
+  }
+}
+
 export async function PUT(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)

@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import Link from 'next/link'
 
@@ -19,6 +19,48 @@ export default function AdminProfilePage() {
   const { t } = useLanguage()
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
+
+  const fetchProfileData = useCallback(async () => {
+    if (!session?.user?.id) return
+
+    try {
+      const response = await fetch('/api/profile')
+      if (response.ok) {
+        const data = await response.json()
+        setProfile(data.user)
+      } else {
+        // Fallback to session data if API fails
+        if (session.user) {
+          setProfile({
+            id: session.user.id || '',
+            name: session.user.name || '',
+            email: session.user.email || '',
+            role: session.user.role || ''
+          })
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching profile data:', error)
+      // Fallback to session data if API fails
+      if (session.user) {
+        setProfile({
+          id: session.user.id || '',
+          name: session.user.name || '',
+          email: session.user.email || '',
+          role: session.user.role || ''
+        })
+      }
+    } finally {
+      setLoading(false)
+      setRefreshing(false)
+    }
+  }, [session])
+
+  const handleRefresh = () => {
+    setRefreshing(true)
+    fetchProfileData()
+  }
 
   useEffect(() => {
     if (status === 'loading') return
@@ -33,16 +75,21 @@ export default function AdminProfilePage() {
       return
     }
 
-    if (session.user) {
-      setProfile({
-        id: session.user.id || '',
-        name: session.user.name || '',
-        email: session.user.email || '',
-        role: session.user.role || ''
-      })
+    fetchProfileData()
+  }, [session, status, router, fetchProfileData])
+
+  // Listen for profile updates from edit page
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'profile-updated') {
+        console.log('Profile update detected, refreshing data...')
+        fetchProfileData()
+      }
     }
-    setLoading(false)
-  }, [session, status, router])
+
+    window.addEventListener('storage', handleStorageChange)
+    return () => window.removeEventListener('storage', handleStorageChange)
+  }, [fetchProfileData])
 
   if (loading) {
     return (
@@ -98,12 +145,28 @@ export default function AdminProfilePage() {
           <h1 className="text-2xl font-bold text-gray-900">{t('profile.title')}</h1>
           <p className="text-gray-600">{t('profile.subtitle')}</p>
         </div>
-        <Link
-          href="/admin/profile/edit"
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          Edit Profile
-        </Link>
+        <div className="flex items-center space-x-3">
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {refreshing ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 inline mr-2"></div>
+                Refreshing...
+              </>
+            ) : (
+              'Refresh'
+            )}
+          </button>
+          <Link
+            href="/admin/profile/edit"
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            Edit Profile
+          </Link>
+        </div>
       </div>
 
       <div className="bg-white shadow rounded-lg">
