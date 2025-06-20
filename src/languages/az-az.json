@@ -226,5 +226,22 @@
     "passwordTooShort": "Şifrə ən azı 6 simvol olmalıdır",
     "passwordsDoNotMatch": "Şifrələr uyğun gəlmir",
     "loginAfterRegistrationFailed": "Hesab yaradıldı, amma avtomatik giriş uğursuz oldu. Zəhmət olmasa əl ilə daxil olun."
+  },
+  "cart": {
+    "title": "Alış-veriş səbəti",
+    "empty": "Səbətiniz boşdur",
+    "emptyDescription": "Səbətə məhsul əlavə etmək üçün alış-verişə başlayın",
+    "continueShopping": "Alış-verişə davam et",
+    "quantity": "Miqdar",
+    "remove": "Sil",
+    "clearCart": "Səbəti təmizlə",
+    "clearConfirm": "Səbəti təmizləmək istədiyinizə əminsiniz?",
+    "orderSummary": "Sifariş xülasəsi",
+    "subtotal": "Ara cəm",
+    "total": "Ümumi",
+    "checkout": "Ödənişə keç",
+    "secureCheckout": "Ödəniş sistemimiz tərəfindən təmin edilən təhlükəsiz ödəniş",
+    "itemAdded": "Məhsul səbətə əlavə edildi!",
+    "adding": "Əlavə edilir..."
   }
 } 

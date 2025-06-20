@@ -1,6 +1,7 @@
 'use client'
 
 import { useLanguage } from '@/contexts/LanguageContext'
+import { useCart } from '@/contexts/CartContext'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
@@ -33,6 +34,7 @@ interface Product {
 
 export default function ProductPage() {
   const { t } = useLanguage()
+  const { addItem } = useCart()
   const params = useParams()
   const productId = params.id as string
   
@@ -40,6 +42,8 @@ export default function ProductPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
+  const [quantity, setQuantity] = useState(1)
+  const [isAddingToCart, setIsAddingToCart] = useState(false)
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -76,6 +80,29 @@ export default function ProductPage() {
   const formatDimensions = (dimensions: any) => {
     if (!dimensions) return 'N/A'
     return `${dimensions.length} × ${dimensions.width} × ${dimensions.height} cm`
+  }
+
+  const handleAddToCart = () => {
+    if (!product) return
+    
+    setIsAddingToCart(true)
+    
+    // Simulate API call delay
+    setTimeout(() => {
+      addItem({
+        productId: product.id,
+        name: product.name,
+        price: product.price,
+        quantity: quantity,
+        image: product.images?.find(img => img.isPrimary)?.url || product.images?.[0]?.url,
+        sku: product.sku
+      })
+      
+      setIsAddingToCart(false)
+      
+      // Show success message (you could add a toast notification here)
+      alert(t('cart.itemAdded') || 'Item added to cart!')
+    }, 500)
   }
 
   if (loading) {
@@ -280,13 +307,45 @@ export default function ProductPage() {
 
               {/* Action Buttons */}
               <div className="border-t border-gray-200 pt-6">
-                <div className="flex space-x-4">
-                  <button className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
-                    {t('products.addToCart')}
-                  </button>
-                  <button className="flex-1 bg-gray-100 text-gray-700 py-3 px-6 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors">
-                    {t('products.addToWishlist')}
-                  </button>
+                <div className="space-y-4">
+                  {/* Quantity Selector */}
+                  <div className="flex items-center space-x-4">
+                    <label htmlFor="quantity" className="text-sm font-medium text-gray-700">
+                      {t('cart.quantity') || 'Quantity'}:
+                    </label>
+                    <select
+                      id="quantity"
+                      value={quantity}
+                      onChange={(e) => setQuantity(parseInt(e.target.value))}
+                      className="rounded-md border border-gray-300 py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                        <option key={num} value={num}>
+                          {num}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div className="flex space-x-4">
+                    <button 
+                      onClick={handleAddToCart}
+                      disabled={isAddingToCart || !product.isActive}
+                      className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                    >
+                      {isAddingToCart ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          {t('cart.adding') || 'Adding...'}
+                        </>
+                      ) : (
+                        t('products.addToCart') || 'Add to Cart'
+                      )}
+                    </button>
+                    <button className="flex-1 bg-gray-100 text-gray-700 py-3 px-6 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors">
+                      {t('products.addToWishlist') || 'Add to Wishlist'}
+                    </button>
+                  </div>
                 </div>
               </div>
 

@@ -198,7 +198,9 @@
     "welcome": "Welcome to Product System",
     "description": "A comprehensive e-commerce product management system",
     "getStarted": "Get Started",
-    "learnMore": "Learn More"
+    "viewProducts": "View Products",
+    "viewCategories": "View Categories",
+    "adminPanel": "Admin Panel"
   },
   "errors": {
     "notFound": "Page not found",
@@ -228,5 +230,22 @@
     "passwordTooShort": "Password must be at least 6 characters long",
     "passwordsDoNotMatch": "Passwords do not match",
     "loginAfterRegistrationFailed": "Account created but automatic login failed. Please sign in manually."
+  },
+  "cart": {
+    "title": "Shopping Cart",
+    "empty": "Your cart is empty",
+    "emptyDescription": "Start shopping to add items to your cart",
+    "continueShopping": "Continue Shopping",
+    "quantity": "Quantity",
+    "remove": "Remove",
+    "clearCart": "Clear Cart",
+    "clearConfirm": "Are you sure you want to clear your cart?",
+    "orderSummary": "Order summary",
+    "subtotal": "Subtotal",
+    "total": "Total",
+    "checkout": "Proceed to Checkout",
+    "secureCheckout": "Secure checkout powered by our payment system",
+    "itemAdded": "Item added to cart!",
+    "adding": "Adding..."
   }
 } 

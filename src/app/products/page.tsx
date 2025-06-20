@@ -1,6 +1,7 @@
 'use client'
 
 import { useLanguage } from '@/contexts/LanguageContext'
+import { useCart } from '@/contexts/CartContext'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 
@@ -17,8 +18,10 @@ interface Product {
 
 export default function ProductsPage() {
   const { t } = useLanguage()
+  const { addItem } = useCart()
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
+  const [addingToCart, setAddingToCart] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -44,6 +47,30 @@ export default function ProductsPage() {
       style: 'currency',
       currency: 'USD',
     }).format(price)
+  }
+
+  const handleAddToCart = (e: React.MouseEvent, product: Product) => {
+    e.preventDefault() // Prevent navigation to product detail page
+    e.stopPropagation()
+    
+    setAddingToCart(product.id)
+    
+    // Simulate API call delay
+    setTimeout(() => {
+      addItem({
+        productId: product.id,
+        name: product.name,
+        price: product.price,
+        quantity: 1,
+        image: product.images?.[0]?.url,
+        sku: product.slug // Using slug as SKU for now
+      })
+      
+      setAddingToCart(null)
+      
+      // Show success message
+      alert(t('cart.itemAdded') || 'Item added to cart!')
+    }, 500)
   }
 
   if (loading) {
@@ -72,59 +99,74 @@ export default function ProductsPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {products.map((product) => (
-              <Link
+              <div
                 key={product.id}
-                href={`/products/${product.id}`}
-                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow block"
+                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
               >
-                <div className="aspect-w-1 aspect-h-1 w-full">
-                  {product.images && product.images.length > 0 ? (
-                    <img
-                      src={product.images[0].url}
-                      alt={product.images[0].alt || product.name}
-                      className="w-full h-48 object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
-                      <span className="text-gray-400 text-4xl">📦</span>
-                    </div>
-                  )}
-                </div>
-                
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    {product.name}
-                  </h3>
-                  <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                    {product.description}
-                  </p>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-lg font-bold text-gray-900">
-                        {formatPrice(product.price)}
-                      </span>
-                      {product.comparePrice && (
-                        <span className="text-sm text-gray-500 line-through">
-                          {formatPrice(product.comparePrice)}
-                        </span>
-                      )}
-                    </div>
-                    
-                    <span className="px-3 py-1 bg-blue-600 text-white text-sm rounded">
-                      {t('products.viewDetails')}
-                    </span>
+                <Link href={`/products/${product.id}`} className="block">
+                  <div className="aspect-w-1 aspect-h-1 w-full">
+                    {product.images && product.images.length > 0 ? (
+                      <img
+                        src={product.images[0].url}
+                        alt={product.images[0].alt || product.name}
+                        className="w-full h-48 object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
+                        <span className="text-gray-400 text-4xl">📦</span>
+                      </div>
+                    )}
                   </div>
                   
-                  {product.category && (
-                    <div className="mt-2">
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                        {product.category.name}
-                      </span>
+                  <div className="p-4">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      {product.name}
+                    </h3>
+                    <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                      {product.description}
+                    </p>
+                    
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-lg font-bold text-gray-900">
+                          {formatPrice(product.price)}
+                        </span>
+                        {product.comparePrice && (
+                          <span className="text-sm text-gray-500 line-through">
+                            {formatPrice(product.comparePrice)}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  )}
+                    
+                    {product.category && (
+                      <div className="mb-3">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                          {product.category.name}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </Link>
+                
+                {/* Add to Cart Button */}
+                <div className="px-4 pb-4">
+                  <button
+                    onClick={(e) => handleAddToCart(e, product)}
+                    disabled={addingToCart === product.id}
+                    className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                  >
+                    {addingToCart === product.id ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        {t('cart.adding') || 'Adding...'}
+                      </>
+                    ) : (
+                      t('products.addToCart') || 'Add to Cart'
+                    )}
+                  </button>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         )}
