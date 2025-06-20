@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import Link from 'next/link'
 
@@ -39,6 +39,65 @@ export default function EditProfilePage() {
     confirmPassword: ''
   })
 
+  const fetchProfileData = useCallback(async () => {
+    if (!session?.user?.id) return
+
+    try {
+      const response = await fetch('/api/profile')
+      if (response.ok) {
+        const data = await response.json()
+        const userProfile = data.user
+        setProfile(userProfile)
+        setFormData({
+          name: userProfile.name || '',
+          email: userProfile.email || '',
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        })
+      } else {
+        // Fallback to session data if API fails
+        if (session.user) {
+          const userProfile = {
+            id: session.user.id || '',
+            name: session.user.name || '',
+            email: session.user.email || '',
+            role: session.user.role || ''
+          }
+          setProfile(userProfile)
+          setFormData({
+            name: userProfile.name,
+            email: userProfile.email,
+            currentPassword: '',
+            newPassword: '',
+            confirmPassword: ''
+          })
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching profile data:', error)
+      // Fallback to session data if API fails
+      if (session.user) {
+        const userProfile = {
+          id: session.user.id || '',
+          name: session.user.name || '',
+          email: session.user.email || '',
+          role: session.user.role || ''
+        }
+        setProfile(userProfile)
+        setFormData({
+          name: userProfile.name,
+          email: userProfile.email,
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        })
+      }
+    } finally {
+      setLoading(false)
+    }
+  }, [session])
+
   useEffect(() => {
     if (status === 'loading') return
 
@@ -52,24 +111,8 @@ export default function EditProfilePage() {
       return
     }
 
-    if (session.user) {
-      const userProfile = {
-        id: session.user.id || '',
-        name: session.user.name || '',
-        email: session.user.email || '',
-        role: session.user.role || ''
-      }
-      setProfile(userProfile)
-      setFormData({
-        name: userProfile.name,
-        email: userProfile.email,
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-      })
-    }
-    setLoading(false)
-  }, [session, status, router])
+    fetchProfileData()
+  }, [session, status, router, fetchProfileData])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -156,6 +199,9 @@ export default function EditProfilePage() {
           console.error('Failed to update session:', updateError)
         }
       }
+
+      // Refresh profile data to show updated information
+      await fetchProfileData()
 
       // Trigger profile page refresh by setting localStorage
       localStorage.setItem('profile-updated', Date.now().toString())
