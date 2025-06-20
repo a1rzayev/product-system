@@ -71,22 +71,22 @@ export default function Navbar() {
             <LanguageSwitcher />
             {session ? (
               <div className="flex items-center space-x-4">
-                {session.user?.role === 'ADMIN' && (
-                  <div className="flex items-center space-x-4">
-                    <Link
-                      href="/admin/profile"
-                      className="text-sm text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
-                    >
-                      {t('auth.welcome')}, {session.user?.name || session.user?.email}
-                    </Link>
+                <div className="flex items-center space-x-4">
+                  <Link
+                    href={session.user?.role === 'ADMIN' ? '/admin/profile' : '/profile'}
+                    className="text-sm text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
+                  >
+                    {t('auth.welcome')}, {session.user?.name || session.user?.email}
+                  </Link>
+                  {session.user?.role === 'ADMIN' && (
                     <Link
                       href="/admin"
                       className="text-sm text-gray-600 hover:text-gray-700 font-medium"
                     >
                       {t('admin.dashboard') || 'Dashboard'}
                     </Link>
-                  </div>
-                )}
+                  )}
+                </div>
                 <button
                   onClick={handleLogout}
                   disabled={isLoggingOut}

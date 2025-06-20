@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { signIn, getSession, useSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useLanguage } from '@/contexts/LanguageContext'
+import Link from 'next/link'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -17,11 +18,15 @@ export default function Login() {
   const { data: session, status } = useSession()
   const { t } = useLanguage()
 
-  // Redirect if already authenticated as admin
+  // Redirect if already authenticated
   useEffect(() => {
-    if (status === 'authenticated' && session?.user?.role === 'ADMIN') {
-      console.log('Already authenticated as admin, redirecting...')
-      window.location.href = '/admin'
+    if (status === 'authenticated' && session?.user) {
+      console.log('Already authenticated, redirecting...')
+      if (session.user.role === 'ADMIN') {
+        window.location.href = '/admin'
+      } else {
+        window.location.href = '/'
+      }
     }
   }, [session, status])
 
@@ -34,7 +39,7 @@ export default function Login() {
   }, [searchParams, t])
 
   // Don't render the form if already authenticated
-  if (status === 'loading' || (status === 'authenticated' && session?.user?.role === 'ADMIN')) {
+  if (status === 'loading' || status === 'authenticated') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
@@ -63,12 +68,16 @@ export default function Login() {
         setError(t('auth.invalidCredentials'))
       } else {
         const session = await getSession()
-        if (session?.user.role === 'ADMIN') {
+        if (session?.user) {
           setIsRedirecting(true)
-          // Use window.location instead of router.push to avoid history issues
-          window.location.href = '/admin'
+          // Redirect based on user role
+          if (session.user.role === 'ADMIN') {
+            window.location.href = '/admin'
+          } else {
+            window.location.href = '/'
+          }
         } else {
-          setError(t('errors.unauthorized'))
+          setError(t('errors.somethingWentWrong'))
         }
       }
     } catch (error) {
@@ -87,7 +96,7 @@ export default function Login() {
             {t('auth.login')}
           </h2>
           <p className="mt-2 text-center text-sm text-black">
-            {t('auth.signIn')} {t('admin.dashboard').toLowerCase()}
+            {t('auth.signInToAccount')}
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -156,6 +165,18 @@ export default function Login() {
             >
               {loading ? t('common.loading') : isRedirecting ? t('common.loading') : t('auth.signIn')}
             </button>
+          </div>
+
+          <div className="text-center">
+            <p className="text-sm text-gray-600">
+              {t('auth.dontHaveAccount')}{' '}
+              <Link
+                href="/register"
+                className="font-medium text-blue-600 hover:text-blue-500"
+              >
+                {t('register.createAccount')}
+              </Link>
+            </p>
           </div>
         </form>
       </div>
