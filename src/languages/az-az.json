@@ -92,6 +92,8 @@
   "products": {
     "title": "Məhsullar",
     "addProduct": "Məhsul əlavə et",
+    "exportToExcel": "Excel-ə ixrac et",
+    "exporting": "İxrac edilir...",
     "addNewProduct": "Yeni məhsul əlavə et",
     "createNewProduct": "Kataloqda yeni məhsul yarat",
     "editProduct": "Məhsulu redaktə et",
@@ -108,7 +110,12 @@
     "description": "Təsvir",
     "image": "Şəkil",
     "createdAt": "Yaradılma tarixi",
-    "updatedAt": "Yenilənmə tarixi"
+    "updatedAt": "Yenilənmə tarixi",
+    "deleteProduct": "Məhsulu sil",
+    "confirmDelete": "Bu məhsulu silmək istədiyinizə əminsiniz?",
+    "productDeleted": "Məhsul uğurla silindi",
+    "productUpdated": "Məhsul uğurla yeniləndi",
+    "productCreated": "Məhsul uğurla yaradıldı"
   },
   "categories": {
     "title": "Kateqoriyalar",
