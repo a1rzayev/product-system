@@ -20,9 +20,11 @@ export default function AdminCategories() {
           throw new Error('Failed to fetch categories')
         }
         const result = await response.json()
-        setCategories(result || [])
+        // Extract the data array from the API response
+        setCategories(result.data || [])
       } catch (error) {
         console.error('Error fetching categories:', error)
+        setCategories([]) // Set empty array on error
       } finally {
         setLoading(false)
       }
@@ -188,7 +190,7 @@ export default function AdminCategories() {
         <div className="px-6 py-4 border-b border-gray-200">
           <h2 className="text-lg font-medium text-gray-900">{t('categories.title')}</h2>
           <p className="text-sm text-gray-600">
-            {categories.length} {t('categories.title').toLowerCase()} {t('common.loading')}
+            {categories.length} {categories.length === 1 ? 'category' : 'categories'} found
           </p>
         </div>
         <CategoryTable categories={categories} onCategoryDeleted={handleCategoryDeleted} />

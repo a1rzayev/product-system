@@ -63,7 +63,7 @@ export default function CategoryTable({ categories, onCategoryDeleted }: Categor
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {categories.map((category) => (
+          {categories && categories.length > 0 ? categories.map((category) => (
             <tr key={category.id} className="hover:bg-gray-50">
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm font-medium text-gray-900">
@@ -82,7 +82,7 @@ export default function CategoryTable({ categories, onCategoryDeleted }: Categor
                 {category.parent?.name || '-'}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                {category.products?.length || 0}
+                {category._count?.products || 0}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <div className="flex justify-end space-x-2">
@@ -104,11 +104,11 @@ export default function CategoryTable({ categories, onCategoryDeleted }: Categor
                 </div>
               </td>
             </tr>
-          ))}
+          )) : null}
         </tbody>
       </table>
       
-      {categories.length === 0 && (
+      {(!categories || categories.length === 0) && (
         <div className="text-center py-12">
           <p className="text-gray-500">No categories found</p>
           <Link
