@@ -75,23 +75,18 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// New endpoint specifically for large exports
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-
-    if (!session || !session.user) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
-    }
-
-    if (session.user.role !== 'ADMIN') {
-      return NextResponse.json({ message: 'Forbidden' }, { status: 403 })
-    }
-
     const { searchParams } = new URL(request.url)
     const action = searchParams.get('action')
 
+    // Handle admin export action
     if (action === 'export-large') {
+      if (!session || !session.user || session.user.role !== 'ADMIN') {
+        return NextResponse.json({ message: 'Forbidden' }, { status: 403 })
+      }
+
       // Get total count first
       const total = await prisma.order.count()
       
@@ -152,8 +147,8 @@ export async function POST(request: NextRequest) {
         'Shipping': order.shipping,
         'Discount': order.discount,
         'Items Count': order.items?.length || 0,
-        'Shipping City': order.shippingAddress?.city || 'N/A',
-        'Shipping Country': order.shippingAddress?.country || 'N/A',
+        'Shipping City': JSON.parse(order.shippingAddress || '{}').city || 'N/A',
+        'Shipping Country': JSON.parse(order.shippingAddress || '{}').country || 'N/A',
         'Notes': order.notes || 'No Notes',
         'Created At': new Date(order.createdAt).toLocaleDateString(),
         'Updated At': new Date(order.updatedAt).toLocaleDateString()
@@ -167,10 +162,88 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    return NextResponse.json({ message: 'Invalid action' }, { status: 400 })
+    // Handle customer order creation - require authentication
+    if (!session || !session.user) {
+      return NextResponse.json({ message: 'Authentication required' }, { status: 401 })
+    }
+
+    const body = await request.json()
+    const { items, total, billingInfo } = body
+
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return NextResponse.json({ message: 'No items provided' }, { status: 400 })
+    }
+
+    if (!billingInfo) {
+      return NextResponse.json({ message: 'Billing information required' }, { status: 400 })
+    }
+
+    // Generate order number
+    const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+
+    // Create order with transaction
+    const order = await prisma.$transaction(async (tx) => {
+      // Create order
+      const newOrder = await tx.order.create({
+        data: {
+          orderNumber,
+          status: 'CONFIRMED',
+          total,
+          subtotal: total,
+          tax: 0,
+          shipping: 0,
+          discount: 0,
+          customerId: session.user.id, // Use authenticated user's ID
+          billingAddress: JSON.stringify({
+            firstName: billingInfo.firstName,
+            lastName: billingInfo.lastName,
+            email: billingInfo.email,
+            phone: billingInfo.phone,
+            address: billingInfo.address,
+            city: billingInfo.city,
+            state: billingInfo.state,
+            zipCode: billingInfo.zipCode,
+            country: billingInfo.country
+          }),
+          shippingAddress: JSON.stringify({
+            firstName: billingInfo.firstName,
+            lastName: billingInfo.lastName,
+            email: billingInfo.email,
+            phone: billingInfo.phone,
+            address: billingInfo.address,
+            city: billingInfo.city,
+            state: billingInfo.state,
+            zipCode: billingInfo.zipCode,
+            country: billingInfo.country
+          }),
+          notes: 'Order placed through checkout'
+        }
+      })
+
+      // Create order items
+      const orderItems = await Promise.all(
+        items.map((item: any) =>
+          tx.orderItem.create({
+            data: {
+              orderId: newOrder.id,
+              productId: item.productId,
+              quantity: item.quantity,
+              price: item.price
+            }
+          })
+        )
+      )
+
+      return {
+        ...newOrder,
+        items: orderItems
+      }
+    })
+
+    return NextResponse.json(order, { status: 201 })
 
   } catch (error) {
-    console.error('Orders export error:', error)
+    console.error('Order creation error:', error)
     return NextResponse.json(
       { message: 'Internal server error' },
       { status: 500 }

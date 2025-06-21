@@ -18,6 +18,9 @@ export default function Login() {
   const { data: session, status } = useSession()
   const { t } = useLanguage()
 
+  // Get redirect URL from query parameters
+  const redirectUrl = searchParams.get('redirect') || '/'
+
   // Redirect if already authenticated
   useEffect(() => {
     if (status === 'authenticated' && session?.user) {
@@ -25,10 +28,10 @@ export default function Login() {
       if (session.user.role === 'ADMIN') {
         window.location.href = '/admin'
       } else {
-        window.location.href = '/'
+        window.location.href = redirectUrl
       }
     }
-  }, [session, status])
+  }, [session, status, redirectUrl])
 
   // Check for error parameter from URL
   useEffect(() => {
@@ -70,11 +73,11 @@ export default function Login() {
         const session = await getSession()
         if (session?.user) {
           setIsRedirecting(true)
-          // Redirect based on user role
+          // Redirect based on user role or redirect URL
           if (session.user.role === 'ADMIN') {
             window.location.href = '/admin'
           } else {
-            window.location.href = '/'
+            window.location.href = redirectUrl
           }
         } else {
           setError(t('errors.somethingWentWrong'))

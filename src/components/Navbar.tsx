@@ -6,6 +6,7 @@ import { useSession, signOut } from 'next-auth/react'
 import { useState } from 'react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import LanguageSwitcher from './LanguageSwitcher'
+import CartIcon from './CartIcon'
 
 export default function Navbar() {
   const pathname = usePathname()
@@ -71,6 +72,7 @@ export default function Navbar() {
             <LanguageSwitcher />
             {session ? (
               <div className="flex items-center space-x-4">
+                {session.user?.role !== 'ADMIN' && <CartIcon />}
                 <div className="flex items-center space-x-4">
                   <Link
                     href={session.user?.role === 'ADMIN' ? '/admin/profile' : '/profile'}
@@ -96,12 +98,15 @@ export default function Navbar() {
                 </button>
               </div>
             ) : (
-              <Link
-                href="/login"
-                className="text-sm text-black hover:text-gray-700"
-              >
-                {t('auth.login')}
-              </Link>
+              <div className="flex items-center space-x-4">
+                <CartIcon />
+                <Link
+                  href="/login"
+                  className="text-sm text-black hover:text-gray-700"
+                >
+                  {t('auth.login')}
+                </Link>
+              </div>
             )}
           </div>
         </div>

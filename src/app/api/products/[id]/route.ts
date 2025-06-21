@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { productService } from '@/lib/db'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
 
 // GET - Get a single product
 export async function GET(
@@ -9,22 +7,42 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions)
-    
-    if (!session || session.user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    const { id } = params
 
-    const product = await productService.getById(params.id)
-    
+    // Fetch product with category and images
+    const product = await prisma.product.findUnique({
+      where: { id },
+      include: {
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true
+          }
+        },
+        images: {
+          orderBy: {
+            order: 'asc'
+          }
+        }
+      }
+    })
+
     if (!product) {
-      return NextResponse.json({ error: 'Product not found' }, { status: 404 })
+      return NextResponse.json(
+        { message: 'Product not found' },
+        { status: 404 }
+      )
     }
 
     return NextResponse.json(product)
+
   } catch (error) {
-    console.error('Error fetching product:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    console.error('Product fetch error:', error)
+    return NextResponse.json(
+      { message: 'Internal server error' },
+      { status: 500 }
+    )
   }
 }
 
@@ -34,20 +52,44 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions)
-    
-    if (!session || session.user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
+    const { id } = params
     const body = await request.json()
-    
-    const updatedProduct = await productService.update(params.id, body)
-    
+
+    // Update product
+    const updatedProduct = await prisma.product.update({
+      where: { id },
+      data: {
+        name: body.name,
+        description: body.description,
+        slug: body.slug,
+        sku: body.sku,
+        price: body.price,
+        comparePrice: body.comparePrice,
+        categoryId: body.categoryId,
+        isActive: body.isActive,
+        isFeatured: body.isFeatured,
+        weight: body.weight,
+        dimensions: body.dimensions ? JSON.stringify(body.dimensions) : null
+      },
+      include: {
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true
+          }
+        }
+      }
+    })
+
     return NextResponse.json(updatedProduct)
+
   } catch (error) {
-    console.error('Error updating product:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    console.error('Product update error:', error)
+    return NextResponse.json(
+      { message: 'Internal server error' },
+      { status: 500 }
+    )
   }
 }
 
@@ -57,17 +99,20 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions)
-    
-    if (!session || session.user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    const { id } = params
 
-    await productService.delete(params.id)
-    
+    // Delete product (this will cascade delete related data)
+    await prisma.product.delete({
+      where: { id }
+    })
+
     return NextResponse.json({ message: 'Product deleted successfully' })
+
   } catch (error) {
-    console.error('Error deleting product:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    console.error('Product delete error:', error)
+    return NextResponse.json(
+      { message: 'Internal server error' },
+      { status: 500 }
+    )
   }
 } 

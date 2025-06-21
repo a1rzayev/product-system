@@ -44,7 +44,7 @@ export default function EditCategoryPage({ params }: EditCategoryPageProps) {
         if (categoriesResponse.ok) {
           const categoriesData = await categoriesResponse.json()
           // Filter out the current category from parent options
-          const filteredCategories = categoriesData.filter((cat: Category) => cat.id !== id)
+          const filteredCategories = (categoriesData.data || []).filter((cat: Category) => cat.id !== id)
           setCategories(filteredCategories)
         }
 
