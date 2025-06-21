@@ -1,6 +1,18 @@
 'use client'
 
+/**
+ * CartContext - User-specific shopping cart management
+ * 
+ * This context provides a shopping cart that is specific to each user:
+ * - Authenticated users: Cart is stored with key 'cart_{userId}'
+ * - Guest users: Cart is stored with key 'cart_guest'
+ * - When a guest user logs in, their cart items are merged with their existing user cart
+ * - Cart is automatically cleared when switching between users
+ * - Cart persists across browser sessions via localStorage
+ */
+
 import React, { createContext, useContext, useReducer, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
 
 export interface CartItem {
   id: string
@@ -113,24 +125,94 @@ export const useCart = () => {
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(cartReducer, initialState)
+  const { data: session, status } = useSession()
 
-  // Load cart from localStorage on mount
+  // Get cart key based on user session
+  const getCartKey = () => {
+    if (session?.user?.id) {
+      return `cart_${session.user.id}`
+    }
+    return 'cart_guest' // For non-authenticated users
+  }
+
+  // Load cart from localStorage on mount or when session changes
   useEffect(() => {
-    const savedCart = localStorage.getItem('cart')
-    if (savedCart) {
-      try {
-        const cartItems = JSON.parse(savedCart)
-        dispatch({ type: 'LOAD_CART', payload: cartItems })
-      } catch (error) {
-        console.error('Error loading cart from localStorage:', error)
+    if (status === 'loading') return // Wait for session to load
+    
+    const cartKey = getCartKey()
+    const savedCart = localStorage.getItem(cartKey)
+    
+    if (session?.user?.id) {
+      // User is logged in - check for guest cart to merge
+      const guestCart = localStorage.getItem('cart_guest')
+      let itemsToLoad: CartItem[] = []
+      
+      if (savedCart) {
+        try {
+          itemsToLoad = JSON.parse(savedCart)
+        } catch (error) {
+          console.error('Error loading user cart from localStorage:', error)
+        }
+      }
+      
+      // If there's a guest cart, merge it with user cart
+      if (guestCart) {
+        try {
+          const guestItems = JSON.parse(guestCart)
+          // Merge guest items with user items, combining quantities for same products
+          const mergedItems = [...itemsToLoad]
+          
+          guestItems.forEach((guestItem: CartItem) => {
+            const existingItem = mergedItems.find(item => item.productId === guestItem.productId)
+            if (existingItem) {
+              existingItem.quantity += guestItem.quantity
+            } else {
+              mergedItems.push(guestItem)
+            }
+          })
+          
+          itemsToLoad = mergedItems
+          // Clear guest cart after merging
+          localStorage.removeItem('cart_guest')
+        } catch (error) {
+          console.error('Error merging guest cart:', error)
+        }
+      }
+      
+      if (itemsToLoad.length > 0) {
+        dispatch({ type: 'LOAD_CART', payload: itemsToLoad })
+      } else {
+        dispatch({ type: 'CLEAR_CART' })
+      }
+    } else {
+      // Guest user or not authenticated
+      if (savedCart) {
+        try {
+          const cartItems = JSON.parse(savedCart)
+          dispatch({ type: 'LOAD_CART', payload: cartItems })
+        } catch (error) {
+          console.error('Error loading guest cart from localStorage:', error)
+        }
+      } else {
+        dispatch({ type: 'CLEAR_CART' })
       }
     }
-  }, [])
+  }, [session?.user?.id, status])
+
+  // Clear cart when user logs out
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      dispatch({ type: 'CLEAR_CART' })
+    }
+  }, [status])
 
   // Save cart to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(state.items))
-  }, [state.items])
+    if (status === 'loading') return // Wait for session to load
+    
+    const cartKey = getCartKey()
+    localStorage.setItem(cartKey, JSON.stringify(state.items))
+  }, [state.items, session?.user?.id, status])
 
   const addItem = (item: Omit<CartItem, 'id'>) => {
     const cartItem: CartItem = {
