@@ -12,6 +12,13 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit
     const isExport = searchParams.get('export') === 'true'
 
+    // Search and filter parameters
+    const search = searchParams.get('search') || ''
+    const parentId = searchParams.get('parentId') || ''
+    const hasProducts = searchParams.get('hasProducts') === 'true'
+    const sortBy = searchParams.get('sortBy') || 'name'
+    const sortOrder = searchParams.get('sortOrder') || 'asc'
+
     // Check if this is an export request (admin only)
     if (isExport) {
       const session = await getServerSession(authOptions)
@@ -23,21 +30,68 @@ export async function GET(request: NextRequest) {
     // For exports, use a larger limit but still reasonable
     const actualLimit = isExport ? Math.min(limit, 5000) : limit
 
+    // Build where clause for filtering
+    const where: any = {}
+
+    // Search functionality
+    if (search) {
+      where.OR = [
+        { name: { contains: search } },
+        { description: { contains: search } },
+        { slug: { contains: search } }
+      ]
+    }
+
+    // Parent category filter
+    if (parentId) {
+      if (parentId === 'null') {
+        where.parentId = null // Top-level categories
+      } else {
+        where.parentId = parentId
+      }
+    }
+
+    // Categories with products filter
+    if (hasProducts) {
+      where.products = {
+        some: {}
+      }
+    }
+
+    // Build order by clause
+    let orderBy: any = {}
+    switch (sortBy) {
+      case 'name':
+        orderBy.name = sortOrder
+        break
+      case 'createdAt':
+        orderBy.createdAt = sortOrder
+        break
+      case 'updatedAt':
+        orderBy.updatedAt = sortOrder
+        break
+      default:
+        orderBy.name = 'asc'
+    }
+
     // Fetch categories with parent and children data
     const categories = await prisma.category.findMany({
+      where,
       skip,
       take: actualLimit,
       include: {
         parent: {
           select: {
             id: true,
-            name: true
+            name: true,
+            slug: true
           }
         },
         children: {
           select: {
             id: true,
-            name: true
+            name: true,
+            slug: true
           }
         },
         _count: {
@@ -47,13 +101,11 @@ export async function GET(request: NextRequest) {
           }
         }
       },
-      orderBy: {
-        createdAt: 'desc'
-      }
+      orderBy
     })
 
     // Get total count for pagination
-    const total = await prisma.category.count()
+    const total = await prisma.category.count({ where })
 
     return NextResponse.json({
       data: categories,
@@ -62,6 +114,13 @@ export async function GET(request: NextRequest) {
         limit: actualLimit,
         total,
         totalPages: Math.ceil(total / actualLimit)
+      },
+      filters: {
+        search,
+        parentId,
+        hasProducts,
+        sortBy,
+        sortOrder
       }
     })
 

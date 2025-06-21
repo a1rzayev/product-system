@@ -12,6 +12,16 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit
     const isExport = searchParams.get('export') === 'true'
 
+    // Search and filter parameters
+    const search = searchParams.get('search') || ''
+    const category = searchParams.get('category') || ''
+    const minPrice = searchParams.get('minPrice') ? parseFloat(searchParams.get('minPrice')!) : null
+    const maxPrice = searchParams.get('maxPrice') ? parseFloat(searchParams.get('maxPrice')!) : null
+    const sortBy = searchParams.get('sortBy') || 'createdAt'
+    const sortOrder = searchParams.get('sortOrder') || 'desc'
+    const featured = searchParams.get('featured') === 'true'
+    const active = searchParams.get('active') !== 'false' // Default to true
+
     // Check if this is an export request (admin only)
     if (isExport) {
       const session = await getServerSession(authOptions)
@@ -23,25 +33,84 @@ export async function GET(request: NextRequest) {
     // For exports, use a larger limit but still reasonable
     const actualLimit = isExport ? Math.min(limit, 5000) : limit
 
+    // Build where clause for filtering
+    const where: any = {
+      isActive: active
+    }
+
+    // Search functionality
+    if (search) {
+      where.OR = [
+        { name: { contains: search } },
+        { description: { contains: search } },
+        { sku: { contains: search } }
+      ]
+    }
+
+    // Category filter
+    if (category) {
+      where.categoryId = category
+    }
+
+    // Price range filter
+    if (minPrice !== null || maxPrice !== null) {
+      where.price = {}
+      if (minPrice !== null) where.price.gte = minPrice
+      if (maxPrice !== null) where.price.lte = maxPrice
+    }
+
+    // Featured filter
+    if (featured) {
+      where.isFeatured = true
+    }
+
+    // Build order by clause
+    let orderBy: any = {}
+    switch (sortBy) {
+      case 'name':
+        orderBy.name = sortOrder
+        break
+      case 'price':
+        orderBy.price = sortOrder
+        break
+      case 'createdAt':
+        orderBy.createdAt = sortOrder
+        break
+      case 'updatedAt':
+        orderBy.updatedAt = sortOrder
+        break
+      default:
+        orderBy.createdAt = 'desc'
+    }
+
     // Fetch products with category data
     const products = await prisma.product.findMany({
+      where,
       skip,
       take: actualLimit,
       include: {
         category: {
           select: {
             id: true,
-            name: true
+            name: true,
+            slug: true
+          }
+        },
+        images: {
+          where: { isPrimary: true },
+          take: 1
+        },
+        _count: {
+          select: {
+            reviews: true
           }
         }
       },
-      orderBy: {
-        createdAt: 'desc'
-      }
+      orderBy
     })
 
     // Get total count for pagination
-    const total = await prisma.product.count()
+    const total = await prisma.product.count({ where })
 
     return NextResponse.json({
       data: products,
@@ -50,6 +119,16 @@ export async function GET(request: NextRequest) {
         limit: actualLimit,
         total,
         totalPages: Math.ceil(total / actualLimit)
+      },
+      filters: {
+        search,
+        category,
+        minPrice,
+        maxPrice,
+        sortBy,
+        sortOrder,
+        featured,
+        active
       }
     })
 

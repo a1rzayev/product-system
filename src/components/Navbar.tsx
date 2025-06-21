@@ -7,12 +7,14 @@ import { useState } from 'react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import LanguageSwitcher from './LanguageSwitcher'
 import CartIcon from './CartIcon'
+import { useCart } from '@/contexts/CartContext'
 
 export default function Navbar() {
   const pathname = usePathname()
   const { data: session } = useSession()
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const { t } = useLanguage()
+  const { items } = useCart()
 
   const navigation = [
     { name: t('navigation.home'), href: '/' },
