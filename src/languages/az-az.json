@@ -229,6 +229,8 @@
   },
   "cart": {
     "title": "Alış-veriş səbəti",
+    "subtitle": "Məhsullarınızı nəzərdən keçirin və ödənişə keçin",
+    "items": "Səbətdəki məhsullar",
     "empty": "Səbətiniz boşdur",
     "emptyDescription": "Səbətə məhsul əlavə etmək üçün alış-verişə başlayın",
     "continueShopping": "Alış-verişə davam et",

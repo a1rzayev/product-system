@@ -233,6 +233,8 @@
   },
   "cart": {
     "title": "Shopping Cart",
+    "subtitle": "Review your items and proceed to checkout",
+    "items": "Cart Items",
     "empty": "Your cart is empty",
     "emptyDescription": "Start shopping to add items to your cart",
     "continueShopping": "Continue Shopping",
@@ -240,7 +242,7 @@
     "remove": "Remove",
     "clearCart": "Clear Cart",
     "clearConfirm": "Are you sure you want to clear your cart?",
-    "orderSummary": "Order summary",
+    "orderSummary": "Order Summary",
     "subtotal": "Subtotal",
     "total": "Total",
     "checkout": "Proceed to Checkout",
