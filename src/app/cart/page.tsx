@@ -191,13 +191,12 @@ export default function CartPage() {
                   </div>
 
                   <div className="pt-4">
-                    <button
-                      type="button"
-                      disabled={state.items.length === 0}
-                      className="w-full bg-blue-600 border border-transparent rounded-md shadow-sm py-3 px-4 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    <Link
+                      href="/checkout"
+                      className="w-full bg-blue-600 border border-transparent rounded-md shadow-sm py-3 px-4 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                     >
                       {t('cart.checkout') || 'Proceed to Checkout'}
-                    </button>
+                    </Link>
                   </div>
 
                   <div className="text-center text-sm text-gray-500">

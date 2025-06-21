@@ -2,9 +2,10 @@
 
 import { useLanguage } from '@/contexts/LanguageContext'
 import { useCart } from '@/contexts/CartContext'
+import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 
 interface Product {
   id: string
@@ -35,7 +36,9 @@ interface Product {
 export default function ProductPage() {
   const { t } = useLanguage()
   const { addItem } = useCart()
+  const { data: session, status } = useSession()
   const params = useParams()
+  const router = useRouter()
   const productId = params.id as string
   
   const [product, setProduct] = useState<Product | null>(null)
@@ -84,6 +87,13 @@ export default function ProductPage() {
 
   const handleAddToCart = () => {
     if (!product) return
+    
+    // Check if user is authenticated
+    if (!session?.user) {
+      // Redirect to login with return URL
+      router.push(`/login?redirect=/products/${productId}`)
+      return
+    }
     
     setIsAddingToCart(true)
     
