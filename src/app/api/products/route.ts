@@ -216,10 +216,79 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    return NextResponse.json({ message: 'Invalid action' }, { status: 400 })
+    // Handle product creation
+    const body = await request.json()
+    
+    // Validate required fields
+    if (!body.name || !body.slug || !body.sku || !body.categoryId || !body.price) {
+      return NextResponse.json(
+        { error: 'Missing required fields: name, slug, sku, categoryId, price' },
+        { status: 400 }
+      )
+    }
+
+    // Check if slug or sku already exists
+    const existingProduct = await prisma.product.findFirst({
+      where: {
+        OR: [
+          { slug: body.slug },
+          { sku: body.sku }
+        ]
+      }
+    })
+
+    if (existingProduct) {
+      return NextResponse.json(
+        { error: 'Product with this slug or SKU already exists' },
+        { status: 400 }
+      )
+    }
+
+    // Check if category exists
+    const category = await prisma.category.findUnique({
+      where: { id: body.categoryId }
+    })
+
+    if (!category) {
+      return NextResponse.json(
+        { error: 'Category not found' },
+        { status: 400 }
+      )
+    }
+
+    // Create the product
+    const product = await prisma.product.create({
+      data: {
+        name: body.name,
+        description: body.description || '',
+        slug: body.slug,
+        sku: body.sku,
+        price: parseFloat(body.price),
+        comparePrice: body.comparePrice ? parseFloat(body.comparePrice) : null,
+        isActive: body.isActive !== undefined ? body.isActive : true,
+        isFeatured: body.isFeatured !== undefined ? body.isFeatured : false,
+        weight: body.weight ? parseFloat(body.weight) : null,
+        dimensions: body.dimensions ? JSON.stringify(body.dimensions) : null,
+        categoryId: body.categoryId
+      },
+      include: {
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true
+          }
+        }
+      }
+    })
+
+    return NextResponse.json({
+      message: 'Product created successfully',
+      product
+    }, { status: 201 })
 
   } catch (error) {
-    console.error('Products export error:', error)
+    console.error('Products API error:', error)
     return NextResponse.json(
       { message: 'Internal server error' },
       { status: 500 }
