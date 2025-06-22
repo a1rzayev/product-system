@@ -168,7 +168,7 @@
     "productCreated": "Product created successfully",
     "productNotFound": "Product Not Found",
     "productUnavailable": "Product Unavailable",
-    "productNotAvailable": "This product is currently not available.",
+    "productNotAvailable": "This product is not available for purchase.",
     "backToProducts": "Back to Products",
     "viewDetails": "View Details",
     "addToCart": "Add to Cart",

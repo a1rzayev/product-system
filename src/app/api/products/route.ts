@@ -30,12 +30,24 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Get session to check user role
+    const session = await getServerSession(authOptions)
+    const isAdmin = session?.user?.role === 'ADMIN'
+
     // For exports, use a larger limit but still reasonable
     const actualLimit = isExport ? Math.min(limit, 5000) : limit
 
     // Build where clause for filtering
-    const where: any = {
-      isActive: active
+    const where: any = {}
+
+    // Only filter by active status for non-admin users
+    if (!isAdmin) {
+      where.isActive = active
+    } else {
+      // For admins, respect the active filter if explicitly set
+      if (searchParams.has('active')) {
+        where.isActive = active
+      }
     }
 
     // Search functionality
