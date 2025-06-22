@@ -190,7 +190,13 @@
     "dragAndDrop": "or drag and drop",
     "imageRequirements": "PNG, JPG, GIF up to 5MB each (max 10 images)",
     "selectedImages": "Selected Images",
-    "uploadingImages": "Uploading images..."
+    "uploadingImages": "Uploading images...",
+    "addImages": "Add Images",
+    "currentImages": "Current Images",
+    "newImagesToUpload": "New Images to Upload",
+    "setAsPrimary": "Set as primary",
+    "deleteImage": "Delete image",
+    "primary": "Primary"
   },
   "categories": {
     "title": "Categories",
