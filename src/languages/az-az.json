@@ -16,7 +16,29 @@
     "no": "Xeyr",
     "actions": "Əməliyyatlar",
     "select": "Seç",
-    "total": "cəmi"
+    "total": "cəmi",
+    "add": "Əlavə et",
+    "searchProducts": "Məhsulları axtar...",
+    "filters": "Filtrlər",
+    "sortBy": "Sırala",
+    "order": "Sıra",
+    "ascending": "Artan",
+    "descending": "Azalan",
+    "clear": "Təmizlə",
+    "clearAll": "Hamısını təmizlə",
+    "clearFilters": "Bütün filtrləri təmizlə",
+    "applyFilters": "Filtrləri tətbiq et",
+    "activeFilters": "Aktiv filtrlər:",
+    "allCategories": "Bütün kateqoriyalar",
+    "minPrice": "Min qiymət",
+    "maxPrice": "Maks qiymət",
+    "featured": "Tövsiyə edilən",
+    "featuredOnly": "Yalnız tövsiyə edilənlər",
+    "newest": "Ən yeni",
+    "name": "Ad",
+    "price": "Qiymət",
+    "updated": "Yeniləndi",
+    "brandName": "MəhsulSistemi"
   },
   "navigation": {
     "home": "Ana Səhifə",
@@ -39,7 +61,16 @@
     "invalidCredentials": "Yanlış e-poçt və ya şifrə",
     "dontHaveAccount": "Hesabınız yoxdur?",
     "signInToAccount": "Hesabınıza daxil olun",
-    "loginRequired": "Davam etmək üçün zəhmət olmasa daxil olun"
+    "loginRequired": "Davam etmək üçün zəhmət olmasa daxil olun",
+    "register": "Qeydiyyat",
+    "signUp": "Qeydiyyatdan keç",
+    "loginSuccess": "Giriş uğurla tamamlandı!",
+    "registerSuccess": "Qeydiyyat uğurla tamamlandı!",
+    "passwordMismatch": "Şifrələr uyğun gəlmir",
+    "emailRequired": "Email tələb olunur",
+    "passwordRequired": "Şifrə tələb olunur",
+    "firstNameRequired": "Ad tələb olunur",
+    "lastNameRequired": "Soyad tələb olunur"
   },
   "profile": {
     "title": "Profil",
@@ -68,14 +99,14 @@
     "passwordsDoNotMatch": "Şifrələr uyğun gəlmir",
     "passwordTooShort": "Şifrə ən azı 6 simvol olmalıdır",
     "nameRequired": "Ad tələb olunur",
-    "emailRequired": "Email tələb olunur",
     "invalidEmail": "Yanlış email formatı",
     "newPasswordRequired": "Yeni şifrə tələb olunur",
     "confirmPasswordRequired": "Zəhmət olmasa yeni şifrəni təsdiqləyin",
     "passwordTooLong": "Şifrə 128 simvoldan az olmalıdır",
     "newPasswordSameAsCurrent": "Yeni şifrə cari şifrədən fərqli olmalıdır",
     "refreshData": "Məlumatları yenilə",
-    "refreshing": "Yenilənir..."
+    "refreshing": "Yenilənir...",
+    "updateError": "Profili yeniləmək mümkün olmadı"
   },
   "admin": {
     "dashboard": "İdarəetmə Paneli",
@@ -89,7 +120,20 @@
     "confirmDelete": "Silmək istədiyinizə əminsiniz?",
     "itemDeleted": "Element silindi",
     "itemCreated": "Element yaradıldı",
-    "itemUpdated": "Element yeniləndi"
+    "itemUpdated": "Element yeniləndi",
+    "title": "Admin paneli",
+    "stats": "Statistika",
+    "addProduct": "Məhsul əlavə et",
+    "editProduct": "Məhsulu redaktə et",
+    "addCategory": "Kateqoriya əlavə et",
+    "editCategory": "Kateqoriyanı redaktə et",
+    "viewOrder": "Sifarişi gör",
+    "exportData": "Məlumatları ixrac et",
+    "deleteConfirm": "Bu elementi silmək istədiyinizə əminsiniz?",
+    "deleteSuccess": "Element uğurla silindi",
+    "deleteError": "Elementi silmək mümkün olmadı",
+    "saveSuccess": "Element uğurla yadda saxlanıldı",
+    "saveError": "Elementi yadda saxlamaq mümkün olmadı"
   },
   "products": {
     "title": "Məhsullar",
@@ -131,7 +175,11 @@
     "status": "Status",
     "active": "Aktiv",
     "inactive": "Qeyri-aktiv",
-    "featured": "Tövsiyə edilən"
+    "featured": "Tövsiyə edilən",
+    "searchPlaceholder": "Məhsulları axtar...",
+    "noProductsFound": "Məhsul tapılmadı",
+    "tryDifferentSearch": "Axtarışı və ya filtrləri dəyişdirməyə çalışın",
+    "reviews": "rəy"
   },
   "categories": {
     "title": "Kateqoriyalar",
@@ -156,7 +204,15 @@
     "name": "Ad",
     "description": "Təsvir",
     "createdAt": "Yaradılma tarixi",
-    "updatedAt": "Yenilənmə tarixi"
+    "updatedAt": "Yenilənmə tarixi",
+    "searchPlaceholder": "Kateqoriyaları axtar...",
+    "noCategoriesFound": "Kateqoriya tapılmadı",
+    "tryDifferentSearch": "Axtarışı və ya filtrləri dəyişdirməyə çalışın",
+    "viewProducts": "Məhsulları gör",
+    "products": "məhsul",
+    "subcategories": "alt kateqoriya",
+    "parent": "Ana",
+    "noCategories": "Kateqoriyalar mövcud deyil"
   },
   "users": {
     "title": "İstifadəçilər",
@@ -245,7 +301,14 @@
     "checkout": "Ödənişə keç",
     "secureCheckout": "Ödəniş sistemimiz tərəfindən təmin edilən təhlükəsiz ödəniş",
     "itemAdded": "Məhsul səbətə əlavə edildi!",
-    "adding": "Əlavə edilir..."
+    "adding": "Əlavə edilir...",
+    "itemRemoved": "Məhsul səbətdən silindi",
+    "quantityUpdated": "Miqdar yeniləndi",
+    "proceedToCheckout": "Ödənişə keç",
+    "tax": "Vergi",
+    "shipping": "Çatdırılma",
+    "grandTotal": "Ümumi cəm",
+    "update": "Yenilə"
   },
   "checkout": {
     "title": "Ödəniş",
@@ -287,6 +350,12 @@
     "downloadBill": "Hesabı yüklə",
     "downloading": "Yüklənir...",
     "billDownloadError": "Hesabı yükləmək mümkün olmadı. Zəhmət olmasa yenidən cəhd edin.",
-    "orderConfirmationNote": "Sifariş təsdiqi email ünvanınıza göndərildi."
+    "orderConfirmationNote": "Sifariş təsdiqi email ünvanınıza göndərildi.",
+    "paymentMethod": "Ödəniş üsulu",
+    "placeOrder": "Sifariş ver",
+    "orderPlaced": "Sifariş uğurla verildi!",
+    "downloadInvoice": "Hesab-fakturanı yüklə",
+    "backToHome": "Ana səhifəyə qayıt",
+    "thankYou": "Sifarişiniz üçün təşəkkür edirik!"
   }
 } 
