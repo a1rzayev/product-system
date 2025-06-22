@@ -23,6 +23,17 @@ export interface Category {
   parent?: Category
   children?: Category[]
   products?: Product[]
+  images?: CategoryImage[]
+}
+
+export interface CategoryImage {
+  id: string
+  url: string
+  alt?: string
+  isPrimary: boolean
+  order: number
+  categoryId: string
+  createdAt: Date
 }
 
 export interface Product {
@@ -188,6 +199,12 @@ export interface CreateCategoryForm {
   description?: string
   slug: string
   parentId?: string
+  images?: {
+    url: string
+    alt?: string
+    isPrimary?: boolean
+    order?: number
+  }[]
 }
 
 export interface CreateUserForm {

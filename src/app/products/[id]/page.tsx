@@ -144,7 +144,7 @@ export default function ProductPage() {
     )
   }
 
-  if (!product.isActive) {
+  if (!product.isActive && session?.user?.role !== 'ADMIN') {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -246,7 +246,17 @@ export default function ProductPage() {
             <div className="space-y-6">
               {/* Product Header */}
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
+                <div className="flex items-center justify-between mb-2">
+                  <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
+                  {!product.isActive && session?.user?.role === 'ADMIN' && (
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800 border border-red-200">
+                      <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      {t('products.inactive') || 'Inactive'}
+                    </span>
+                  )}
+                </div>
                 {product.category && (
                   <Link
                     href={`/categories/${product.category.slug}`}
@@ -327,7 +337,7 @@ export default function ProductPage() {
                       id="quantity"
                       value={quantity}
                       onChange={(e) => setQuantity(parseInt(e.target.value))}
-                      className="rounded-md border border-gray-300 py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="rounded-md border border-gray-300 py-2 px-3 text-sm text-black focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
                       {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
                         <option key={num} value={num}>
@@ -341,13 +351,19 @@ export default function ProductPage() {
                     <button 
                       onClick={handleAddToCart}
                       disabled={isAddingToCart || !product.isActive}
-                      className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                      className={`flex-1 py-3 px-6 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center ${
+                        !product.isActive 
+                          ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
+                          : 'bg-blue-600 text-white hover:bg-blue-700'
+                      }`}
                     >
                       {isAddingToCart ? (
                         <>
                           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                           {t('cart.adding') || 'Adding...'}
                         </>
+                      ) : !product.isActive ? (
+                        t('products.inactive') || 'Inactive'
                       ) : (
                         t('products.addToCart') || 'Add to Cart'
                       )}

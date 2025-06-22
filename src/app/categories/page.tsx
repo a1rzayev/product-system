@@ -13,6 +13,7 @@ interface Category {
   slug: string
   parent?: { id: string; name: string; slug: string }
   children?: Array<{ id: string; name: string; slug: string }>
+  images?: Array<{ id: string; url: string; alt: string; isPrimary: boolean; order: number }>
   _count?: { products: number; children: number }
 }
 
@@ -118,15 +119,55 @@ export default function CategoriesPage() {
               {categories.map((category) => (
                 <div
                   key={category.id}
-                  className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+                  className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
                 >
                   <Link href={`/products?category=${category.id}`} className="block">
+                    {/* Category Image */}
+                    {category.images && category.images.length > 0 ? (
+                      <div className="relative h-48 bg-gray-200 overflow-hidden">
+                        <img
+                          src={category.images.find(img => img.isPrimary)?.url || category.images[0].url}
+                          alt={category.images.find(img => img.isPrimary)?.alt || category.name}
+                          className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                          onError={(e) => {
+                            // Fallback to placeholder if image fails to load
+                            e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik04MCAxMDBDODAgODkuNTQ0IDg4LjU0NCA4MSA5OSA4MUgxMDFDMTExLjQ1NiA4MSAxMjAgODkuNTQ0IDEyMCAxMDBWMTEwQzEyMCAxMjAuNDU2IDExMS40NTYgMTI5IDEwMSAxMjlIOU5DOSA4OC41NDQgODEgODAgODkuNTQ0IDgwIDEwMFYxMDBaIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik04MCAxMDBDODAgODkuNTQ0IDg4LjU0NCA4MSA5OSA4MUgxMDFDMTExLjQ1NiA4MSAxMjAgODkuNTQ0IDEyMCAxMDBWMTEwQzEyMCAxMjAuNDU2IDExMS40NTYgMTI5IDEwMSAxMjlIOU5DOSA4OC41NDQgODEgODAgODkuNTQ0IDgwIDEwMFYxMDBaIiBmaWxsPSIjRjNGNEY2Ii8+Cjwvc3ZnPgo='
+                          }}
+                          loading="lazy"
+                          onLoad={(e) => {
+                            // Remove loading state when image loads
+                            e.currentTarget.style.opacity = '1'
+                          }}
+                          style={{ opacity: 0, transition: 'opacity 0.3s ease-in-out' }}
+                        />
+                        {/* Image overlay for better text readability if needed */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
+                        
+                        {/* Multiple images indicator */}
+                        {category.images.length > 1 && (
+                          <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full">
+                            +{category.images.length - 1}
+                          </div>
+                        )}
+                        
+                        {/* Primary image indicator */}
+                        {category.images.find(img => img.isPrimary) && (
+                          <div className="absolute top-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
+                            {t('products.primary') || 'Primary'}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                        <div className="text-6xl text-gray-400">📁</div>
+                      </div>
+                    )}
+                    
                     <div className="p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-xl font-semibold text-gray-900">
+                      <div className="mb-4">
+                        <h3 className="text-xl font-semibold text-gray-900 mb-2 hover:text-blue-600 transition-colors">
                           {category.name}
                         </h3>
-                        <div className="text-2xl">📁</div>
                       </div>
                       
                       {category.description && (
@@ -164,7 +205,7 @@ export default function CategoriesPage() {
                   <div className="px-6 pb-6">
                     <Link
                       href={`/products?category=${category.id}`}
-                      className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors flex items-center justify-center"
+                      className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors flex items-center justify-center font-medium"
                     >
                       {t('categories.viewProducts') || 'View Products'}
                     </Link>

@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
+// Helper to parse dimensions
+function parseProductDimensions(product: any): any {
+  if (!product) return product
+  return {
+    ...product,
+    dimensions: product.dimensions ? JSON.parse(product.dimensions) : undefined
+  }
+}
+
 // GET - Get a single product
 export async function GET(
   request: NextRequest,
@@ -35,7 +44,10 @@ export async function GET(
       )
     }
 
-    return NextResponse.json(product)
+    // Parse dimensions before returning
+    const parsedProduct = parseProductDimensions(product)
+
+    return NextResponse.json(parsedProduct)
 
   } catch (error) {
     console.error('Product fetch error:', error)
@@ -82,7 +94,10 @@ export async function PUT(
       }
     })
 
-    return NextResponse.json(updatedProduct)
+    // Parse dimensions before returning
+    const parsedProduct = parseProductDimensions(updatedProduct)
+
+    return NextResponse.json(parsedProduct)
 
   } catch (error) {
     console.error('Product update error:', error)

@@ -7,56 +7,70 @@ async function main() {
   console.log('Starting database seed...')
 
   // Create computer goods categories
-  const laptops = await prisma.category.create({
-    data: {
+  const laptops = await prisma.category.upsert({
+    where: { slug: 'laptops' },
+    update: {},
+    create: {
       name: 'Laptops',
       description: 'Portable computers for work and play',
       slug: 'laptops'
     }
   })
 
-  const desktops = await prisma.category.create({
-    data: {
+  const desktops = await prisma.category.upsert({
+    where: { slug: 'desktops' },
+    update: {},
+    create: {
       name: 'Desktops',
       description: 'Powerful desktop computers',
       slug: 'desktops'
     }
   })
 
-  const monitors = await prisma.category.create({
-    data: {
+  const monitors = await prisma.category.upsert({
+    where: { slug: 'monitors' },
+    update: {},
+    create: {
       name: 'Monitors',
       description: 'High-resolution computer monitors',
       slug: 'monitors'
     }
   })
 
-  const keyboards = await prisma.category.create({
-    data: {
+  const keyboards = await prisma.category.upsert({
+    where: { slug: 'keyboards' },
+    update: {},
+    create: {
       name: 'Keyboards',
       description: 'Mechanical and membrane keyboards',
       slug: 'keyboards'
     }
   })
 
-  const mice = await prisma.category.create({
-    data: {
+  const mice = await prisma.category.upsert({
+    where: { slug: 'mice' },
+    update: {},
+    create: {
       name: 'Mice',
       description: 'Wired and wireless computer mice',
       slug: 'mice'
     }
   })
 
-  const components = await prisma.category.create({
-    data: {
+  const components = await prisma.category.upsert({
+    where: { slug: 'components' },
+    update: {},
+    create: {
       name: 'Components',
       description: 'PC parts and upgrades',
       slug: 'components'
     }
   })
 
-  const accessories = await prisma.category.create({
-    data: {
+  const accessories = await prisma.category.upsert({
+    where: { slug: 'accessories' },
+    update: {},
+    create: {
       name: 'Accessories',
       description: 'Computer accessories and peripherals',
       slug: 'accessories'
@@ -87,8 +101,10 @@ async function main() {
   })
 
   // Create products
-  const macbook = await prisma.product.create({
-    data: {
+  const macbook = await prisma.product.upsert({
+    where: { slug: 'macbook-pro-16' },
+    update: {},
+    create: {
       name: 'MacBook Pro 16"',
       description: 'Apple M3 Pro, 16GB RAM, 1TB SSD',
       slug: 'macbook-pro-16',
@@ -195,6 +211,27 @@ async function main() {
       isFeatured: false,
       weight: 120,
       dimensions: JSON.stringify({ length: 115, width: 45, height: 14 }),
+      categoryId: accessories.id
+    }
+  })
+
+  // Create an inactive product for testing
+  const inactiveProduct = await prisma.product.upsert({
+    where: { slug: 'discontinued-product' },
+    update: {
+      isActive: false // Ensure it's inactive
+    },
+    create: {
+      name: 'Discontinued Product',
+      description: 'This product is no longer available for purchase',
+      slug: 'discontinued-product',
+      sku: 'DISCONTINUED-001',
+      price: 99.99,
+      comparePrice: 129.99,
+      isActive: false,
+      isFeatured: false,
+      weight: 500,
+      dimensions: JSON.stringify({ length: 100, width: 50, height: 25 }),
       categoryId: accessories.id
     }
   })

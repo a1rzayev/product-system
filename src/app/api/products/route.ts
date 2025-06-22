@@ -30,12 +30,24 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Get session to check user role
+    const session = await getServerSession(authOptions)
+    const isAdmin = session?.user?.role === 'ADMIN'
+
     // For exports, use a larger limit but still reasonable
     const actualLimit = isExport ? Math.min(limit, 5000) : limit
 
     // Build where clause for filtering
-    const where: any = {
-      isActive: active
+    const where: any = {}
+
+    // Only filter by active status for non-admin users
+    if (!isAdmin) {
+      where.isActive = active
+    } else {
+      // For admins, respect the active filter if explicitly set
+      if (searchParams.has('active')) {
+        where.isActive = active
+      }
     }
 
     // Search functionality
@@ -97,8 +109,9 @@ export async function GET(request: NextRequest) {
           }
         },
         images: {
-          where: { isPrimary: true },
-          take: 1
+          orderBy: {
+            order: 'asc'
+          }
         },
         _count: {
           select: {
@@ -216,10 +229,98 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    return NextResponse.json({ message: 'Invalid action' }, { status: 400 })
+    // Handle product creation
+    const body = await request.json()
+    console.log('Product creation request body:', body)
+    
+    // Validate required fields
+    if (!body.name || !body.slug || !body.sku || !body.categoryId || !body.price) {
+      return NextResponse.json(
+        { error: 'Missing required fields: name, slug, sku, categoryId, price' },
+        { status: 400 }
+      )
+    }
+
+    // Check if slug or sku already exists
+    const existingProduct = await prisma.product.findFirst({
+      where: {
+        OR: [
+          { slug: body.slug },
+          { sku: body.sku }
+        ]
+      }
+    })
+
+    if (existingProduct) {
+      return NextResponse.json(
+        { error: 'Product with this slug or SKU already exists' },
+        { status: 400 }
+      )
+    }
+
+    // Check if category exists
+    const category = await prisma.category.findUnique({
+      where: { id: body.categoryId }
+    })
+
+    if (!category) {
+      return NextResponse.json(
+        { error: 'Category not found' },
+        { status: 400 }
+      )
+    }
+
+    console.log('Images data received:', body.images)
+
+    // Create the product
+    const product = await prisma.product.create({
+      data: {
+        name: body.name,
+        description: body.description || '',
+        slug: body.slug,
+        sku: body.sku,
+        price: parseFloat(body.price),
+        comparePrice: body.comparePrice ? parseFloat(body.comparePrice) : null,
+        isActive: body.isActive !== undefined ? body.isActive : true,
+        isFeatured: body.isFeatured !== undefined ? body.isFeatured : false,
+        weight: body.weight ? parseFloat(body.weight) : null,
+        dimensions: body.dimensions ? JSON.stringify(body.dimensions) : null,
+        categoryId: body.categoryId,
+        // Create images if provided
+        images: body.images && body.images.length > 0 ? {
+          create: body.images.map((image: any, index: number) => ({
+            url: image.url,
+            alt: image.alt || '',
+            isPrimary: image.isPrimary || index === 0,
+            order: image.order || index
+          }))
+        } : undefined
+      },
+      include: {
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true
+          }
+        },
+        images: {
+          orderBy: {
+            order: 'asc'
+          }
+        }
+      }
+    })
+
+    console.log('Product created successfully:', product)
+
+    return NextResponse.json({
+      message: 'Product created successfully',
+      product
+    }, { status: 201 })
 
   } catch (error) {
-    console.error('Products export error:', error)
+    console.error('Products API error:', error)
     return NextResponse.json(
       { message: 'Internal server error' },
       { status: 500 }
