@@ -230,6 +230,7 @@ export async function POST(request: NextRequest) {
 
     // Handle product creation
     const body = await request.json()
+    console.log('Product creation request body:', body)
     
     // Validate required fields
     if (!body.name || !body.slug || !body.sku || !body.categoryId || !body.price) {
@@ -268,6 +269,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    console.log('Images data received:', body.images)
+
     // Create the product
     const product = await prisma.product.create({
       data: {
@@ -281,7 +284,16 @@ export async function POST(request: NextRequest) {
         isFeatured: body.isFeatured !== undefined ? body.isFeatured : false,
         weight: body.weight ? parseFloat(body.weight) : null,
         dimensions: body.dimensions ? JSON.stringify(body.dimensions) : null,
-        categoryId: body.categoryId
+        categoryId: body.categoryId,
+        // Create images if provided
+        images: body.images && body.images.length > 0 ? {
+          create: body.images.map((image: any, index: number) => ({
+            url: image.url,
+            alt: image.alt || '',
+            isPrimary: image.isPrimary || index === 0,
+            order: image.order || index
+          }))
+        } : undefined
       },
       include: {
         category: {
@@ -290,9 +302,16 @@ export async function POST(request: NextRequest) {
             name: true,
             slug: true
           }
+        },
+        images: {
+          orderBy: {
+            order: 'asc'
+          }
         }
       }
     })
+
+    console.log('Product created successfully:', product)
 
     return NextResponse.json({
       message: 'Product created successfully',

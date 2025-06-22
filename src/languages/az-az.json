@@ -179,7 +179,13 @@
     "searchPlaceholder": "Məhsul axtar...",
     "noProductsFound": "Məhsul tapılmadı",
     "tryDifferentSearch": "Axtarışı və ya filtrləri dəyişdirməyə çalışın",
-    "reviews": "rəy"
+    "reviews": "rəy",
+    "productImages": "Məhsul şəkilləri",
+    "uploadImages": "Şəkillər yüklə",
+    "dragAndDrop": "və ya faylları sürükləyin",
+    "imageRequirements": "PNG, JPG, GIF hər biri 5MB-dək (maksimum 10 şəkil)",
+    "selectedImages": "Seçilmiş şəkillər",
+    "uploadingImages": "Şəkillər yüklənir..."
   },
   "categories": {
     "title": "Kateqoriyalar",
