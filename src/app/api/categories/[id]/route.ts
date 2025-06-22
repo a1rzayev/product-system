@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { categoryService } from '@/lib/db'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
 
 // GET - Get a single category
 export async function GET(
@@ -41,6 +42,29 @@ export async function PUT(
     }
 
     const body = await request.json()
+    
+    // Validate required fields
+    if (!body.name || !body.slug) {
+      return NextResponse.json(
+        { error: 'Name and slug are required' },
+        { status: 400 }
+      )
+    }
+
+    // Check if slug already exists for another category
+    const existingCategory = await prisma.category.findFirst({
+      where: { 
+        slug: body.slug,
+        id: { not: params.id }
+      }
+    })
+
+    if (existingCategory) {
+      return NextResponse.json(
+        { error: 'Category with this slug already exists' },
+        { status: 400 }
+      )
+    }
     
     const updatedCategory = await categoryService.update(params.id, body)
     

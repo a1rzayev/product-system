@@ -46,8 +46,25 @@ model Category {
   parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
   children Category[] @relation("CategoryHierarchy")
   products Product[]
+  images    CategoryImage[]
 
   @@map("categories")
+}
+
+// Category images
+model CategoryImage {
+  id        String   @id @default(cuid())
+  url       String
+  alt       String?
+  isPrimary Boolean  @default(false)
+  order     Int      @default(0)
+  categoryId String
+  createdAt DateTime @default(now())
+
+  // Relations
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@map("category_images")
 }
 
 // Main product model

@@ -2,18 +2,26 @@ import { writeFile, mkdir } from 'fs/promises'
 import { join } from 'path'
 import { existsSync } from 'fs'
 
-export async function saveImage(file: File): Promise<string> {
+export async function saveImage(file: File, folder: string = 'products'): Promise<string> {
   try {
+    console.log(`Saving image to folder: ${folder}`)
+    
     // Create uploads directory if it doesn't exist
     const uploadsDir = join(process.cwd(), 'public', 'uploads')
+    console.log('Uploads directory:', uploadsDir)
+    
     if (!existsSync(uploadsDir)) {
+      console.log('Creating uploads directory...')
       await mkdir(uploadsDir, { recursive: true })
     }
 
-    // Create products subdirectory
-    const productsDir = join(uploadsDir, 'products')
-    if (!existsSync(productsDir)) {
-      await mkdir(productsDir, { recursive: true })
+    // Create folder-specific subdirectory
+    const folderDir = join(uploadsDir, folder)
+    console.log('Folder directory:', folderDir)
+    
+    if (!existsSync(folderDir)) {
+      console.log(`Creating ${folder} directory...`)
+      await mkdir(folderDir, { recursive: true })
     }
 
     // Generate unique filename
@@ -23,7 +31,8 @@ export async function saveImage(file: File): Promise<string> {
     const filename = `${timestamp}-${randomString}.${fileExtension}`
     
     // Full path for saving
-    const filePath = join(productsDir, filename)
+    const filePath = join(folderDir, filename)
+    console.log('Saving file to:', filePath)
     
     // Convert File to Buffer
     const bytes = await file.arrayBuffer()
@@ -31,16 +40,19 @@ export async function saveImage(file: File): Promise<string> {
     
     // Save file
     await writeFile(filePath, buffer)
+    console.log('File saved successfully')
     
     // Return the public URL
-    return `/uploads/products/${filename}`
+    const publicUrl = `/uploads/${folder}/${filename}`
+    console.log('Public URL:', publicUrl)
+    return publicUrl
   } catch (error) {
     console.error('Error saving image:', error)
     throw new Error('Failed to save image')
   }
 }
 
-export async function saveMultipleImages(files: File[]): Promise<Array<{
+export async function saveMultipleImages(files: File[], folder: string = 'products'): Promise<Array<{
   url: string
   alt: string
   isPrimary: boolean
@@ -50,7 +62,7 @@ export async function saveMultipleImages(files: File[]): Promise<Array<{
   
   for (let i = 0; i < files.length; i++) {
     const file = files[i]
-    const url = await saveImage(file)
+    const url = await saveImage(file, folder)
     
     savedImages.push({
       url,

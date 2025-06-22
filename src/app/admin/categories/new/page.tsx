@@ -13,6 +13,7 @@ export default function NewCategoryPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [images, setImages] = useState<File[]>([])
 
   const [formData, setFormData] = useState({
     name: '',
@@ -20,6 +21,43 @@ export default function NewCategoryPage() {
     slug: '',
     parentId: ''
   })
+
+  const uploadImages = async (): Promise<any[]> => {
+    if (images.length === 0) return []
+
+    const uploadedImages = []
+
+    for (let i = 0; i < images.length; i++) {
+      const file = images[i]
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('folder', 'categories')
+
+      try {
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to upload image')
+        }
+
+        const result = await response.json()
+        uploadedImages.push({
+          url: result.url,
+          alt: file.name,
+          isPrimary: i === 0, // First image is primary
+          order: i
+        })
+      } catch (error) {
+        console.error('Error uploading image:', error)
+        throw new Error(`Failed to upload ${file.name}`)
+      }
+    }
+
+    return uploadedImages
+  }
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -46,6 +84,13 @@ export default function NewCategoryPage() {
     setError('')
 
     try {
+      console.log('Starting form submission...')
+      console.log('Images to upload:', images.length)
+      
+      // Upload images first
+      const uploadedImages = await uploadImages()
+      console.log('Uploaded images:', uploadedImages)
+
       const response = await fetch('/api/categories', {
         method: 'POST',
         headers: {
@@ -53,13 +98,19 @@ export default function NewCategoryPage() {
         },
         body: JSON.stringify({
           ...formData,
-          parentId: formData.parentId || null
+          parentId: formData.parentId || null,
+          images: uploadedImages
         }),
       })
 
       if (!response.ok) {
+        const errorData = await response.json()
+        console.error('Error response:', errorData)
         throw new Error('Failed to create category')
       }
+
+      const result = await response.json()
+      console.log('Category created successfully:', result)
 
       router.push('/admin/categories')
     } catch (error) {
@@ -73,6 +124,15 @@ export default function NewCategoryPage() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
+  }
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || [])
+    setImages(prev => [...prev, ...files])
+  }
+
+  const removeImage = (index: number) => {
+    setImages(prev => prev.filter((_, i) => i !== index))
   }
 
   if (loading) {
@@ -172,6 +232,79 @@ export default function NewCategoryPage() {
             rows={4}
             className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-black mb-2">
+            {t('categories.categoryImages')}
+          </label>
+          
+          <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+            <div className="space-y-1 text-center">
+              <svg
+                className="mx-auto h-12 w-12 text-gray-400"
+                stroke="currentColor"
+                fill="none"
+                viewBox="0 0 48 48"
+                aria-hidden="true"
+              >
+                <path
+                  d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <div className="flex text-sm text-gray-600">
+                <label
+                  htmlFor="image-upload"
+                  className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
+                >
+                  <span>{t('categories.uploadCategoryImages')}</span>
+                  <input
+                    id="image-upload"
+                    name="image-upload"
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    className="sr-only"
+                    onChange={handleImageChange}
+                  />
+                </label>
+                <p className="pl-1">{t('products.dragAndDrop')}</p>
+              </div>
+              <p className="text-xs text-gray-500">{t('products.imageRequirements')}</p>
+            </div>
+          </div>
+
+          {images.length > 0 && (
+            <div className="mt-4">
+              <h4 className="text-sm font-medium text-black mb-2">{t('categories.newCategoryImagesToUpload')}</h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {images.map((file, index) => (
+                  <div key={index} className="relative group">
+                    <img
+                      src={URL.createObjectURL(file)}
+                      alt={file.name}
+                      className="w-full h-24 object-cover rounded-lg border border-gray-300"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      ×
+                    </button>
+                    {index === 0 && (
+                      <span className="absolute bottom-1 left-1 bg-blue-500 text-white text-xs px-2 py-1 rounded">
+                        {t('products.primary')}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex justify-end space-x-3">

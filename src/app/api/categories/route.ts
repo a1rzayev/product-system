@@ -94,6 +94,11 @@ export async function GET(request: NextRequest) {
             slug: true
           }
         },
+        images: {
+          orderBy: {
+            order: 'asc'
+          }
+        },
         _count: {
           select: {
             products: true,
@@ -177,6 +182,11 @@ export async function POST(request: NextRequest) {
                 name: true
               }
             },
+            images: {
+              orderBy: {
+                order: 'asc'
+              }
+            },
             _count: {
               select: {
                 products: true,
@@ -212,10 +222,48 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    return NextResponse.json({ message: 'Invalid action' }, { status: 400 })
+    // Create new category
+    const body = await request.json()
+
+    // Validate required fields
+    if (!body.name || !body.slug) {
+      return NextResponse.json(
+        { message: 'Name and slug are required' },
+        { status: 400 }
+      )
+    }
+
+    // Check if slug already exists
+    const existingCategory = await prisma.category.findUnique({
+      where: { slug: body.slug }
+    })
+
+    if (existingCategory) {
+      return NextResponse.json(
+        { message: 'Category with this slug already exists' },
+        { status: 400 }
+      )
+    }
+
+    // Import categoryService
+    const { categoryService } = await import('@/lib/db')
+
+    // Create the category
+    const category = await categoryService.create({
+      name: body.name,
+      description: body.description || '',
+      slug: body.slug,
+      parentId: body.parentId || null,
+      images: body.images || []
+    })
+
+    return NextResponse.json({
+      message: 'Category created successfully',
+      category
+    }, { status: 201 })
 
   } catch (error) {
-    console.error('Categories export error:', error)
+    console.error('Categories API error:', error)
     return NextResponse.json(
       { message: 'Internal server error' },
       { status: 500 }

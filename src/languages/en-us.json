@@ -229,7 +229,11 @@
     "products": "products",
     "subcategories": "subcategories",
     "parent": "Parent",
-    "noCategories": "No categories available"
+    "noCategories": "No categories available",
+    "categoryImages": "Category Images",
+    "uploadCategoryImages": "Upload category images",
+    "currentCategoryImages": "Current Category Images",
+    "newCategoryImagesToUpload": "New Images to Upload"
   },
   "users": {
     "title": "Users",

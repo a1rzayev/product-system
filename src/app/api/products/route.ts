@@ -109,8 +109,9 @@ export async function GET(request: NextRequest) {
           }
         },
         images: {
-          where: { isPrimary: true },
-          take: 1
+          orderBy: {
+            order: 'asc'
+          }
         },
         _count: {
           select: {

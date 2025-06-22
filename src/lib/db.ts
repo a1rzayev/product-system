@@ -181,6 +181,7 @@ export const categoryService = {
       include: {
         parent: true,
         children: true,
+        images: { orderBy: { order: 'asc' } },
         _count: { select: { products: true } }
       },
       orderBy: { name: 'asc' }
@@ -195,6 +196,7 @@ export const categoryService = {
       include: {
         parent: true,
         children: true,
+        images: { orderBy: { order: 'asc' } },
         products: {
           where: { isActive: true },
           include: { images: true, inventory: true }
@@ -207,8 +209,25 @@ export const categoryService = {
   // Create category
   async create(data: CreateCategoryForm): Promise<Category> {
     const category = await prisma.category.create({
-      data,
-      include: { parent: true, children: true }
+      data: {
+        name: data.name,
+        description: data.description,
+        slug: data.slug,
+        parentId: data.parentId,
+        images: data.images && data.images.length > 0 ? {
+          create: data.images.map((image: any, index: number) => ({
+            url: image.url,
+            alt: image.alt || '',
+            isPrimary: image.isPrimary || index === 0,
+            order: image.order || index
+          }))
+        } : undefined
+      },
+      include: { 
+        parent: true, 
+        children: true,
+        images: { orderBy: { order: 'asc' } }
+      }
     })
     return category as Category
   },
@@ -217,8 +236,26 @@ export const categoryService = {
   async update(id: string, data: Partial<CreateCategoryForm>): Promise<Category> {
     const category = await prisma.category.update({
       where: { id },
-      data,
-      include: { parent: true, children: true }
+      data: {
+        name: data.name,
+        description: data.description,
+        slug: data.slug,
+        parentId: data.parentId,
+        images: data.images ? {
+          deleteMany: {},
+          create: data.images.map((image: any, index: number) => ({
+            url: image.url,
+            alt: image.alt || '',
+            isPrimary: image.isPrimary || index === 0,
+            order: image.order || index
+          }))
+        } : undefined
+      },
+      include: { 
+        parent: true, 
+        children: true,
+        images: { orderBy: { order: 'asc' } }
+      }
     })
     return category as Category
   },
