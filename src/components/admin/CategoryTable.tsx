@@ -94,7 +94,7 @@ export default function CategoryTable({ categories, onCategoryDeleted }: Categor
     })
   }
 
-  const truncateNotes = (notes: string, maxLength: number = 50) => {
+  const truncateNotes = (notes: string, maxLength: number = 10) => {
     if (!notes) return ''
     return notes.length > maxLength ? notes.substring(0, maxLength) + '...' : notes
   }
