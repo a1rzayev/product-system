@@ -285,6 +285,7 @@ export async function POST(request: NextRequest) {
         isFeatured: body.isFeatured !== undefined ? body.isFeatured : false,
         weight: body.weight ? parseFloat(body.weight) : null,
         dimensions: body.dimensions ? JSON.stringify(body.dimensions) : null,
+        notes: body.notes || null,
         categoryId: body.categoryId,
         // Create images if provided
         images: body.images && body.images.length > 0 ? {

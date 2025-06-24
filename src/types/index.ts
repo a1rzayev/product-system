@@ -52,6 +52,7 @@ export interface Product {
     width: number
     height: number
   }
+  notes?: string
   categoryId: string
   createdAt: Date
   updatedAt: Date
