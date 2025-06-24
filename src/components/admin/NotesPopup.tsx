@@ -60,7 +60,7 @@ export default function NotesPopup({
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-lg font-semibold text-black">
               Edit Notes
             </h3>
             <button
@@ -72,7 +72,7 @@ export default function NotesPopup({
               </svg>
             </button>
           </div>
-          <p className="text-sm text-gray-600 mt-1">
+          <p className="text-sm text-black mt-1">
             {productName}
           </p>
         </div>
@@ -80,7 +80,7 @@ export default function NotesPopup({
         {/* Content */}
         <div className="px-6 py-4">
           <div className="mb-4">
-            <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="notes" className="block text-sm font-medium text-black mb-2">
               Admin Notes
             </label>
             <textarea
@@ -88,7 +88,7 @@ export default function NotesPopup({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Add notes about this product (only visible to admins)..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 resize-none"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 resize-none text-black"
               rows={6}
               maxLength={1000}
             />

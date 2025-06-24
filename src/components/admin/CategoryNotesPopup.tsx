@@ -46,7 +46,7 @@ export default function CategoryNotesPopup({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold flex items-center gap-2">
+          <h3 className="text-lg font-semibold flex items-center gap-2 text-black">
             <Edit3 className="w-5 h-5" />
             Category Notes
           </h3>
@@ -59,20 +59,20 @@ export default function CategoryNotesPopup({
         </div>
 
         <div className="mb-4">
-          <p className="text-sm text-gray-600 mb-2">
+          <p className="text-sm text-black mb-2">
             Category: <span className="font-medium">{categoryName}</span>
           </p>
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-black mb-2">
             Notes
           </label>
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Add notes or comments about this category..."
-            className="w-full h-32 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+            className="w-full h-32 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-black"
           />
         </div>
 
