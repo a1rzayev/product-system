@@ -11,139 +11,63 @@ export async function GET() {
       prisma.user.count(),
     ])
 
-    // Fetch revenue statistics
-    const revenueStats = await prisma.order.aggregate({
-      _sum: {
-        total: true,
-        subtotal: true,
-        tax: true,
-        shipping: true,
-        discount: true,
-      },
-      _avg: {
-        total: true,
-      },
-      _count: {
-        id: true,
-      },
-    })
-
-    // Get recent orders (last 10)
-    const recentOrders = await prisma.order.findMany({
-      take: 10,
-      orderBy: {
-        createdAt: 'desc',
-      },
-      include: {
-        customer: {
-          select: {
-            name: true,
-            email: true,
-          },
-        },
-        items: {
-          include: {
-            product: {
-              select: {
-                name: true,
-              },
-            },
-          },
-        },
-      },
-    })
-
-    // Get top products by order count
-    const topProducts = await prisma.orderItem.groupBy({
+    // Get sold products by category
+    const soldProductsByCategory = await prisma.orderItem.groupBy({
       by: ['productId'],
       _sum: {
         quantity: true,
       },
-      orderBy: {
-        _sum: {
-          quantity: true,
-        },
-      },
-      take: 5,
     })
 
-    // Get top products with product details
-    const topProductsWithDetails = await Promise.all(
-      topProducts.map(async (item) => {
+    // Get category data for sold products
+    const categorySales = await Promise.all(
+      soldProductsByCategory.map(async (item) => {
         const product = await prisma.product.findUnique({
           where: { id: item.productId },
           select: {
             id: true,
             name: true,
-            price: true,
-            images: {
-              take: 1,
-              orderBy: { order: 'asc' },
+            categoryId: true,
+            category: {
+              select: {
+                id: true,
+                name: true,
+              },
             },
           },
         })
         return {
-          ...product,
+          productId: item.productId,
+          categoryId: product?.categoryId,
+          categoryName: product?.category?.name || 'Unknown',
           totalSold: item._sum.quantity || 0,
         }
       })
     )
 
-    // Get orders by status
-    const ordersByStatus = await prisma.order.groupBy({
-      by: ['status'],
-      _count: {
-        id: true,
-      },
-    })
+    // Group by category
+    const categoryStats = categorySales.reduce((acc, item) => {
+      const categoryName = item.categoryName
+      if (!acc[categoryName]) {
+        acc[categoryName] = {
+          name: categoryName,
+          totalSold: 0,
+          productCount: 0,
+        }
+      }
+      acc[categoryName].totalSold += item.totalSold
+      acc[categoryName].productCount += 1
+      return acc
+    }, {} as Record<string, { name: string; totalSold: number; productCount: number }>)
 
-    // Get monthly revenue for the last 6 months
-    const sixMonthsAgo = new Date()
-    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6)
+    // Convert to array and sort by total sold
+    const categorySalesArray = Object.values(categoryStats).sort((a, b) => b.totalSold - a.totalSold)
 
-    const monthlyRevenue = await prisma.order.groupBy({
-      by: ['createdAt'],
+    // Get basic revenue stats
+    const revenueStats = await prisma.order.aggregate({
       _sum: {
         total: true,
       },
-      where: {
-        createdAt: {
-          gte: sixMonthsAgo,
-        },
-      },
-      orderBy: {
-        createdAt: 'asc',
-      },
-    })
-
-    // Process monthly revenue data
-    const monthlyData = monthlyRevenue.reduce((acc, item) => {
-      const month = new Date(item.createdAt).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-      })
-      acc[month] = (acc[month] || 0) + (item._sum.total || 0)
-      return acc
-    }, {} as Record<string, number>)
-
-    // Get active vs inactive products
-    const productStatus = await prisma.product.groupBy({
-      by: ['isActive'],
-      _count: {
-        id: true,
-      },
-    })
-
-    // Get featured products count
-    const featuredProducts = await prisma.product.count({
-      where: {
-        isFeatured: true,
-      },
-    })
-
-    // Get user roles distribution
-    const userRoles = await prisma.user.groupBy({
-      by: ['role'],
       _count: {
         id: true,
       },
@@ -159,32 +83,11 @@ export async function GET() {
       // Revenue statistics
       revenue: {
         total: revenueStats._sum.total || 0,
-        subtotal: revenueStats._sum.subtotal || 0,
-        tax: revenueStats._sum.tax || 0,
-        shipping: revenueStats._sum.shipping || 0,
-        discount: revenueStats._sum.discount || 0,
-        average: revenueStats._avg.total || 0,
         orderCount: revenueStats._count.id || 0,
       },
       
-      // Recent orders
-      recentOrders,
-      
-      // Top products
-      topProducts: topProductsWithDetails,
-      
-      // Orders by status
-      ordersByStatus,
-      
-      // Monthly revenue
-      monthlyRevenue: monthlyData,
-      
-      // Product status
-      productStatus,
-      featuredProducts,
-      
-      // User roles
-      userRoles,
+      // Category sales
+      categorySales: categorySalesArray,
     }
 
     return NextResponse.json(stats)
@@ -198,20 +101,9 @@ export async function GET() {
         users: 0,
         revenue: {
           total: 0,
-          subtotal: 0,
-          tax: 0,
-          shipping: 0,
-          discount: 0,
-          average: 0,
           orderCount: 0,
         },
-        recentOrders: [],
-        topProducts: [],
-        ordersByStatus: [],
-        monthlyRevenue: {},
-        productStatus: [],
-        featuredProducts: 0,
-        userRoles: [],
+        categorySales: [],
       },
       { status: 500 }
     )
