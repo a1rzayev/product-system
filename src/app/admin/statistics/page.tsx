@@ -287,17 +287,17 @@ export default function StatisticsPage() {
           <div className="space-y-3">
             <div className="flex justify-between">
               <span className="text-gray-600">Total Categories with Sales:</span>
-              <span className="font-medium text-black">{stats.categorySales.length}</span>
+              <span className="font-medium">{stats.categorySales.length}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600">Total Products Sold:</span>
-              <span className="font-medium text-black">
+              <span className="font-medium">
                 {stats.categorySales.reduce((sum, cat) => sum + cat.totalSold, 0)}
               </span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600">Average Order Value:</span>
-              <span className="font-medium text-black">
+              <span className="font-medium">
                 {stats.revenue.orderCount > 0 
                   ? formatCurrency(stats.revenue.total / stats.revenue.orderCount)
                   : formatCurrency(0)
