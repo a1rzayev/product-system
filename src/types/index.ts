@@ -18,6 +18,7 @@ export interface Category {
   description?: string
   slug: string
   parentId?: string
+  notes?: string
   createdAt: Date
   updatedAt: Date
   parent?: Category
@@ -200,6 +201,7 @@ export interface CreateCategoryForm {
   description?: string
   slug: string
   parentId?: string
+  notes?: string
   images?: {
     url: string
     alt?: string

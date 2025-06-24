@@ -254,6 +254,7 @@ export async function POST(request: NextRequest) {
       description: body.description || '',
       slug: body.slug,
       parentId: body.parentId || null,
+      notes: body.notes || null,
       images: body.images || []
     })
 

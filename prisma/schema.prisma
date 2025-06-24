@@ -39,6 +39,7 @@ model Category {
   description String?
   slug        String   @unique
   parentId    String?
+  notes       String?  // Admin notes/comments
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

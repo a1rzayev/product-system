@@ -214,6 +214,7 @@ export const categoryService = {
         description: data.description,
         slug: data.slug,
         parentId: data.parentId,
+        notes: data.notes,
         images: data.images && data.images.length > 0 ? {
           create: data.images.map((image: any, index: number) => ({
             url: image.url,
@@ -241,6 +242,7 @@ export const categoryService = {
         description: data.description,
         slug: data.slug,
         parentId: data.parentId,
+        notes: data.notes,
         images: data.images ? {
           deleteMany: {},
           create: data.images.map((image: any, index: number) => ({
