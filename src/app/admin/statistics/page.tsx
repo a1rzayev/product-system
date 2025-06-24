@@ -184,32 +184,92 @@ export default function StatisticsPage() {
         <h3 className="text-lg font-semibold text-gray-900 mb-6">Products Sold by Category</h3>
         
         {stats.categorySales.length > 0 ? (
-          <div className="space-y-4">
-            {stats.categorySales.map((category, index) => (
-              <div key={category.name} className="flex items-center space-x-4">
-                <div className="flex-shrink-0 w-32">
-                  <p className="text-sm font-medium text-gray-900 truncate">{category.name}</p>
-                  <p className="text-xs text-gray-500">{category.productCount} products</p>
-                </div>
+          <div className="flex flex-col lg:flex-row items-center lg:items-start space-y-6 lg:space-y-0 lg:space-x-8">
+            {/* Pie Chart */}
+            <div className="flex-shrink-0">
+              <div className="relative w-64 h-64">
+                <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                  {(() => {
+                    const total = stats.categorySales.reduce((sum, cat) => sum + cat.totalSold, 0)
+                    const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4', '#84CC16', '#F97316']
+                    let currentAngle = 0
+                    
+                    return stats.categorySales.map((category, index) => {
+                      const percentage = (category.totalSold / total) * 100
+                      const angle = (percentage / 100) * 360
+                      const startAngle = currentAngle
+                      const endAngle = currentAngle + angle
+                      
+                      const x1 = 50 + 40 * Math.cos((startAngle * Math.PI) / 180)
+                      const y1 = 50 + 40 * Math.sin((startAngle * Math.PI) / 180)
+                      const x2 = 50 + 40 * Math.cos((endAngle * Math.PI) / 180)
+                      const y2 = 50 + 40 * Math.sin((endAngle * Math.PI) / 180)
+                      
+                      const largeArcFlag = angle > 180 ? 1 : 0
+                      
+                      const pathData = [
+                        `M 50 50`,
+                        `L ${x1} ${y1}`,
+                        `A 40 40 0 ${largeArcFlag} 1 ${x2} ${y2}`,
+                        'Z'
+                      ].join(' ')
+                      
+                      currentAngle += angle
+                      
+                      return (
+                        <path
+                          key={category.name}
+                          d={pathData}
+                          fill={colors[index % colors.length]}
+                          className="transition-all duration-300 hover:opacity-80"
+                        />
+                      )
+                    })
+                  })()}
+                  {/* Center circle for donut effect */}
+                  <circle cx="50" cy="50" r="15" fill="white" />
+                </svg>
                 
-                <div className="flex-1">
-                  <div className="bg-gray-200 rounded-full h-8 overflow-hidden">
-                    <div 
-                      className="bg-blue-600 h-full rounded-full transition-all duration-500"
-                      style={{ 
-                        width: `${(category.totalSold / maxSold) * 100}%`,
-                        minWidth: '20px'
-                      }}
-                    ></div>
+                {/* Center text */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-900">
+                      {stats.categorySales.reduce((sum, cat) => sum + cat.totalSold, 0)}
+                    </div>
+                    <div className="text-sm text-gray-500">Total Sold</div>
                   </div>
                 </div>
-                
-                <div className="flex-shrink-0 w-20 text-right">
-                  <p className="text-sm font-bold text-gray-900">{category.totalSold}</p>
-                  <p className="text-xs text-gray-500">sold</p>
-                </div>
               </div>
-            ))}
+            </div>
+            
+            {/* Legend */}
+            <div className="flex-1 min-w-0">
+              <div className="space-y-3">
+                {stats.categorySales.map((category, index) => {
+                  const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4', '#84CC16', '#F97316']
+                  const percentage = ((category.totalSold / stats.categorySales.reduce((sum, cat) => sum + cat.totalSold, 0)) * 100).toFixed(1)
+                  
+                  return (
+                    <div key={category.name} className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                      <div 
+                        className="w-4 h-4 rounded-full flex-shrink-0"
+                        style={{ backgroundColor: colors[index % colors.length] }}
+                      ></div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm font-medium text-gray-900 truncate">{category.name}</p>
+                          <p className="text-sm font-bold text-gray-900">{category.totalSold}</p>
+                        </div>
+                        <div className="flex justify-between items-center mt-1">
+                          <p className="text-xs text-gray-500">{category.productCount} products</p>
+                          <p className="text-xs text-gray-500">{percentage}%</p>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
           </div>
         ) : (
           <div className="text-center py-8">
