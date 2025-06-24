@@ -113,6 +113,34 @@ export default function ProductTable({ products, onProductDeleted }: ProductTabl
     }
   }
 
+  const handleDeleteNotes = async (productId: string) => {
+    if (!confirm('Are you sure you want to delete the notes for this product?')) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/products/${productId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ notes: null }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete notes')
+      }
+
+      // Call the callback to refresh the data
+      if (onProductDeleted) {
+        onProductDeleted()
+      }
+    } catch (error) {
+      console.error('Error deleting notes:', error)
+      alert('Failed to delete notes. Please try again.')
+    }
+  }
+
   const truncateNotes = (notes: string, maxLength: number = 10) => {
     if (!notes) return ''
     return notes.length > maxLength ? notes.substring(0, maxLength) + '...' : notes
@@ -204,6 +232,12 @@ export default function ProductTable({ products, onProductDeleted }: ProductTabl
                           className="ml-2 text-blue-600 hover:text-blue-800 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
                         >
                           Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteNotes(product.id)}
+                          className="ml-2 text-red-600 hover:text-red-800 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          Delete
                         </button>
                       </div>
                     ) : (

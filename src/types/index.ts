@@ -25,6 +25,10 @@ export interface Category {
   children?: Category[]
   products?: Product[]
   images?: CategoryImage[]
+  _count?: {
+    products: number
+    children: number
+  }
 }
 
 export interface CategoryImage {

@@ -85,7 +85,7 @@ export default function NotesPopup({
             </label>
             <textarea
               id="notes"
-              value={notes}
+              value={notes || ''}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Add notes about this product (only visible to admins)..."
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 resize-none text-black"

@@ -76,6 +76,34 @@ export default function CategoryTable({ categories, onCategoryDeleted }: Categor
     }
   }
 
+  const handleDeleteNotes = async (categoryId: string) => {
+    if (!confirm('Are you sure you want to delete the notes for this category?')) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/categories/${categoryId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ notes: null }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete notes')
+      }
+
+      // Refresh the data
+      if (onCategoryDeleted) {
+        onCategoryDeleted()
+      }
+    } catch (error) {
+      console.error('Error deleting notes:', error)
+      alert('Failed to delete notes. Please try again.')
+    }
+  }
+
   const openNotesPopup = (category: Category) => {
     setNotesPopup({
       isOpen: true,
@@ -171,12 +199,20 @@ export default function CategoryTable({ categories, onCategoryDeleted }: Categor
                         <p className="text-sm text-gray-600 cursor-pointer hover:text-gray-900">
                           {truncateNotes(category.notes)}
                         </p>
-                        <button
-                          onClick={() => openNotesPopup(category)}
-                          className="ml-2 text-blue-600 hover:text-blue-800 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          Edit
-                        </button>
+                        <div className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                          <button
+                            onClick={() => openNotesPopup(category)}
+                            className="text-blue-600 hover:text-blue-800 text-xs"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteNotes(category.id)}
+                            className="text-red-600 hover:text-red-800 text-xs"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </div>
                     ) : (
                       <button

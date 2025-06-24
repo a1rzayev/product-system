@@ -10,6 +10,7 @@ interface CategoryNotesPopupProps {
   categoryName: string
   currentNotes?: string
   onSave: (notes: string) => Promise<void>
+  onDelete?: (categoryId: string) => Promise<void>
 }
 
 export default function CategoryNotesPopup({
@@ -18,7 +19,8 @@ export default function CategoryNotesPopup({
   categoryId,
   categoryName,
   currentNotes = '',
-  onSave
+  onSave,
+  onDelete
 }: CategoryNotesPopupProps) {
   const [notes, setNotes] = useState(currentNotes)
   const [isSaving, setIsSaving] = useState(false)
@@ -69,7 +71,7 @@ export default function CategoryNotesPopup({
             Notes
           </label>
           <textarea
-            value={notes}
+            value={notes || ''}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Add notes or comments about this category..."
             className="w-full h-32 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-black"
