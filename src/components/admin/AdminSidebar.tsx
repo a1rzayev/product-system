@@ -10,6 +10,7 @@ export default function AdminSidebar() {
 
   const navigation = [
     { name: t('admin.dashboard'), href: '/admin', icon: '📊' },
+    { name: t('admin.statistics'), href: '/admin/statistics', icon: '📈' },
     { name: t('admin.products'), href: '/admin/products', icon: '📦' },
     { name: t('admin.categories'), href: '/admin/categories', icon: '🏷️' },
     { name: t('admin.orders'), href: '/admin/orders', icon: '📋' },

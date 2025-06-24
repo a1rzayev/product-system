@@ -114,6 +114,7 @@
   },
   "admin": {
     "dashboard": "Dashboard",
+    "statistics": "Statistics",
     "users": "Users",
     "orders": "Orders",
     "products": "Products",
