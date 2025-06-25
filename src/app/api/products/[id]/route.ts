@@ -81,7 +81,8 @@ export async function PUT(
         isActive: body.isActive,
         isFeatured: body.isFeatured,
         weight: body.weight,
-        dimensions: body.dimensions ? JSON.stringify(body.dimensions) : null
+        dimensions: body.dimensions ? JSON.stringify(body.dimensions) : null,
+        notes: body.notes
       },
       include: {
         category: {

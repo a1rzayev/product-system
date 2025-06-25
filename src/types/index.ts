@@ -18,12 +18,17 @@ export interface Category {
   description?: string
   slug: string
   parentId?: string
+  notes?: string
   createdAt: Date
   updatedAt: Date
   parent?: Category
   children?: Category[]
   products?: Product[]
   images?: CategoryImage[]
+  _count?: {
+    products: number
+    children: number
+  }
 }
 
 export interface CategoryImage {
@@ -52,6 +57,7 @@ export interface Product {
     width: number
     height: number
   }
+  notes?: string
   categoryId: string
   createdAt: Date
   updatedAt: Date
@@ -199,6 +205,7 @@ export interface CreateCategoryForm {
   description?: string
   slug: string
   parentId?: string
+  notes?: string
   images?: {
     url: string
     alt?: string

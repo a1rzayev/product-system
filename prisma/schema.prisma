@@ -39,6 +39,7 @@ model Category {
   description String?
   slug        String   @unique
   parentId    String?
+  notes       String?  // Admin notes/comments
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -80,6 +81,7 @@ model Product {
   isFeatured  Boolean  @default(false)
   weight      Float?
   dimensions  String?  // JSON string for SQLite
+  notes       String?  // Admin notes/comments
   categoryId  String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

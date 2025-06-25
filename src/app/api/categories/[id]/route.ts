@@ -75,6 +75,48 @@ export async function PUT(
   }
 }
 
+// PATCH - Update category notes
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions)
+    
+    if (!session || session.user.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const body = await request.json()
+    
+    // Only allow updating notes field
+    const updateData: { notes?: string } = {}
+    if (body.notes !== undefined) {
+      updateData.notes = body.notes
+    }
+
+    const updatedCategory = await prisma.category.update({
+      where: { id: params.id },
+      data: updateData,
+      include: {
+        parent: true,
+        children: true,
+        images: true,
+        _count: {
+          select: {
+            products: true
+          }
+        }
+      }
+    })
+    
+    return NextResponse.json(updatedCategory)
+  } catch (error) {
+    console.error('Error updating category notes:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
 // DELETE - Delete a category
 export async function DELETE(
   request: NextRequest,
