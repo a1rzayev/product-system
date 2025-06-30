@@ -163,6 +163,7 @@
       "titleMaxLength": "Title must be less than 100 characters",
       "descriptionMaxLength": "Description must be less than 500 characters",
       "dueDatePast": "Due date cannot be in the past",
+      "assignedToRequired": "Please select someone to assign the todo to",
       "noOtherAdmins": "No other admins found. Todo will be assigned to you."
     },
     "messages": {

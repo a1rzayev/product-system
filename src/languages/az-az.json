@@ -162,6 +162,15 @@
       "createError": "Todo yaratmaq alınmadı",
       "updateError": "Todo yeniləmək alınmadı",
       "deleteError": "Todo silmək alınmadı"
+    },
+    "validation": {
+      "titleRequired": "Başlıq tələb olunur",
+      "titleMinLength": "Başlıq ən azı 3 simvol olmalıdır",
+      "titleMaxLength": "Başlıq 100 simvoldan az olmalıdır",
+      "descriptionMaxLength": "Təsvir 500 simvoldan az olmalıdır",
+      "dueDatePast": "Bitmə tarixi keçmişdə ola bilməz",
+      "assignedToRequired": "Zəhmət olmasa todo-nu kimə təyin etmək istədiyinizi seçin",
+      "noOtherAdmins": "Başqa admin tapılmadı. Todo sizə təyin ediləcək."
     }
   },
   "products": {

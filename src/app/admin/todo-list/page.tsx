@@ -41,6 +41,7 @@ interface ValidationErrors {
   description?: string
   priority?: string
   dueDate?: string
+  assignedTo?: string
 }
 
 export default function TodoListPage() {
@@ -137,6 +138,11 @@ export default function TodoListPage() {
       if (selectedDate < today) {
         newErrors.dueDate = t('admin.validation.dueDatePast')
       }
+    }
+
+    // Assign to validation
+    if (!newTodo.assignedTo.trim()) {
+      newErrors.assignedTo = t('admin.validation.assignedToRequired')
     }
 
     setErrors(newErrors)
@@ -327,6 +333,11 @@ export default function TodoListPage() {
       if (selectedDate < today) {
         newErrors.dueDate = t('admin.validation.dueDatePast')
       }
+    }
+
+    // Assign to validation
+    if (!editingTodo.assignedTo.trim()) {
+      newErrors.assignedTo = t('admin.validation.assignedToRequired')
     }
 
     setErrors(newErrors)
@@ -543,12 +554,17 @@ export default function TodoListPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Assign To (Admin Only)
+                  Assign To (Admin Only) *
                 </label>
                 <select
                   value={newTodo.assignedTo}
-                  onChange={(e) => setNewTodo({ ...newTodo, assignedTo: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white text-base"
+                  onChange={(e) => {
+                    setNewTodo({ ...newTodo, assignedTo: e.target.value })
+                    if (errors.assignedTo) setErrors({ ...errors, assignedTo: undefined })
+                  }}
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white text-base ${
+                    errors.assignedTo ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                  }`}
                 >
                   <option value="">Select an admin</option>
                   {users.map((user) => (
@@ -557,6 +573,9 @@ export default function TodoListPage() {
                     </option>
                   ))}
                 </select>
+                {errors.assignedTo && (
+                  <p className="text-red-500 text-sm mt-2">{errors.assignedTo}</p>
+                )}
               </div>
             </div>
             <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200">
@@ -684,12 +703,17 @@ export default function TodoListPage() {
                           </div>
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Assign To (Admin Only)
+                              Assign To (Admin Only) *
                             </label>
                             <select
                               value={editingTodo.assignedTo}
-                              onChange={(e) => setEditingTodo({ ...editingTodo, assignedTo: e.target.value })}
-                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white text-base"
+                              onChange={(e) => {
+                                setEditingTodo({ ...editingTodo, assignedTo: e.target.value })
+                                if (errors.assignedTo) setErrors({ ...errors, assignedTo: undefined })
+                              }}
+                              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white text-base ${
+                                errors.assignedTo ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                              }`}
                             >
                               <option value="">Select an admin</option>
                               {users.map((user) => (
@@ -698,6 +722,9 @@ export default function TodoListPage() {
                                 </option>
                               ))}
                             </select>
+                            {errors.assignedTo && (
+                              <p className="text-red-500 text-sm mt-2">{errors.assignedTo}</p>
+                            )}
                           </div>
                         </div>
                         <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200">
