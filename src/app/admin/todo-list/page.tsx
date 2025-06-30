@@ -70,6 +70,13 @@ export default function TodoListPage() {
     dueDate: '',
     assignedTo: ''
   })
+  const [filters, setFilters] = useState({
+    status: '',
+    priority: '',
+    dueDate: '',
+    assignedTo: '',
+    search: ''
+  })
 
   useEffect(() => {
     fetchTodos()
@@ -449,6 +456,51 @@ export default function TodoListPage() {
     return `${day}/${month}/${year}`
   }
 
+  const getFilteredTodos = () => {
+    return todos.filter(todo => {
+      // Search filter
+      if (filters.search && !todo.title.toLowerCase().includes(filters.search.toLowerCase()) && 
+          !(todo.description && todo.description.toLowerCase().includes(filters.search.toLowerCase()))) {
+        return false
+      }
+
+      // Status filter
+      if (filters.status && todo.status !== filters.status) {
+        return false
+      }
+
+      // Priority filter
+      if (filters.priority && todo.priority !== filters.priority) {
+        return false
+      }
+
+      // Due date filter
+      if (filters.dueDate) {
+        const todoDate = todo.dueDate ? new Date(todo.dueDate).toISOString().split('T')[0] : null
+        if (todoDate !== filters.dueDate) {
+          return false
+        }
+      }
+
+      // Assigned to filter
+      if (filters.assignedTo && todo.assignedTo !== filters.assignedTo) {
+        return false
+      }
+
+      return true
+    })
+  }
+
+  const clearFilters = () => {
+    setFilters({
+      status: '',
+      priority: '',
+      dueDate: '',
+      assignedTo: '',
+      search: ''
+    })
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -626,14 +678,187 @@ export default function TodoListPage() {
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
         <div className="p-6">
           <h2 className="text-lg font-semibold mb-6 text-black">{t('admin.allTodos')}</h2>
+          
+          {/* Filters Section */}
+          <div className="mb-6 p-6 bg-white rounded-lg border border-gray-200 shadow-sm">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-black">Filters</h3>
+              <button
+                onClick={clearFilters}
+                className="text-sm text-blue-600 hover:text-blue-800 font-medium underline"
+              >
+                Clear all filters
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+              {/* Search Filter */}
+              <div>
+                <label className="block text-sm font-semibold text-black mb-2">
+                  Search
+                </label>
+                <input
+                  type="text"
+                  value={filters.search}
+                  onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                  placeholder="Search todos..."
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white"
+                />
+              </div>
+
+              {/* Status Filter */}
+              <div>
+                <label className="block text-sm font-semibold text-black mb-2">
+                  Status
+                </label>
+                <select
+                  value={filters.status}
+                  onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white"
+                >
+                  <option value="">All Status</option>
+                  <option value="UNDONE">⏳ Undone</option>
+                  <option value="IN_PROGRESS">🔄 In Progress</option>
+                  <option value="DONE">✅ Done</option>
+                </select>
+              </div>
+
+              {/* Priority Filter */}
+              <div>
+                <label className="block text-sm font-semibold text-black mb-2">
+                  Priority
+                </label>
+                <select
+                  value={filters.priority}
+                  onChange={(e) => setFilters({ ...filters, priority: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white"
+                >
+                  <option value="">All Priorities</option>
+                  <option value="LOW">🟢 Low</option>
+                  <option value="MEDIUM">🟡 Medium</option>
+                  <option value="HIGH">🔴 High</option>
+                </select>
+              </div>
+
+              {/* Due Date Filter */}
+              <div>
+                <label className="block text-sm font-semibold text-black mb-2">
+                  Due Date
+                </label>
+                <input
+                  type="date"
+                  value={filters.dueDate}
+                  onChange={(e) => setFilters({ ...filters, dueDate: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white"
+                />
+              </div>
+
+              {/* Assigned To Filter */}
+              <div>
+                <label className="block text-sm font-semibold text-black mb-2">
+                  Assigned To
+                </label>
+                <select
+                  value={filters.assignedTo}
+                  onChange={(e) => setFilters({ ...filters, assignedTo: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white"
+                >
+                  <option value="">All Users</option>
+                  {users.map((user) => (
+                    <option key={user.id} value={user.id}>
+                      {user.name || user.email}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Active Filters Display */}
+            {Object.values(filters).some(filter => filter !== '') && (
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                <div className="flex flex-wrap gap-3">
+                  {filters.search && (
+                    <span className="inline-flex items-center px-3 py-2 rounded-full text-sm bg-blue-100 text-blue-900 border border-blue-200 font-medium">
+                      Search: "{filters.search}"
+                      <button
+                        onClick={() => setFilters({ ...filters, search: '' })}
+                        className="ml-2 text-blue-700 hover:text-blue-900 font-bold"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                  {filters.status && (
+                    <span className="inline-flex items-center px-3 py-2 rounded-full text-sm bg-green-100 text-green-900 border border-green-200 font-medium">
+                      Status: {filters.status.replace('_', ' ')}
+                      <button
+                        onClick={() => setFilters({ ...filters, status: '' })}
+                        className="ml-2 text-green-700 hover:text-green-900 font-bold"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                  {filters.priority && (
+                    <span className="inline-flex items-center px-3 py-2 rounded-full text-sm bg-yellow-100 text-yellow-900 border border-yellow-200 font-medium">
+                      Priority: {filters.priority}
+                      <button
+                        onClick={() => setFilters({ ...filters, priority: '' })}
+                        className="ml-2 text-yellow-700 hover:text-yellow-900 font-bold"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                  {filters.dueDate && (
+                    <span className="inline-flex items-center px-3 py-2 rounded-full text-sm bg-purple-100 text-purple-900 border border-purple-200 font-medium">
+                      Due: {formatDate(filters.dueDate)}
+                      <button
+                        onClick={() => setFilters({ ...filters, dueDate: '' })}
+                        className="ml-2 text-purple-700 hover:text-purple-900 font-bold"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                  {filters.assignedTo && (
+                    <span className="inline-flex items-center px-3 py-2 rounded-full text-sm bg-orange-100 text-orange-900 border border-orange-200 font-medium">
+                      Assigned: {users.find(u => u.id === filters.assignedTo)?.name || 'Unknown'}
+                      <button
+                        onClick={() => setFilters({ ...filters, assignedTo: '' })}
+                        className="ml-2 text-orange-700 hover:text-orange-900 font-bold"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
           {todos.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500 text-lg mb-2">No todos found</p>
-              <p className="text-gray-400">Create your first todo to get started!</p>
+              <p className="text-black text-lg mb-2 font-medium">No todos found</p>
+              <p className="text-gray-600">Create your first todo to get started!</p>
+            </div>
+          ) : getFilteredTodos().length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-black text-lg mb-2 font-medium">No todos match your filters</p>
+              <p className="text-gray-600 mb-4">Try adjusting your filters or clear them to see all todos</p>
+              <button
+                onClick={clearFilters}
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              >
+                Clear all filters
+              </button>
             </div>
           ) : (
             <div className="space-y-4">
-              {todos.map((todo) => (
+              <div className="text-sm text-black font-medium mb-4">
+                Showing {getFilteredTodos().length} of {todos.length} todos
+              </div>
+              {getFilteredTodos().map((todo) => (
                 <div
                   key={todo.id}
                   className={`p-6 border rounded-lg transition-all duration-200 ${
@@ -798,22 +1023,22 @@ export default function TodoListPage() {
                                '🟢 Low'}
                             </span>
                             {todo.dueDate && (
-                              <span className="flex items-center text-gray-600">
+                              <span className="flex items-center text-black">
                                 📅 Due: {formatDate(todo.dueDate)}
                               </span>
                             )}
                             {todo.assignee && (
-                              <span className="flex items-center text-gray-600">
+                              <span className="flex items-center text-black">
                                 👤 Assigned to: {todo.assignee.name}
                               </span>
                             )}
-                            <span className="flex items-center text-gray-600">
+                            <span className="flex items-center text-black">
                               ✨ Created by: {todo.creator.name}
                             </span>
                           </div>
                           <div className="mt-3 flex items-center space-x-4">
                             <div className="flex items-center space-x-2">
-                              <label className="text-sm font-medium text-gray-700">Status:</label>
+                              <label className="text-sm font-medium text-black">Status:</label>
                               <select
                                 value={todo.status || 'UNDONE'}
                                 onChange={(e) => handleStatusUpdate(todo.id, e.target.value as any)}
