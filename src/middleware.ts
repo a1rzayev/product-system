@@ -23,10 +23,8 @@ export async function middleware(req: NextRequest) {
         return NextResponse.redirect(new URL('/login', req.url))
       }
 
-      // If user is not admin, redirect to login with error
-      if (token.role !== 'ADMIN') {
-        return NextResponse.redirect(new URL('/login?error=unauthorized', req.url))
-      }
+      // Allow any authenticated user to access admin panel
+      // Admin-specific features will be handled by individual API routes
     } catch (error) {
       console.error('Middleware error:', error)
       return NextResponse.redirect(new URL('/login', req.url))

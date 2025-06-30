@@ -15,6 +15,7 @@ export default function AdminSidebar() {
     { name: t('admin.categories'), href: '/admin/categories', icon: '🏷️' },
     { name: t('admin.orders'), href: '/admin/orders', icon: '📋' },
     { name: t('admin.users'), href: '/admin/users', icon: '👥' },
+    { name: t('admin.todoList'), href: '/admin/todo-list', icon: '✅' },
     { name: t('profile.title'), href: '/admin/profile', icon: '👤' },
   ]
 

@@ -20,12 +20,17 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50')
     const skip = (page - 1) * limit
     const isExport = searchParams.get('export') === 'true'
+    const role = searchParams.get('role')
 
     // For exports, use a larger limit but still reasonable
     const actualLimit = isExport ? Math.min(limit, 5000) : limit
 
+    // Build where clause for filtering
+    const whereClause = role ? { role } : {}
+
     // Fetch users with order count
     const users = await prisma.user.findMany({
+      where: whereClause,
       skip,
       take: actualLimit,
       select: {
@@ -47,7 +52,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Get total count for pagination
-    const total = await prisma.user.count()
+    const total = await prisma.user.count({ where: whereClause })
 
     return NextResponse.json({
       data: users,
