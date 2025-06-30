@@ -184,7 +184,6 @@ export default function TodoListPage() {
 
       if (response.ok) {
         fetchTodos()
-        setSuccessMessage(t('admin.messages.todoUpdated'))
       } else {
         const errorData = await response.json()
         setErrorMessage(errorData.error || t('admin.messages.updateError'))
@@ -207,7 +206,6 @@ export default function TodoListPage() {
 
       if (response.ok) {
         fetchTodos()
-        setSuccessMessage(t('admin.messages.todoUpdated'))
       } else {
         const errorData = await response.json()
         setErrorMessage(errorData.error || t('admin.messages.updateError'))
