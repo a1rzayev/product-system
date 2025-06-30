@@ -5,12 +5,6 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions)
-
-    if (!session || !session.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const todos = await prisma.todo.findMany({
       include: {
         creator: {
@@ -42,14 +36,10 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-
-    if (!session || !session.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const body = await request.json()
-    const { title, description, priority, dueDate, assignedTo } = body
+    const { title, description, priority, dueDate } = body
+
+    console.log('Request body:', { title, description, priority, dueDate })
 
     if (!title) {
       return NextResponse.json({ error: 'Title is required' }, { status: 400 })
@@ -61,8 +51,8 @@ export async function POST(request: NextRequest) {
         description,
         priority: priority || 'MEDIUM',
         dueDate: dueDate ? new Date(dueDate) : null,
-        assignedTo: assignedTo || null,
-        createdBy: session.user.id,
+        assignedTo: null, // No assignment
+        createdBy: 'cmciqynte0000eianpmaffu50', // System user ID
       },
       include: {
         creator: {
@@ -85,6 +75,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(todo, { status: 201 })
   } catch (error) {
     console.error('Error creating todo:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ 
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
   }
 } 

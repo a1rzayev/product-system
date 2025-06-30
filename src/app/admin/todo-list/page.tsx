@@ -28,31 +28,86 @@ interface Todo {
   }
 }
 
-interface User {
-  id: string
-  name: string
-  email: string
+interface ValidationErrors {
+  title?: string
+  description?: string
+  priority?: string
+  dueDate?: string
 }
 
 export default function TodoListPage() {
   const { t } = useLanguage()
   const [todos, setTodos] = useState<Todo[]>([])
-  const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
-  const [usersLoading, setUsersLoading] = useState(false)
   const [showAddForm, setShowAddForm] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [errors, setErrors] = useState<ValidationErrors>({})
+  const [successMessage, setSuccessMessage] = useState('')
+  const [errorMessage, setErrorMessage] = useState('')
+  const [currentUserRole, setCurrentUserRole] = useState<string>('')
   const [newTodo, setNewTodo] = useState({
     title: '',
     description: '',
     priority: 'MEDIUM' as const,
-    dueDate: '',
-    assignedTo: ''
+    dueDate: ''
   })
 
   useEffect(() => {
     fetchTodos()
-    fetchUsers()
+    getCurrentUserRole()
   }, [])
+
+  const getCurrentUserRole = async () => {
+    try {
+      const response = await fetch('/api/debug-session')
+      if (response.ok) {
+        const data = await response.json()
+        if (data.session?.user?.role) {
+          setCurrentUserRole(data.session.user.role)
+        }
+      }
+    } catch (error) {
+      console.error('Error getting user role:', error)
+    }
+  }
+
+  const validateForm = (): boolean => {
+    const newErrors: ValidationErrors = {}
+
+    // Title validation
+    if (!newTodo.title.trim()) {
+      newErrors.title = t('admin.validation.titleRequired')
+    } else if (newTodo.title.trim().length < 3) {
+      newErrors.title = t('admin.validation.titleMinLength')
+    } else if (newTodo.title.trim().length > 100) {
+      newErrors.title = t('admin.validation.titleMaxLength')
+    }
+
+    // Description validation
+    if (newTodo.description && newTodo.description.length > 500) {
+      newErrors.description = t('admin.validation.descriptionMaxLength')
+    }
+
+    // Due date validation
+    if (newTodo.dueDate) {
+      const selectedDate = new Date(newTodo.dueDate)
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      
+      if (selectedDate < today) {
+        newErrors.dueDate = t('admin.validation.dueDatePast')
+      }
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const clearMessages = () => {
+    setSuccessMessage('')
+    setErrorMessage('')
+    setErrors({})
+  }
 
   const fetchTodos = async () => {
     try {
@@ -60,35 +115,28 @@ export default function TodoListPage() {
       if (response.ok) {
         const data = await response.json()
         setTodos(data)
+      } else {
+        const errorData = await response.json()
+        setErrorMessage(errorData.error || t('admin.messages.fetchError'))
       }
     } catch (error) {
       console.error('Error fetching todos:', error)
+      setErrorMessage(t('admin.messages.fetchError'))
     } finally {
       setLoading(false)
     }
   }
 
-  const fetchUsers = async () => {
-    try {
-      setUsersLoading(true)
-      const response = await fetch('/api/users?role=ADMIN')
-      if (response.ok) {
-        const data = await response.json()
-        setUsers(data.data || [])
-      } else {
-        console.error('Failed to fetch users:', response.status)
-        setUsers([])
-      }
-    } catch (error) {
-      console.error('Error fetching users:', error)
-      setUsers([])
-    } finally {
-      setUsersLoading(false)
-    }
-  }
-
   const handleAddTodo = async (e: React.FormEvent) => {
     e.preventDefault()
+    clearMessages()
+
+    if (!validateForm()) {
+      return
+    }
+
+    setSubmitting(true)
+
     try {
       const response = await fetch('/api/todos', {
         method: 'POST',
@@ -99,18 +147,25 @@ export default function TodoListPage() {
       })
 
       if (response.ok) {
+        const createdTodo = await response.json()
         setNewTodo({
           title: '',
           description: '',
           priority: 'MEDIUM',
-          dueDate: '',
-          assignedTo: ''
+          dueDate: ''
         })
         setShowAddForm(false)
+        setSuccessMessage(t('admin.messages.todoCreated'))
         fetchTodos()
+      } else {
+        const errorData = await response.json()
+        setErrorMessage(errorData.error || t('admin.messages.createError'))
       }
     } catch (error) {
       console.error('Error adding todo:', error)
+      setErrorMessage(t('admin.messages.createError'))
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -126,9 +181,14 @@ export default function TodoListPage() {
 
       if (response.ok) {
         fetchTodos()
+        setSuccessMessage(t('admin.messages.todoUpdated'))
+      } else {
+        const errorData = await response.json()
+        setErrorMessage(errorData.error || t('admin.messages.updateError'))
       }
     } catch (error) {
       console.error('Error updating todo:', error)
+      setErrorMessage(t('admin.messages.updateError'))
     }
   }
 
@@ -142,9 +202,14 @@ export default function TodoListPage() {
 
       if (response.ok) {
         fetchTodos()
+        setSuccessMessage(t('admin.messages.todoDeleted'))
+      } else {
+        const errorData = await response.json()
+        setErrorMessage(errorData.error || t('admin.messages.deleteError'))
       }
     } catch (error) {
       console.error('Error deleting todo:', error)
+      setErrorMessage(t('admin.messages.deleteError'))
     }
   }
 
@@ -178,12 +243,36 @@ export default function TodoListPage() {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900">{t('admin.todoList')}</h1>
         <button
-          onClick={() => setShowAddForm(!showAddForm)}
+          onClick={() => {
+            setShowAddForm(!showAddForm)
+            clearMessages()
+          }}
           className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
         >
           {showAddForm ? t('common.cancel') : t('admin.addNew')}
         </button>
       </div>
+
+      {/* Success and Error Messages */}
+      {successMessage && (
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+          {successMessage}
+        </div>
+      )}
+
+      {errorMessage && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          {errorMessage}
+        </div>
+      )}
+
+      {/* Info message for non-admin users */}
+      {currentUserRole && currentUserRole !== 'ADMIN' && (
+        <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded">
+          <p className="font-medium">Note:</p>
+          <p>You are logged in as a {currentUserRole.toLowerCase()}. You can create and manage todos.</p>
+        </div>
+      )}
 
       {showAddForm && (
         <div className="bg-white p-6 rounded-lg shadow-sm border">
@@ -197,9 +286,17 @@ export default function TodoListPage() {
                 type="text"
                 required
                 value={newTodo.title}
-                onChange={(e) => setNewTodo({ ...newTodo, title: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onChange={(e) => {
+                  setNewTodo({ ...newTodo, title: e.target.value })
+                  if (errors.title) setErrors({ ...errors, title: undefined })
+                }}
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  errors.title ? 'border-red-500' : 'border-gray-300'
+                }`}
               />
+              {errors.title && (
+                <p className="text-red-500 text-sm mt-1">{errors.title}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -207,12 +304,20 @@ export default function TodoListPage() {
               </label>
               <textarea
                 value={newTodo.description}
-                onChange={(e) => setNewTodo({ ...newTodo, description: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onChange={(e) => {
+                  setNewTodo({ ...newTodo, description: e.target.value })
+                  if (errors.description) setErrors({ ...errors, description: undefined })
+                }}
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  errors.description ? 'border-red-500' : 'border-gray-300'
+                }`}
                 rows={3}
               />
+              {errors.description && (
+                <p className="text-red-500 text-sm mt-1">{errors.description}</p>
+              )}
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   {t('admin.todoPriority')}
@@ -234,42 +339,37 @@ export default function TodoListPage() {
                 <input
                   type="date"
                   value={newTodo.dueDate}
-                  onChange={(e) => setNewTodo({ ...newTodo, dueDate: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={(e) => {
+                    setNewTodo({ ...newTodo, dueDate: e.target.value })
+                    if (errors.dueDate) setErrors({ ...errors, dueDate: undefined })
+                  }}
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    errors.dueDate ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('admin.todoAssignedTo')}
-                </label>
-                <select
-                  value={newTodo.assignedTo}
-                  onChange={(e) => setNewTodo({ ...newTodo, assignedTo: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  disabled={usersLoading}
-                >
-                  <option value="">{usersLoading ? t('common.loading') : t('admin.selectUser')}</option>
-                  {Array.isArray(users) && users.map((user) => (
-                    <option key={user.id} value={user.id}>
-                      {user.name} ({user.email})
-                    </option>
-                  ))}
-                </select>
+                {errors.dueDate && (
+                  <p className="text-red-500 text-sm mt-1">{errors.dueDate}</p>
+                )}
               </div>
             </div>
             <div className="flex justify-end space-x-3">
               <button
                 type="button"
-                onClick={() => setShowAddForm(false)}
+                onClick={() => {
+                  setShowAddForm(false)
+                  clearMessages()
+                }}
                 className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+                disabled={submitting}
               >
                 {t('common.cancel')}
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={submitting}
               >
-                {t('common.save')}
+                {submitting ? 'Creating...' : t('common.save')}
               </button>
             </div>
           </form>

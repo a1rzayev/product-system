@@ -155,7 +155,24 @@
     "priorityHigh": "High",
     "noTodos": "No todos found",
     "allTodos": "All Todos",
-    "selectUser": "Select user"
+    "selectUser": "Select user",
+    "validation": {
+      "titleRequired": "Title is required",
+      "titleMinLength": "Title must be at least 3 characters",
+      "titleMaxLength": "Title must be less than 100 characters",
+      "descriptionMaxLength": "Description must be less than 500 characters",
+      "dueDatePast": "Due date cannot be in the past",
+      "noOtherAdmins": "No other admins found. Todo will be assigned to you."
+    },
+    "messages": {
+      "todoCreated": "Todo created successfully!",
+      "todoUpdated": "Todo updated successfully!",
+      "todoDeleted": "Todo deleted successfully!",
+      "fetchError": "Failed to fetch todos",
+      "createError": "Failed to create todo",
+      "updateError": "Failed to update todo",
+      "deleteError": "Failed to delete todo"
+    }
   },
   "products": {
     "title": "Products",
