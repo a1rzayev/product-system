@@ -77,6 +77,17 @@ export default function TodoListPage() {
     getCurrentUserRole()
   }, [])
 
+  // Auto-dismiss success messages after 3 seconds
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        setSuccessMessage('')
+      }, 3000)
+      
+      return () => clearTimeout(timer)
+    }
+  }, [successMessage])
+
   const fetchUsers = async () => {
     try {
       const response = await fetch('/api/users?role=ADMIN')
@@ -150,7 +161,6 @@ export default function TodoListPage() {
   }
 
   const clearMessages = () => {
-    setSuccessMessage('')
     setErrorMessage('')
     setErrors({})
   }
