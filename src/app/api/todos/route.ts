@@ -49,9 +49,9 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { title, description, priority, dueDate, status } = body
+    const { title, description, priority, dueDate, assignedTo } = body
 
-    console.log('Request body:', { title, description, priority, dueDate, status })
+    console.log('Request body:', { title, description, priority, dueDate, assignedTo })
 
     if (!title) {
       return NextResponse.json({ error: 'Title is required' }, { status: 400 })
@@ -61,10 +61,10 @@ export async function POST(request: NextRequest) {
       data: {
         title,
         description,
-        status: status || 'UNDONE',
+        status: 'UNDONE', // Default status for new todos
         priority: priority || 'MEDIUM',
         dueDate: dueDate ? new Date(dueDate) : null,
-        assignedTo: session.user.id, // Assign to current user
+        assignedTo: assignedTo || session.user.id, // Use provided assignee or default to current user
         createdBy: session.user.id, // Created by current user
       },
       include: {

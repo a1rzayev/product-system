@@ -29,6 +29,13 @@ interface Todo {
   }
 }
 
+interface User {
+  id: string
+  name: string
+  email: string
+  role: string
+}
+
 interface ValidationErrors {
   title?: string
   description?: string
@@ -39,6 +46,7 @@ interface ValidationErrors {
 export default function TodoListPage() {
   const { t } = useLanguage()
   const [todos, setTodos] = useState<Todo[]>([])
+  const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [showAddForm, setShowAddForm] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -49,15 +57,37 @@ export default function TodoListPage() {
   const [newTodo, setNewTodo] = useState({
     title: '',
     description: '',
-    status: 'UNDONE' as const,
     priority: 'MEDIUM' as const,
-    dueDate: ''
+    dueDate: '',
+    assignedTo: ''
   })
 
   useEffect(() => {
     fetchTodos()
+    fetchUsers()
     getCurrentUserRole()
   }, [])
+
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch('/api/users?role=ADMIN')
+      if (response.ok) {
+        const data = await response.json()
+        const usersData = data.data || data
+        console.log('Fetched users:', usersData)
+        
+        // Double-check: filter to only show admin users on frontend
+        const adminUsers = usersData.filter((user: User) => user.role === 'ADMIN')
+        console.log('Filtered admin users:', adminUsers)
+        
+        setUsers(adminUsers)
+      } else {
+        console.error('Error fetching users:', response.statusText)
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error)
+    }
+  }
 
   const getCurrentUserRole = async () => {
     try {
@@ -153,9 +183,9 @@ export default function TodoListPage() {
         setNewTodo({
           title: '',
           description: '',
-          status: 'UNDONE',
           priority: 'MEDIUM',
-          dueDate: ''
+          dueDate: '',
+          assignedTo: ''
         })
         setShowAddForm(false)
         setSuccessMessage(t('admin.messages.todoCreated'))
@@ -372,20 +402,6 @@ export default function TodoListPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('admin.todoStatus')}
-                </label>
-                <select
-                  value={newTodo.status}
-                  onChange={(e) => setNewTodo({ ...newTodo, status: e.target.value as any })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white text-base"
-                >
-                  <option value="UNDONE">⏳ Undone</option>
-                  <option value="IN_PROGRESS">🔄 In Progress</option>
-                  <option value="DONE">✅ Done</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
                   {t('admin.todoPriority')}
                 </label>
                 <select
@@ -416,6 +432,23 @@ export default function TodoListPage() {
                 {errors.dueDate && (
                   <p className="text-red-500 text-sm mt-2">{errors.dueDate}</p>
                 )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Assign To (Admin Only)
+                </label>
+                <select
+                  value={newTodo.assignedTo}
+                  onChange={(e) => setNewTodo({ ...newTodo, assignedTo: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white text-base"
+                >
+                  <option value="">Select an admin</option>
+                  {users.map((user) => (
+                    <option key={user.id} value={user.id}>
+                      {user.name || user.email}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
             <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200">
