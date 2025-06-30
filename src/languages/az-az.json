@@ -140,6 +140,7 @@
     "editTodo": "Görevi Redaktə Et",
     "todoTitle": "Görev Başlığı",
     "todoDescription": "Təsvir",
+    "todoStatus": "Status",
     "todoPriority": "Prioritet",
     "todoDueDate": "Bitmə Tarixi",
     "todoAssignedTo": "Təyin Et (Yalnız Admin)",

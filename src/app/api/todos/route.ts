@@ -49,9 +49,9 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { title, description, priority, dueDate } = body
+    const { title, description, priority, dueDate, status } = body
 
-    console.log('Request body:', { title, description, priority, dueDate })
+    console.log('Request body:', { title, description, priority, dueDate, status })
 
     if (!title) {
       return NextResponse.json({ error: 'Title is required' }, { status: 400 })
@@ -61,6 +61,7 @@ export async function POST(request: NextRequest) {
       data: {
         title,
         description,
+        status: status || 'UNDONE',
         priority: priority || 'MEDIUM',
         dueDate: dueDate ? new Date(dueDate) : null,
         assignedTo: session.user.id, // Assign to current user

@@ -144,6 +144,7 @@
     "editTodo": "Edit Todo",
     "todoTitle": "Todo Title",
     "todoDescription": "Description",
+    "todoStatus": "Status",
     "todoPriority": "Priority",
     "todoDueDate": "Due Date",
     "todoAssignedTo": "Assign To (Admin only)",

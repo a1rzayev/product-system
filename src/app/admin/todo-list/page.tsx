@@ -10,6 +10,7 @@ interface Todo {
   title: string
   description?: string
   isCompleted: boolean
+  status: 'UNDONE' | 'IN_PROGRESS' | 'DONE'
   priority: 'LOW' | 'MEDIUM' | 'HIGH'
   dueDate?: string
   assignedTo?: string
@@ -48,6 +49,7 @@ export default function TodoListPage() {
   const [newTodo, setNewTodo] = useState({
     title: '',
     description: '',
+    status: 'UNDONE' as const,
     priority: 'MEDIUM' as const,
     dueDate: ''
   })
@@ -151,6 +153,7 @@ export default function TodoListPage() {
         setNewTodo({
           title: '',
           description: '',
+          status: 'UNDONE',
           priority: 'MEDIUM',
           dueDate: ''
         })
@@ -192,6 +195,29 @@ export default function TodoListPage() {
     }
   }
 
+  const handleStatusUpdate = async (todoId: string, newStatus: 'UNDONE' | 'IN_PROGRESS' | 'DONE') => {
+    try {
+      const response = await fetch(`/api/todos/${todoId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus }),
+      })
+
+      if (response.ok) {
+        fetchTodos()
+        setSuccessMessage(t('admin.messages.todoUpdated'))
+      } else {
+        const errorData = await response.json()
+        setErrorMessage(errorData.error || t('admin.messages.updateError'))
+      }
+    } catch (error) {
+      console.error('Error updating todo status:', error)
+      setErrorMessage(t('admin.messages.updateError'))
+    }
+  }
+
   const handleDeleteTodo = async (todoId: string) => {
     if (!confirm(t('admin.deleteConfirm'))) return
 
@@ -223,6 +249,32 @@ export default function TodoListPage() {
         return 'bg-green-100 text-green-800'
       default:
         return 'bg-gray-100 text-gray-800'
+    }
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'DONE':
+        return 'bg-green-100 text-green-800 border border-green-200'
+      case 'IN_PROGRESS':
+        return 'bg-blue-100 text-blue-800 border border-blue-200'
+      case 'UNDONE':
+        return 'bg-gray-100 text-gray-800 border border-gray-200'
+      default:
+        return 'bg-gray-100 text-gray-800 border border-gray-200'
+    }
+  }
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'DONE':
+        return '✅'
+      case 'IN_PROGRESS':
+        return '🔄'
+      case 'UNDONE':
+        return '⏳'
+      default:
+        return '⏳'
     }
   }
 
@@ -319,7 +371,21 @@ export default function TodoListPage() {
                 <p className="text-red-500 text-sm mt-2">{errors.description}</p>
               )}
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('admin.todoStatus')}
+                </label>
+                <select
+                  value={newTodo.status}
+                  onChange={(e) => setNewTodo({ ...newTodo, status: e.target.value as any })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white text-base"
+                >
+                  <option value="UNDONE">⏳ Undone</option>
+                  <option value="IN_PROGRESS">🔄 In Progress</option>
+                  <option value="DONE">✅ Done</option>
+                </select>
+              </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   {t('admin.todoPriority')}
@@ -399,12 +465,6 @@ export default function TodoListPage() {
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-start space-x-4 flex-1">
-                      <input
-                        type="checkbox"
-                        checked={todo.isCompleted}
-                        onChange={() => handleToggleComplete(todo.id, todo.isCompleted)}
-                        className="mt-1 h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-colors"
-                      />
                       <div className="flex-1">
                         <h3 className={`text-lg font-medium mb-2 ${
                           todo.isCompleted ? 'line-through text-gray-500' : 'text-black'
@@ -419,6 +479,9 @@ export default function TodoListPage() {
                           </p>
                         )}
                         <div className="flex items-center space-x-6 text-sm">
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(todo.status || 'UNDONE')}`}>
+                            {getStatusIcon(todo.status || 'UNDONE')} {(todo.status || 'UNDONE').replace('_', ' ')}
+                          </span>
                           <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
                             todo.priority === 'HIGH' ? 'bg-red-100 text-red-800 border border-red-200' :
                             todo.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' :
@@ -441,6 +504,20 @@ export default function TodoListPage() {
                           <span className="flex items-center text-gray-600">
                             ✨ Created by: {todo.creator.name}
                           </span>
+                        </div>
+                        <div className="mt-3 flex items-center space-x-4">
+                          <div className="flex items-center space-x-2">
+                            <label className="text-sm font-medium text-gray-700">Status:</label>
+                            <select
+                              value={todo.status || 'UNDONE'}
+                              onChange={(e) => handleStatusUpdate(todo.id, e.target.value as any)}
+                              className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white"
+                            >
+                              <option value="UNDONE">⏳ Undone</option>
+                              <option value="IN_PROGRESS">🔄 In Progress</option>
+                              <option value="DONE">✅ Done</option>
+                            </select>
+                          </div>
                         </div>
                       </div>
                     </div>

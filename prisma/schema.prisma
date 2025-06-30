@@ -237,6 +237,7 @@ model Todo {
   title       String
   description String?
   isCompleted Boolean   @default(false)
+  status      String    @default("UNDONE") // UNDONE, IN_PROGRESS, DONE
   priority    String    @default("MEDIUM") // LOW, MEDIUM, HIGH
   dueDate     DateTime?
   assignedTo  String?

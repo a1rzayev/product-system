@@ -15,7 +15,7 @@ export async function PATCH(
     }
 
     const body = await request.json()
-    const { title, description, isCompleted, priority, dueDate, assignedTo } = body
+    const { title, description, isCompleted, status, priority, dueDate, assignedTo } = body
 
     const todo = await prisma.todo.update({
       where: {
@@ -25,6 +25,7 @@ export async function PATCH(
         ...(title !== undefined && { title }),
         ...(description !== undefined && { description }),
         ...(isCompleted !== undefined && { isCompleted }),
+        ...(status !== undefined && { status }),
         ...(priority !== undefined && { priority }),
         ...(dueDate !== undefined && { dueDate: dueDate ? new Date(dueDate) : null }),
         ...(assignedTo !== undefined && { assignedTo: assignedTo || null }),

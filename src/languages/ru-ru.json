@@ -144,6 +144,7 @@
     "editTodo": "Редактировать задачу",
     "todoTitle": "Название задачи",
     "todoDescription": "Описание",
+    "todoStatus": "Статус",
     "todoPriority": "Приоритет",
     "todoDueDate": "Срок выполнения",
     "todoAssignedTo": "Назначить (только админ)",
