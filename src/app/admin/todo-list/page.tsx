@@ -39,6 +39,7 @@ export default function TodoListPage() {
   const [todos, setTodos] = useState<Todo[]>([])
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
+  const [usersLoading, setUsersLoading] = useState(false)
   const [showAddForm, setShowAddForm] = useState(false)
   const [newTodo, setNewTodo] = useState({
     title: '',
@@ -69,13 +70,20 @@ export default function TodoListPage() {
 
   const fetchUsers = async () => {
     try {
+      setUsersLoading(true)
       const response = await fetch('/api/users')
       if (response.ok) {
         const data = await response.json()
-        setUsers(data)
+        setUsers(data.data || [])
+      } else {
+        console.error('Failed to fetch users:', response.status)
+        setUsers([])
       }
     } catch (error) {
       console.error('Error fetching users:', error)
+      setUsers([])
+    } finally {
+      setUsersLoading(false)
     }
   }
 
@@ -238,9 +246,10 @@ export default function TodoListPage() {
                   value={newTodo.assignedTo}
                   onChange={(e) => setNewTodo({ ...newTodo, assignedTo: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={usersLoading}
                 >
-                  <option value="">{t('admin.selectUser')}</option>
-                  {users.map((user) => (
+                  <option value="">{usersLoading ? t('common.loading') : t('admin.selectUser')}</option>
+                  {Array.isArray(users) && users.map((user) => (
                     <option key={user.id} value={user.id}>
                       {user.name} ({user.email})
                     </option>
