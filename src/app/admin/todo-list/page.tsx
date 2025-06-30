@@ -241,13 +241,13 @@ export default function TodoListPage() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900">{t('admin.todoList')}</h1>
+        <h1 className="text-2xl font-bold text-black">{t('admin.todoList')}</h1>
         <button
           onClick={() => {
             setShowAddForm(!showAddForm)
             clearMessages()
           }}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+          className="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition-colors font-medium"
         >
           {showAddForm ? t('common.cancel') : t('admin.addNew')}
         </button>
@@ -255,20 +255,20 @@ export default function TodoListPage() {
 
       {/* Success and Error Messages */}
       {successMessage && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg">
           {successMessage}
         </div>
       )}
 
       {errorMessage && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
           {errorMessage}
         </div>
       )}
 
       {/* Info message for non-admin users */}
       {currentUserRole && currentUserRole !== 'ADMIN' && (
-        <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded">
+        <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded-lg">
           <p className="font-medium">Note:</p>
           <p>You are logged in as a {currentUserRole.toLowerCase()}. You can create and manage todos.</p>
         </div>
@@ -276,7 +276,7 @@ export default function TodoListPage() {
 
       {showAddForm && (
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <h2 className="text-lg font-semibold mb-6 text-gray-900">{t('admin.addTodo')}</h2>
+          <h2 className="text-lg font-semibold mb-6 text-black">{t('admin.addTodo')}</h2>
           <form onSubmit={handleAddTodo} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -378,58 +378,67 @@ export default function TodoListPage() {
         </div>
       )}
 
-      <div className="bg-white rounded-lg shadow-sm border">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
         <div className="p-6">
-          <h2 className="text-lg font-semibold mb-4">{t('admin.allTodos')}</h2>
+          <h2 className="text-lg font-semibold mb-6 text-black">{t('admin.allTodos')}</h2>
           {todos.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">{t('admin.noTodos')}</p>
+            <div className="text-center py-12">
+              <p className="text-gray-500 text-lg mb-2">No todos found</p>
+              <p className="text-gray-400">Create your first todo to get started!</p>
+            </div>
           ) : (
             <div className="space-y-4">
               {todos.map((todo) => (
                 <div
                   key={todo.id}
-                  className={`p-4 border rounded-lg ${
-                    todo.isCompleted ? 'bg-gray-50 border-gray-200' : 'bg-white border-gray-300'
+                  className={`p-6 border rounded-lg transition-all duration-200 ${
+                    todo.isCompleted 
+                      ? 'bg-gray-50 border-gray-200 opacity-75' 
+                      : 'bg-white border-gray-300 hover:border-gray-400 hover:shadow-sm'
                   }`}
                 >
                   <div className="flex items-start justify-between">
-                    <div className="flex items-start space-x-3 flex-1">
+                    <div className="flex items-start space-x-4 flex-1">
                       <input
                         type="checkbox"
                         checked={todo.isCompleted}
                         onChange={() => handleToggleComplete(todo.id, todo.isCompleted)}
-                        className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        className="mt-1 h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-colors"
                       />
                       <div className="flex-1">
-                        <h3 className={`font-medium ${todo.isCompleted ? 'line-through text-gray-500' : 'text-gray-900'}`}>
+                        <h3 className={`text-lg font-medium mb-2 ${
+                          todo.isCompleted ? 'line-through text-gray-500' : 'text-black'
+                        }`}>
                           {todo.title}
                         </h3>
                         {todo.description && (
-                          <p className={`text-sm mt-1 ${todo.isCompleted ? 'text-gray-400' : 'text-gray-600'}`}>
+                          <p className={`text-base mb-3 ${
+                            todo.isCompleted ? 'text-gray-400' : 'text-gray-600'
+                          }`}>
                             {todo.description}
                           </p>
                         )}
-                        <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            todo.priority === 'HIGH' ? 'bg-red-100 text-red-800' :
-                            todo.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-green-100 text-green-800'
+                        <div className="flex items-center space-x-6 text-sm">
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                            todo.priority === 'HIGH' ? 'bg-red-100 text-red-800 border border-red-200' :
+                            todo.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' :
+                            'bg-green-100 text-green-800 border border-green-200'
                           }`}>
                             {todo.priority === 'HIGH' ? '🔴 High' :
                              todo.priority === 'MEDIUM' ? '🟡 Medium' :
                              '🟢 Low'}
                           </span>
                           {todo.dueDate && (
-                            <span className="flex items-center">
+                            <span className="flex items-center text-gray-600">
                               📅 Due: {formatDate(todo.dueDate)}
                             </span>
                           )}
                           {todo.assignee && (
-                            <span className="flex items-center">
+                            <span className="flex items-center text-gray-600">
                               👤 Assigned to: {todo.assignee.name}
                             </span>
                           )}
-                          <span className="flex items-center">
+                          <span className="flex items-center text-gray-600">
                             ✨ Created by: {todo.creator.name}
                           </span>
                         </div>
@@ -437,9 +446,12 @@ export default function TodoListPage() {
                     </div>
                     <button
                       onClick={() => handleDeleteTodo(todo.id)}
-                      className="text-red-600 hover:text-red-800 transition-colors"
+                      className="text-red-600 hover:text-red-800 transition-colors p-2 hover:bg-red-50 rounded-lg"
+                      title="Delete todo"
                     >
-                      {t('common.delete')}
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
                     </button>
                   </div>
                 </div>
