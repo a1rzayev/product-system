@@ -169,6 +169,7 @@
       "todoCreated": "Todo created successfully!",
       "todoUpdated": "Todo updated successfully!",
       "todoDeleted": "Todo deleted successfully!",
+      "confirmDelete": "Are you sure you want to delete this todo?",
       "fetchError": "Failed to fetch todos",
       "createError": "Failed to create todo",
       "updateError": "Failed to update todo",

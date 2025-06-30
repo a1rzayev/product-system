@@ -54,6 +54,14 @@ export default function TodoListPage() {
   const [successMessage, setSuccessMessage] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
   const [currentUserRole, setCurrentUserRole] = useState<string>('')
+  const [editingTodoId, setEditingTodoId] = useState<string | null>(null)
+  const [editingTodo, setEditingTodo] = useState({
+    title: '',
+    description: '',
+    priority: 'MEDIUM' as 'LOW' | 'MEDIUM' | 'HIGH',
+    dueDate: '',
+    assignedTo: ''
+  })
   const [newTodo, setNewTodo] = useState({
     title: '',
     description: '',
@@ -247,7 +255,9 @@ export default function TodoListPage() {
   }
 
   const handleDeleteTodo = async (todoId: string) => {
-    if (!confirm(t('admin.deleteConfirm'))) return
+    if (!confirm(t('admin.messages.confirmDelete'))) {
+      return
+    }
 
     try {
       const response = await fetch(`/api/todos/${todoId}`, {
@@ -255,8 +265,8 @@ export default function TodoListPage() {
       })
 
       if (response.ok) {
-        fetchTodos()
         setSuccessMessage(t('admin.messages.todoDeleted'))
+        fetchTodos()
       } else {
         const errorData = await response.json()
         setErrorMessage(errorData.error || t('admin.messages.deleteError'))
@@ -264,6 +274,104 @@ export default function TodoListPage() {
     } catch (error) {
       console.error('Error deleting todo:', error)
       setErrorMessage(t('admin.messages.deleteError'))
+    }
+  }
+
+  const handleStartEdit = (todo: Todo) => {
+    setEditingTodoId(todo.id)
+    setEditingTodo({
+      title: todo.title,
+      description: todo.description || '',
+      priority: todo.priority,
+      dueDate: todo.dueDate ? new Date(todo.dueDate).toISOString().split('T')[0] : '',
+      assignedTo: todo.assignedTo || ''
+    })
+    setErrors({})
+  }
+
+  const handleCancelEdit = () => {
+    setEditingTodoId(null)
+    setEditingTodo({
+      title: '',
+      description: '',
+      priority: 'MEDIUM',
+      dueDate: '',
+      assignedTo: ''
+    })
+    setErrors({})
+  }
+
+  const validateEditForm = (): boolean => {
+    const newErrors: ValidationErrors = {}
+
+    // Title validation
+    if (!editingTodo.title.trim()) {
+      newErrors.title = t('admin.validation.titleRequired')
+    } else if (editingTodo.title.trim().length < 3) {
+      newErrors.title = t('admin.validation.titleMinLength')
+    } else if (editingTodo.title.trim().length > 100) {
+      newErrors.title = t('admin.validation.titleMaxLength')
+    }
+
+    // Description validation
+    if (editingTodo.description && editingTodo.description.length > 500) {
+      newErrors.description = t('admin.validation.descriptionMaxLength')
+    }
+
+    // Due date validation
+    if (editingTodo.dueDate) {
+      const selectedDate = new Date(editingTodo.dueDate)
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      
+      if (selectedDate < today) {
+        newErrors.dueDate = t('admin.validation.dueDatePast')
+      }
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleUpdateTodo = async (e: React.FormEvent) => {
+    e.preventDefault()
+    clearMessages()
+
+    if (!validateEditForm()) {
+      return
+    }
+
+    setSubmitting(true)
+
+    try {
+      const response = await fetch(`/api/todos/${editingTodoId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(editingTodo),
+      })
+
+      if (response.ok) {
+        setEditingTodoId(null)
+        setEditingTodo({
+          title: '',
+          description: '',
+          priority: 'MEDIUM',
+          dueDate: '',
+          assignedTo: ''
+        })
+        setSuccessMessage(t('admin.messages.todoUpdated'))
+        fetchTodos()
+      } else {
+        const errorData = await response.json()
+        setErrorMessage(errorData.error || t('admin.messages.updateError'))
+      }
+    } catch (error) {
+      console.error('Error updating todo:', error)
+      setErrorMessage(t('admin.messages.updateError'))
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -494,74 +602,205 @@ export default function TodoListPage() {
                       : 'bg-white border-gray-300 hover:border-gray-400 hover:shadow-sm'
                   }`}
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start space-x-4 flex-1">
-                      <div className="flex-1">
-                        <h3 className={`text-lg font-medium mb-2 ${
-                          todo.isCompleted ? 'line-through text-gray-500' : 'text-black'
-                        }`}>
-                          {todo.title}
-                        </h3>
-                        {todo.description && (
-                          <p className={`text-base mb-3 ${
-                            todo.isCompleted ? 'text-gray-400' : 'text-gray-600'
-                          }`}>
-                            {todo.description}
-                          </p>
-                        )}
-                        <div className="flex items-center space-x-6 text-sm">
-                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(todo.status || 'UNDONE')}`}>
-                            {getStatusIcon(todo.status || 'UNDONE')} {(todo.status || 'UNDONE').replace('_', ' ')}
-                          </span>
-                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                            todo.priority === 'HIGH' ? 'bg-red-100 text-red-800 border border-red-200' :
-                            todo.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' :
-                            'bg-green-100 text-green-800 border border-green-200'
-                          }`}>
-                            {todo.priority === 'HIGH' ? '🔴 High' :
-                             todo.priority === 'MEDIUM' ? '🟡 Medium' :
-                             '🟢 Low'}
-                          </span>
-                          {todo.dueDate && (
-                            <span className="flex items-center text-gray-600">
-                              📅 Due: {formatDate(todo.dueDate)}
-                            </span>
+                  {editingTodoId === todo.id ? (
+                    // Edit Form
+                    <div className="space-y-6">
+                      <h3 className="text-lg font-semibold text-black">{t('admin.editTodo')}</h3>
+                      <form onSubmit={handleUpdateTodo} className="space-y-6">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            {t('admin.todoTitle')} *
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            value={editingTodo.title}
+                            onChange={(e) => {
+                              setEditingTodo({ ...editingTodo, title: e.target.value })
+                              if (errors.title) setErrors({ ...errors, title: undefined })
+                            }}
+                            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black text-base ${
+                              errors.title ? 'border-red-500 bg-red-50' : 'border-gray-300 bg-white'
+                            }`}
+                            placeholder="Enter todo title"
+                          />
+                          {errors.title && (
+                            <p className="text-red-500 text-sm mt-2">{errors.title}</p>
                           )}
-                          {todo.assignee && (
-                            <span className="flex items-center text-gray-600">
-                              👤 Assigned to: {todo.assignee.name}
-                            </span>
-                          )}
-                          <span className="flex items-center text-gray-600">
-                            ✨ Created by: {todo.creator.name}
-                          </span>
                         </div>
-                        <div className="mt-3 flex items-center space-x-4">
-                          <div className="flex items-center space-x-2">
-                            <label className="text-sm font-medium text-gray-700">Status:</label>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            {t('admin.todoDescription')}
+                          </label>
+                          <textarea
+                            value={editingTodo.description}
+                            onChange={(e) => {
+                              setEditingTodo({ ...editingTodo, description: e.target.value })
+                              if (errors.description) setErrors({ ...errors, description: undefined })
+                            }}
+                            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black text-base ${
+                              errors.description ? 'border-red-500 bg-red-50' : 'border-gray-300 bg-white'
+                            }`}
+                            rows={4}
+                            placeholder="Enter todo description (optional)"
+                          />
+                          {errors.description && (
+                            <p className="text-red-500 text-sm mt-2">{errors.description}</p>
+                          )}
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              {t('admin.todoPriority')}
+                            </label>
                             <select
-                              value={todo.status || 'UNDONE'}
-                              onChange={(e) => handleStatusUpdate(todo.id, e.target.value as any)}
-                              className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white"
+                              value={editingTodo.priority}
+                              onChange={(e) => setEditingTodo({ ...editingTodo, priority: e.target.value as any })}
+                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white text-base"
                             >
-                              <option value="UNDONE">⏳ Undone</option>
-                              <option value="IN_PROGRESS">🔄 In Progress</option>
-                              <option value="DONE">✅ Done</option>
+                              <option value="LOW">{t('admin.priorityLow')}</option>
+                              <option value="MEDIUM">{t('admin.priorityMedium')}</option>
+                              <option value="HIGH">{t('admin.priorityHigh')}</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              {t('admin.todoDueDate')}
+                            </label>
+                            <input
+                              type="date"
+                              value={editingTodo.dueDate}
+                              onChange={(e) => {
+                                setEditingTodo({ ...editingTodo, dueDate: e.target.value })
+                                if (errors.dueDate) setErrors({ ...errors, dueDate: undefined })
+                              }}
+                              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white text-base ${
+                                errors.dueDate ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                              }`}
+                            />
+                            {errors.dueDate && (
+                              <p className="text-red-500 text-sm mt-2">{errors.dueDate}</p>
+                            )}
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Assign To (Admin Only)
+                            </label>
+                            <select
+                              value={editingTodo.assignedTo}
+                              onChange={(e) => setEditingTodo({ ...editingTodo, assignedTo: e.target.value })}
+                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white text-base"
+                            >
+                              <option value="">Select an admin</option>
+                              {users.map((user) => (
+                                <option key={user.id} value={user.id}>
+                                  {user.name || user.email}
+                                </option>
+                              ))}
                             </select>
                           </div>
                         </div>
+                        <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200">
+                          <button
+                            type="button"
+                            onClick={handleCancelEdit}
+                            className="px-6 py-2.5 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                            disabled={submitting}
+                          >
+                            {t('common.cancel')}
+                          </button>
+                          <button
+                            type="submit"
+                            className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                            disabled={submitting}
+                          >
+                            {submitting ? 'Updating...' : t('common.save')}
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  ) : (
+                    // Normal Todo Display
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start space-x-4 flex-1">
+                        <div className="flex-1">
+                          <h3 className={`text-lg font-medium mb-2 ${
+                            todo.isCompleted ? 'line-through text-gray-500' : 'text-black'
+                          }`}>
+                            {todo.title}
+                          </h3>
+                          {todo.description && (
+                            <p className={`text-base mb-3 ${
+                              todo.isCompleted ? 'text-gray-400' : 'text-gray-600'
+                            }`}>
+                              {todo.description}
+                            </p>
+                          )}
+                          <div className="flex items-center space-x-6 text-sm">
+                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(todo.status || 'UNDONE')}`}>
+                              {getStatusIcon(todo.status || 'UNDONE')} {(todo.status || 'UNDONE').replace('_', ' ')}
+                            </span>
+                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                              todo.priority === 'HIGH' ? 'bg-red-100 text-red-800 border border-red-200' :
+                              todo.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' :
+                              'bg-green-100 text-green-800 border border-green-200'
+                            }`}>
+                              {todo.priority === 'HIGH' ? '🔴 High' :
+                               todo.priority === 'MEDIUM' ? '🟡 Medium' :
+                               '🟢 Low'}
+                            </span>
+                            {todo.dueDate && (
+                              <span className="flex items-center text-gray-600">
+                                📅 Due: {formatDate(todo.dueDate)}
+                              </span>
+                            )}
+                            {todo.assignee && (
+                              <span className="flex items-center text-gray-600">
+                                👤 Assigned to: {todo.assignee.name}
+                              </span>
+                            )}
+                            <span className="flex items-center text-gray-600">
+                              ✨ Created by: {todo.creator.name}
+                            </span>
+                          </div>
+                          <div className="mt-3 flex items-center space-x-4">
+                            <div className="flex items-center space-x-2">
+                              <label className="text-sm font-medium text-gray-700">Status:</label>
+                              <select
+                                value={todo.status || 'UNDONE'}
+                                onChange={(e) => handleStatusUpdate(todo.id, e.target.value as any)}
+                                className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white"
+                              >
+                                <option value="UNDONE">⏳ Undone</option>
+                                <option value="IN_PROGRESS">🔄 In Progress</option>
+                                <option value="DONE">✅ Done</option>
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => handleStartEdit(todo)}
+                          className="text-blue-600 hover:text-blue-800 transition-colors p-2 hover:bg-blue-50 rounded-lg"
+                          title="Edit todo"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-7.414a2 2 0 00-2.828 0L2 12.586V14h2.586l8.586-8.586z" />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => handleDeleteTodo(todo.id)}
+                          className="text-red-600 hover:text-red-800 transition-colors p-2 hover:bg-red-50 rounded-lg"
+                          title="Delete todo"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
                       </div>
                     </div>
-                    <button
-                      onClick={() => handleDeleteTodo(todo.id)}
-                      className="text-red-600 hover:text-red-800 transition-colors p-2 hover:bg-red-50 rounded-lg"
-                      title="Delete todo"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
-                  </div>
+                  )}
                 </div>
               ))}
             </div>

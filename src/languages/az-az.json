@@ -152,7 +152,17 @@
     "priorityHigh": "Yüksək",
     "noTodos": "Görev tapılmadı",
     "allTodos": "Bütün Görevlər",
-    "selectUser": "İstifadəçi seç"
+    "selectUser": "İstifadəçi seç",
+    "messages": {
+      "todoCreated": "Todo uğurla yaradıldı!",
+      "todoUpdated": "Todo uğurla yeniləndi!",
+      "todoDeleted": "Todo uğurla silindi!",
+      "confirmDelete": "Bu todo-nu silmək istədiyinizə əminsiniz?",
+      "fetchError": "Todo-ları əldə etmək alınmadı",
+      "createError": "Todo yaratmaq alınmadı",
+      "updateError": "Todo yeniləmək alınmadı",
+      "deleteError": "Todo silmək alınmadı"
+    }
   },
   "products": {
     "title": "Məhsullar",
