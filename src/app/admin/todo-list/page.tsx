@@ -70,6 +70,13 @@ export default function TodoListPage() {
     dueDate: '',
     assignedTo: ''
   })
+  const [filters, setFilters] = useState({
+    status: '',
+    priority: '',
+    dueDate: '',
+    assignedTo: '',
+    search: ''
+  })
 
   useEffect(() => {
     fetchTodos()
@@ -449,6 +456,51 @@ export default function TodoListPage() {
     return `${day}/${month}/${year}`
   }
 
+  const getFilteredTodos = () => {
+    return todos.filter(todo => {
+      // Search filter
+      if (filters.search && !todo.title.toLowerCase().includes(filters.search.toLowerCase()) && 
+          !(todo.description && todo.description.toLowerCase().includes(filters.search.toLowerCase()))) {
+        return false
+      }
+
+      // Status filter
+      if (filters.status && todo.status !== filters.status) {
+        return false
+      }
+
+      // Priority filter
+      if (filters.priority && todo.priority !== filters.priority) {
+        return false
+      }
+
+      // Due date filter
+      if (filters.dueDate) {
+        const todoDate = todo.dueDate ? new Date(todo.dueDate).toISOString().split('T')[0] : null
+        if (todoDate !== filters.dueDate) {
+          return false
+        }
+      }
+
+      // Assigned to filter
+      if (filters.assignedTo && todo.assignedTo !== filters.assignedTo) {
+        return false
+      }
+
+      return true
+    })
+  }
+
+  const clearFilters = () => {
+    setFilters({
+      status: '',
+      priority: '',
+      dueDate: '',
+      assignedTo: '',
+      search: ''
+    })
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -626,14 +678,187 @@ export default function TodoListPage() {
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
         <div className="p-6">
           <h2 className="text-lg font-semibold mb-6 text-black">{t('admin.allTodos')}</h2>
+          
+          {/* Filters Section */}
+          <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-md font-medium text-gray-700">Filters</h3>
+              <button
+                onClick={clearFilters}
+                className="text-sm text-gray-600 hover:text-gray-800 underline"
+              >
+                Clear all filters
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              {/* Search Filter */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Search
+                </label>
+                <input
+                  type="text"
+                  value={filters.search}
+                  onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                  placeholder="Search todos..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                />
+              </div>
+
+              {/* Status Filter */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Status
+                </label>
+                <select
+                  value={filters.status}
+                  onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                >
+                  <option value="">All Status</option>
+                  <option value="UNDONE">⏳ Undone</option>
+                  <option value="IN_PROGRESS">🔄 In Progress</option>
+                  <option value="DONE">✅ Done</option>
+                </select>
+              </div>
+
+              {/* Priority Filter */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Priority
+                </label>
+                <select
+                  value={filters.priority}
+                  onChange={(e) => setFilters({ ...filters, priority: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                >
+                  <option value="">All Priorities</option>
+                  <option value="LOW">🟢 Low</option>
+                  <option value="MEDIUM">🟡 Medium</option>
+                  <option value="HIGH">🔴 High</option>
+                </select>
+              </div>
+
+              {/* Due Date Filter */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Due Date
+                </label>
+                <input
+                  type="date"
+                  value={filters.dueDate}
+                  onChange={(e) => setFilters({ ...filters, dueDate: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                />
+              </div>
+
+              {/* Assigned To Filter */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Assigned To
+                </label>
+                <select
+                  value={filters.assignedTo}
+                  onChange={(e) => setFilters({ ...filters, assignedTo: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                >
+                  <option value="">All Users</option>
+                  {users.map((user) => (
+                    <option key={user.id} value={user.id}>
+                      {user.name || user.email}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Active Filters Display */}
+            {Object.values(filters).some(filter => filter !== '') && (
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <div className="flex flex-wrap gap-2">
+                  {filters.search && (
+                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+                      Search: "{filters.search}"
+                      <button
+                        onClick={() => setFilters({ ...filters, search: '' })}
+                        className="ml-1 text-blue-600 hover:text-blue-800"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                  {filters.status && (
+                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
+                      Status: {filters.status.replace('_', ' ')}
+                      <button
+                        onClick={() => setFilters({ ...filters, status: '' })}
+                        className="ml-1 text-green-600 hover:text-green-800"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                  {filters.priority && (
+                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-yellow-100 text-yellow-800">
+                      Priority: {filters.priority}
+                      <button
+                        onClick={() => setFilters({ ...filters, priority: '' })}
+                        className="ml-1 text-yellow-600 hover:text-yellow-800"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                  {filters.dueDate && (
+                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-purple-100 text-purple-800">
+                      Due: {formatDate(filters.dueDate)}
+                      <button
+                        onClick={() => setFilters({ ...filters, dueDate: '' })}
+                        className="ml-1 text-purple-600 hover:text-purple-800"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                  {filters.assignedTo && (
+                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-orange-100 text-orange-800">
+                      Assigned: {users.find(u => u.id === filters.assignedTo)?.name || 'Unknown'}
+                      <button
+                        onClick={() => setFilters({ ...filters, assignedTo: '' })}
+                        className="ml-1 text-orange-600 hover:text-orange-800"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
           {todos.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-500 text-lg mb-2">No todos found</p>
               <p className="text-gray-400">Create your first todo to get started!</p>
             </div>
+          ) : getFilteredTodos().length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500 text-lg mb-2">No todos match your filters</p>
+              <p className="text-gray-400">Try adjusting your filters or clear them to see all todos</p>
+              <button
+                onClick={clearFilters}
+                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Clear all filters
+              </button>
+            </div>
           ) : (
             <div className="space-y-4">
-              {todos.map((todo) => (
+              <div className="text-sm text-gray-600 mb-4">
+                Showing {getFilteredTodos().length} of {todos.length} todos
+              </div>
+              {getFilteredTodos().map((todo) => (
                 <div
                   key={todo.id}
                   className={`p-6 border rounded-lg transition-all duration-200 ${
