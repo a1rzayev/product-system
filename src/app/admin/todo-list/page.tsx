@@ -193,13 +193,19 @@ export default function TodoListPage() {
 
     setSubmitting(true)
 
+    // Set due date to today if not chosen
+    const todoData = {
+      ...newTodo,
+      dueDate: newTodo.dueDate || new Date().toISOString().split('T')[0]
+    }
+
     try {
       const response = await fetch('/api/todos', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(newTodo),
+        body: JSON.stringify(todoData),
       })
 
       if (response.ok) {
@@ -436,7 +442,11 @@ export default function TodoListPage() {
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString()
+    const date = new Date(dateString)
+    const day = date.getDate().toString().padStart(2, '0')
+    const month = (date.getMonth() + 1).toString().padStart(2, '0')
+    const year = date.getFullYear()
+    return `${day}/${month}/${year}`
   }
 
   if (loading) {
@@ -558,6 +568,7 @@ export default function TodoListPage() {
                     errors.dueDate ? 'border-red-500 bg-red-50' : 'border-gray-300'
                   }`}
                 />
+                <p className="text-gray-500 text-sm mt-1">Leave empty to set as today</p>
                 {errors.dueDate && (
                   <p className="text-red-500 text-sm mt-2">{errors.dueDate}</p>
                 )}
