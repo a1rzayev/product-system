@@ -146,7 +146,7 @@
     "todoDescription": "Description",
     "todoPriority": "Priority",
     "todoDueDate": "Due Date",
-    "todoAssignedTo": "Assign To",
+    "todoAssignedTo": "Assign To (Admin only)",
     "todoCreatedBy": "Created By",
     "todoCompleted": "Completed",
     "todoPending": "Pending",

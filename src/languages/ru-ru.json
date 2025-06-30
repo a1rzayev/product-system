@@ -146,7 +146,7 @@
     "todoDescription": "Описание",
     "todoPriority": "Приоритет",
     "todoDueDate": "Срок выполнения",
-    "todoAssignedTo": "Назначить",
+    "todoAssignedTo": "Назначить (только админ)",
     "todoCreatedBy": "Создал",
     "todoCompleted": "Завершено",
     "todoPending": "В ожидании",

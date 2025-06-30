@@ -142,7 +142,7 @@
     "todoDescription": "Təsvir",
     "todoPriority": "Prioritet",
     "todoDueDate": "Bitmə Tarixi",
-    "todoAssignedTo": "Təyin Et",
+    "todoAssignedTo": "Təyin Et (Yalnız Admin)",
     "todoCreatedBy": "Yaradan",
     "todoCompleted": "Tamamlanıb",
     "todoPending": "Gözləyir",

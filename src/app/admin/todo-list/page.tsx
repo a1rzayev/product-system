@@ -71,7 +71,7 @@ export default function TodoListPage() {
   const fetchUsers = async () => {
     try {
       setUsersLoading(true)
-      const response = await fetch('/api/users')
+      const response = await fetch('/api/users?role=ADMIN')
       if (response.ok) {
         const data = await response.json()
         setUsers(data.data || [])
