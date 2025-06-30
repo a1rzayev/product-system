@@ -275,11 +275,11 @@ export default function TodoListPage() {
       )}
 
       {showAddForm && (
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
-          <h2 className="text-lg font-semibold mb-4">{t('admin.addTodo')}</h2>
-          <form onSubmit={handleAddTodo} className="space-y-4">
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+          <h2 className="text-lg font-semibold mb-6 text-gray-900">{t('admin.addTodo')}</h2>
+          <form onSubmit={handleAddTodo} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 {t('admin.todoTitle')} *
               </label>
               <input
@@ -290,16 +290,17 @@ export default function TodoListPage() {
                   setNewTodo({ ...newTodo, title: e.target.value })
                   if (errors.title) setErrors({ ...errors, title: undefined })
                 }}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.title ? 'border-red-500' : 'border-gray-300'
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black text-base ${
+                  errors.title ? 'border-red-500 bg-red-50' : 'border-gray-300 bg-white'
                 }`}
+                placeholder="Enter todo title"
               />
               {errors.title && (
-                <p className="text-red-500 text-sm mt-1">{errors.title}</p>
+                <p className="text-red-500 text-sm mt-2">{errors.title}</p>
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 {t('admin.todoDescription')}
               </label>
               <textarea
@@ -308,24 +309,25 @@ export default function TodoListPage() {
                   setNewTodo({ ...newTodo, description: e.target.value })
                   if (errors.description) setErrors({ ...errors, description: undefined })
                 }}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.description ? 'border-red-500' : 'border-gray-300'
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black text-base ${
+                  errors.description ? 'border-red-500 bg-red-50' : 'border-gray-300 bg-white'
                 }`}
-                rows={3}
+                rows={4}
+                placeholder="Enter todo description (optional)"
               />
               {errors.description && (
-                <p className="text-red-500 text-sm mt-1">{errors.description}</p>
+                <p className="text-red-500 text-sm mt-2">{errors.description}</p>
               )}
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   {t('admin.todoPriority')}
                 </label>
                 <select
                   value={newTodo.priority}
                   onChange={(e) => setNewTodo({ ...newTodo, priority: e.target.value as any })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white text-base"
                 >
                   <option value="LOW">{t('admin.priorityLow')}</option>
                   <option value="MEDIUM">{t('admin.priorityMedium')}</option>
@@ -333,7 +335,7 @@ export default function TodoListPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   {t('admin.todoDueDate')}
                 </label>
                 <input
@@ -343,30 +345,30 @@ export default function TodoListPage() {
                     setNewTodo({ ...newTodo, dueDate: e.target.value })
                     if (errors.dueDate) setErrors({ ...errors, dueDate: undefined })
                   }}
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.dueDate ? 'border-red-500' : 'border-gray-300'
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white text-base ${
+                    errors.dueDate ? 'border-red-500 bg-red-50' : 'border-gray-300'
                   }`}
                 />
                 {errors.dueDate && (
-                  <p className="text-red-500 text-sm mt-1">{errors.dueDate}</p>
+                  <p className="text-red-500 text-sm mt-2">{errors.dueDate}</p>
                 )}
               </div>
             </div>
-            <div className="flex justify-end space-x-3">
+            <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200">
               <button
                 type="button"
                 onClick={() => {
                   setShowAddForm(false)
                   clearMessages()
                 }}
-                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+                className="px-6 py-2.5 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium"
                 disabled={submitting}
               >
                 {t('common.cancel')}
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                 disabled={submitting}
               >
                 {submitting ? 'Creating...' : t('common.save')}
@@ -408,16 +410,28 @@ export default function TodoListPage() {
                           </p>
                         )}
                         <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(todo.priority)}`}>
-                            {todo.priority}
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            todo.priority === 'HIGH' ? 'bg-red-100 text-red-800' :
+                            todo.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-green-100 text-green-800'
+                          }`}>
+                            {todo.priority === 'HIGH' ? '🔴 High' :
+                             todo.priority === 'MEDIUM' ? '🟡 Medium' :
+                             '🟢 Low'}
                           </span>
                           {todo.dueDate && (
-                            <span>Due: {formatDate(todo.dueDate)}</span>
+                            <span className="flex items-center">
+                              📅 Due: {formatDate(todo.dueDate)}
+                            </span>
                           )}
                           {todo.assignee && (
-                            <span>Assigned to: {todo.assignee.name}</span>
+                            <span className="flex items-center">
+                              👤 Assigned to: {todo.assignee.name}
+                            </span>
                           )}
-                          <span>Created by: {todo.creator.name}</span>
+                          <span className="flex items-center">
+                            ✨ Created by: {todo.creator.name}
+                          </span>
                         </div>
                       </div>
                     </div>
