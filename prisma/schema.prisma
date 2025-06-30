@@ -241,6 +241,7 @@ model Todo {
   priority    String    @default("MEDIUM") // LOW, MEDIUM, HIGH
   dueDate     DateTime?
   assignedTo  String?
+  position    Int       @default(0) // For drag and drop ordering
   createdBy   String
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt

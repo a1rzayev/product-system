@@ -4,6 +4,25 @@ import { useState, useEffect } from 'react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { 
+  DndContext, 
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent
+} from '@dnd-kit/core'
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import {
+  useSortable,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
 interface Todo {
   id: string
@@ -14,6 +33,7 @@ interface Todo {
   priority: 'LOW' | 'MEDIUM' | 'HIGH'
   dueDate?: string
   assignedTo?: string
+  position: number
   createdBy: string
   createdAt: string
   updatedAt: string
@@ -42,6 +62,296 @@ interface ValidationErrors {
   priority?: string
   dueDate?: string
   assignedTo?: string
+}
+
+// Sortable Todo Item Component
+function SortableTodoItem({ 
+  todo, 
+  onToggleComplete, 
+  onStatusUpdate, 
+  onDelete, 
+  onStartEdit, 
+  editingTodoId, 
+  editingTodo, 
+  setEditingTodo, 
+  handleUpdateTodo, 
+  handleCancelEdit, 
+  submitting, 
+  errors, 
+  setErrors, 
+  users, 
+  getPriorityColor, 
+  getStatusColor, 
+  getStatusIcon, 
+  formatDate, 
+  t 
+}: {
+  todo: Todo
+  onToggleComplete: (todoId: string, isCompleted: boolean) => void
+  onStatusUpdate: (todoId: string, newStatus: 'UNDONE' | 'IN_PROGRESS' | 'DONE') => void
+  onDelete: (todoId: string) => void
+  onStartEdit: (todo: Todo) => void
+  editingTodoId: string | null
+  editingTodo: any
+  setEditingTodo: (todo: any) => void
+  handleUpdateTodo: (e: React.FormEvent) => void
+  handleCancelEdit: () => void
+  submitting: boolean
+  errors: ValidationErrors
+  setErrors: (errors: ValidationErrors) => void
+  users: User[]
+  getPriorityColor: (priority: string) => string
+  getStatusColor: (status: string) => string
+  getStatusIcon: (status: string) => string
+  formatDate: (dateString: string) => string
+  t: (key: string) => string
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: todo.id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  }
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className={`p-6 border rounded-lg transition-all duration-200 cursor-move ${
+        todo.isCompleted 
+          ? 'bg-gray-50 border-gray-200 opacity-75' 
+          : 'bg-white border-gray-300 hover:border-gray-400 hover:shadow-sm'
+      }`}
+    >
+      {editingTodoId === todo.id ? (
+        // Edit Form
+        <div className="space-y-6">
+          <h3 className="text-lg font-semibold text-black">{t('admin.editTodo')}</h3>
+          <form onSubmit={handleUpdateTodo} className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('admin.todoTitle')} *
+              </label>
+              <input
+                type="text"
+                required
+                value={editingTodo.title}
+                onChange={(e) => {
+                  setEditingTodo({ ...editingTodo, title: e.target.value })
+                  if (errors.title) setErrors({ ...errors, title: undefined })
+                }}
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black text-base ${
+                  errors.title ? 'border-red-500 bg-red-50' : 'border-gray-300 bg-white'
+                }`}
+                placeholder="Enter todo title"
+              />
+              {errors.title && (
+                <p className="text-red-500 text-sm mt-2">{errors.title}</p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('admin.todoDescription')}
+              </label>
+              <textarea
+                value={editingTodo.description}
+                onChange={(e) => {
+                  setEditingTodo({ ...editingTodo, description: e.target.value })
+                  if (errors.description) setErrors({ ...errors, description: undefined })
+                }}
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black text-base ${
+                  errors.description ? 'border-red-500 bg-red-50' : 'border-gray-300 bg-white'
+                }`}
+                rows={4}
+                placeholder="Enter todo description (optional)"
+              />
+              {errors.description && (
+                <p className="text-red-500 text-sm mt-2">{errors.description}</p>
+              )}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('admin.todoPriority')}
+                </label>
+                <select
+                  value={editingTodo.priority}
+                  onChange={(e) => setEditingTodo({ ...editingTodo, priority: e.target.value as any })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white text-base"
+                >
+                  <option value="LOW">{t('admin.priorityLow')}</option>
+                  <option value="MEDIUM">{t('admin.priorityMedium')}</option>
+                  <option value="HIGH">{t('admin.priorityHigh')}</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('admin.todoDueDate')}
+                </label>
+                <input
+                  type="date"
+                  value={editingTodo.dueDate}
+                  onChange={(e) => {
+                    setEditingTodo({ ...editingTodo, dueDate: e.target.value })
+                    if (errors.dueDate) setErrors({ ...errors, dueDate: undefined })
+                  }}
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white text-base ${
+                    errors.dueDate ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                  }`}
+                />
+                {errors.dueDate && (
+                  <p className="text-red-500 text-sm mt-2">{errors.dueDate}</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Assign To (Admin Only) *
+                </label>
+                <select
+                  value={editingTodo.assignedTo}
+                  onChange={(e) => {
+                    setEditingTodo({ ...editingTodo, assignedTo: e.target.value })
+                    if (errors.assignedTo) setErrors({ ...errors, assignedTo: undefined })
+                  }}
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white text-base ${
+                    errors.assignedTo ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                  }`}
+                >
+                  <option value="">Select an admin</option>
+                  {users.map((user) => (
+                    <option key={user.id} value={user.id}>
+                      {user.name || user.email}
+                    </option>
+                  ))}
+                </select>
+                {errors.assignedTo && (
+                  <p className="text-red-500 text-sm mt-2">{errors.assignedTo}</p>
+                )}
+              </div>
+            </div>
+            <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200">
+              <button
+                type="button"
+                onClick={handleCancelEdit}
+                className="px-6 py-2.5 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                disabled={submitting}
+              >
+                {t('common.cancel')}
+              </button>
+              <button
+                type="submit"
+                className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                disabled={submitting}
+              >
+                {submitting ? 'Updating...' : t('common.save')}
+              </button>
+            </div>
+          </form>
+        </div>
+      ) : (
+        // Normal Todo Display
+        <div className="flex items-start justify-between">
+          <div className="flex items-start space-x-4 flex-1">
+            <div className="flex-shrink-0 mt-1">
+              <div 
+                className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-600 cursor-move"
+                title={t('admin.dragAndDrop.dragToReorder')}
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8 6a2 2 0 11-4 0 2 2 0 014 0zM8 12a2 2 0 11-4 0 2 2 0 014 0zM8 18a2 2 0 11-4 0 2 2 0 014 0zM20 6a2 2 0 11-4 0 2 2 0 014 0zM20 12a2 2 0 11-4 0 2 2 0 014 0zM20 18a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+            </div>
+            <div className="flex-1">
+              <h3 className={`text-lg font-medium mb-2 ${
+                todo.isCompleted ? 'line-through text-gray-500' : 'text-black'
+              }`}>
+                {todo.title}
+              </h3>
+              {todo.description && (
+                <p className={`text-base mb-3 ${
+                  todo.isCompleted ? 'text-gray-400' : 'text-gray-600'
+                }`}>
+                  {todo.description}
+                </p>
+              )}
+              <div className="flex items-center space-x-6 text-sm">
+                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(todo.status || 'UNDONE')}`}>
+                  {getStatusIcon(todo.status || 'UNDONE')} {(todo.status || 'UNDONE').replace('_', ' ')}
+                </span>
+                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                  todo.priority === 'HIGH' ? 'bg-red-100 text-red-800 border border-red-200' :
+                  todo.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' :
+                  'bg-green-100 text-green-800 border border-green-200'
+                }`}>
+                  {todo.priority === 'HIGH' ? '🔴 High' :
+                   todo.priority === 'MEDIUM' ? '🟡 Medium' :
+                   '🟢 Low'}
+                </span>
+                {todo.dueDate && (
+                  <span className="flex items-center text-black">
+                    📅 Due: {formatDate(todo.dueDate)}
+                  </span>
+                )}
+                {todo.assignee && (
+                  <span className="flex items-center text-black">
+                    👤 Assigned to: {todo.assignee.name}
+                  </span>
+                )}
+                <span className="flex items-center text-black">
+                  ✨ Created by: {todo.creator.name}
+                </span>
+              </div>
+              <div className="mt-3 flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <label className="text-sm font-medium text-black">Status:</label>
+                  <select
+                    value={todo.status || 'UNDONE'}
+                    onChange={(e) => onStatusUpdate(todo.id, e.target.value as any)}
+                    className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white"
+                  >
+                    <option value="UNDONE">⏳ Undone</option>
+                    <option value="IN_PROGRESS">🔄 In Progress</option>
+                    <option value="DONE">✅ Done</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => onStartEdit(todo)}
+              className="text-blue-600 hover:text-blue-800 transition-colors p-2 hover:bg-blue-50 rounded-lg"
+              title="Edit todo"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+            </button>
+            <button
+              onClick={() => onDelete(todo.id)}
+              className="text-red-600 hover:text-red-800 transition-colors p-2 hover:bg-red-50 rounded-lg"
+              title="Delete todo"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
 }
 
 export default function TodoListPage() {
@@ -78,6 +388,18 @@ export default function TodoListPage() {
     search: ''
   })
 
+  // Drag and Drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
+
   useEffect(() => {
     fetchTodos()
     fetchUsers()
@@ -94,6 +416,45 @@ export default function TodoListPage() {
       return () => clearTimeout(timer)
     }
   }, [successMessage])
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event
+
+    if (active.id !== over?.id) {
+      const oldIndex = todos.findIndex(todo => todo.id === active.id)
+      const newIndex = todos.findIndex(todo => todo.id === over?.id)
+
+      const newTodos = arrayMove(todos, oldIndex, newIndex)
+      setTodos(newTodos)
+
+      // Send the new order to the server
+      try {
+        const response = await fetch('/api/todos/reorder', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            todoIds: newTodos.map(todo => todo.id)
+          }),
+        })
+
+        if (response.ok) {
+          setSuccessMessage(t('admin.messages.reorderSuccess'))
+        } else {
+          console.error('Failed to reorder todos')
+          setErrorMessage(t('admin.messages.reorderError'))
+          // Revert the order if the server request failed
+          fetchTodos()
+        }
+      } catch (error) {
+        console.error('Error reordering todos:', error)
+        setErrorMessage(t('admin.messages.reorderError'))
+        // Revert the order if the server request failed
+        fetchTodos()
+      }
+    }
+  }
 
   const fetchUsers = async () => {
     try {
@@ -854,229 +1215,46 @@ export default function TodoListPage() {
               </button>
             </div>
           ) : (
-            <div className="space-y-4">
-              <div className="text-sm text-black font-medium mb-4">
-                Showing {getFilteredTodos().length} of {todos.length} todos
-              </div>
-              {getFilteredTodos().map((todo) => (
-                <div
-                  key={todo.id}
-                  className={`p-6 border rounded-lg transition-all duration-200 ${
-                    todo.isCompleted 
-                      ? 'bg-gray-50 border-gray-200 opacity-75' 
-                      : 'bg-white border-gray-300 hover:border-gray-400 hover:shadow-sm'
-                  }`}
-                >
-                  {editingTodoId === todo.id ? (
-                    // Edit Form
-                    <div className="space-y-6">
-                      <h3 className="text-lg font-semibold text-black">{t('admin.editTodo')}</h3>
-                      <form onSubmit={handleUpdateTodo} className="space-y-6">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            {t('admin.todoTitle')} *
-                          </label>
-                          <input
-                            type="text"
-                            required
-                            value={editingTodo.title}
-                            onChange={(e) => {
-                              setEditingTodo({ ...editingTodo, title: e.target.value })
-                              if (errors.title) setErrors({ ...errors, title: undefined })
-                            }}
-                            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black text-base ${
-                              errors.title ? 'border-red-500 bg-red-50' : 'border-gray-300 bg-white'
-                            }`}
-                            placeholder="Enter todo title"
-                          />
-                          {errors.title && (
-                            <p className="text-red-500 text-sm mt-2">{errors.title}</p>
-                          )}
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            {t('admin.todoDescription')}
-                          </label>
-                          <textarea
-                            value={editingTodo.description}
-                            onChange={(e) => {
-                              setEditingTodo({ ...editingTodo, description: e.target.value })
-                              if (errors.description) setErrors({ ...errors, description: undefined })
-                            }}
-                            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black text-base ${
-                              errors.description ? 'border-red-500 bg-red-50' : 'border-gray-300 bg-white'
-                            }`}
-                            rows={4}
-                            placeholder="Enter todo description (optional)"
-                          />
-                          {errors.description && (
-                            <p className="text-red-500 text-sm mt-2">{errors.description}</p>
-                          )}
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              {t('admin.todoPriority')}
-                            </label>
-                            <select
-                              value={editingTodo.priority}
-                              onChange={(e) => setEditingTodo({ ...editingTodo, priority: e.target.value as any })}
-                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white text-base"
-                            >
-                              <option value="LOW">{t('admin.priorityLow')}</option>
-                              <option value="MEDIUM">{t('admin.priorityMedium')}</option>
-                              <option value="HIGH">{t('admin.priorityHigh')}</option>
-                            </select>
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              {t('admin.todoDueDate')}
-                            </label>
-                            <input
-                              type="date"
-                              value={editingTodo.dueDate}
-                              onChange={(e) => {
-                                setEditingTodo({ ...editingTodo, dueDate: e.target.value })
-                                if (errors.dueDate) setErrors({ ...errors, dueDate: undefined })
-                              }}
-                              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white text-base ${
-                                errors.dueDate ? 'border-red-500 bg-red-50' : 'border-gray-300'
-                              }`}
-                            />
-                            {errors.dueDate && (
-                              <p className="text-red-500 text-sm mt-2">{errors.dueDate}</p>
-                            )}
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Assign To (Admin Only) *
-                            </label>
-                            <select
-                              value={editingTodo.assignedTo}
-                              onChange={(e) => {
-                                setEditingTodo({ ...editingTodo, assignedTo: e.target.value })
-                                if (errors.assignedTo) setErrors({ ...errors, assignedTo: undefined })
-                              }}
-                              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white text-base ${
-                                errors.assignedTo ? 'border-red-500 bg-red-50' : 'border-gray-300'
-                              }`}
-                            >
-                              <option value="">Select an admin</option>
-                              {users.map((user) => (
-                                <option key={user.id} value={user.id}>
-                                  {user.name || user.email}
-                                </option>
-                              ))}
-                            </select>
-                            {errors.assignedTo && (
-                              <p className="text-red-500 text-sm mt-2">{errors.assignedTo}</p>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200">
-                          <button
-                            type="button"
-                            onClick={handleCancelEdit}
-                            className="px-6 py-2.5 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium"
-                            disabled={submitting}
-                          >
-                            {t('common.cancel')}
-                          </button>
-                          <button
-                            type="submit"
-                            className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-                            disabled={submitting}
-                          >
-                            {submitting ? 'Updating...' : t('common.save')}
-                          </button>
-                        </div>
-                      </form>
-                    </div>
-                  ) : (
-                    // Normal Todo Display
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start space-x-4 flex-1">
-                        <div className="flex-1">
-                          <h3 className={`text-lg font-medium mb-2 ${
-                            todo.isCompleted ? 'line-through text-gray-500' : 'text-black'
-                          }`}>
-                            {todo.title}
-                          </h3>
-                          {todo.description && (
-                            <p className={`text-base mb-3 ${
-                              todo.isCompleted ? 'text-gray-400' : 'text-gray-600'
-                            }`}>
-                              {todo.description}
-                            </p>
-                          )}
-                          <div className="flex items-center space-x-6 text-sm">
-                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(todo.status || 'UNDONE')}`}>
-                              {getStatusIcon(todo.status || 'UNDONE')} {(todo.status || 'UNDONE').replace('_', ' ')}
-                            </span>
-                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                              todo.priority === 'HIGH' ? 'bg-red-100 text-red-800 border border-red-200' :
-                              todo.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' :
-                              'bg-green-100 text-green-800 border border-green-200'
-                            }`}>
-                              {todo.priority === 'HIGH' ? '🔴 High' :
-                               todo.priority === 'MEDIUM' ? '🟡 Medium' :
-                               '🟢 Low'}
-                            </span>
-                            {todo.dueDate && (
-                              <span className="flex items-center text-black">
-                                📅 Due: {formatDate(todo.dueDate)}
-                              </span>
-                            )}
-                            {todo.assignee && (
-                              <span className="flex items-center text-black">
-                                👤 Assigned to: {todo.assignee.name}
-                              </span>
-                            )}
-                            <span className="flex items-center text-black">
-                              ✨ Created by: {todo.creator.name}
-                            </span>
-                          </div>
-                          <div className="mt-3 flex items-center space-x-4">
-                            <div className="flex items-center space-x-2">
-                              <label className="text-sm font-medium text-black">Status:</label>
-                              <select
-                                value={todo.status || 'UNDONE'}
-                                onChange={(e) => handleStatusUpdate(todo.id, e.target.value as any)}
-                                className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white"
-                              >
-                                <option value="UNDONE">⏳ Undone</option>
-                                <option value="IN_PROGRESS">🔄 In Progress</option>
-                                <option value="DONE">✅ Done</option>
-                              </select>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <button
-                          onClick={() => handleStartEdit(todo)}
-                          className="text-blue-600 hover:text-blue-800 transition-colors p-2 hover:bg-blue-50 rounded-lg"
-                          title="Edit todo"
-                        >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => handleDeleteTodo(todo.id)}
-                          className="text-red-600 hover:text-red-800 transition-colors p-2 hover:bg-red-50 rounded-lg"
-                          title="Delete todo"
-                        >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  )}
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={getFilteredTodos().map(todo => todo.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="space-y-4">
+                  <div className="text-sm text-black font-medium mb-4">
+                    Showing {getFilteredTodos().length} of {todos.length} todos
+                  </div>
+                  {getFilteredTodos().map((todo) => (
+                    <SortableTodoItem
+                      key={todo.id}
+                      todo={todo}
+                      onToggleComplete={handleToggleComplete}
+                      onStatusUpdate={handleStatusUpdate}
+                      onDelete={handleDeleteTodo}
+                      onStartEdit={handleStartEdit}
+                      editingTodoId={editingTodoId}
+                      editingTodo={editingTodo}
+                      setEditingTodo={setEditingTodo}
+                      handleUpdateTodo={handleUpdateTodo}
+                      handleCancelEdit={handleCancelEdit}
+                      submitting={submitting}
+                      errors={errors}
+                      setErrors={setErrors}
+                      users={users}
+                      getPriorityColor={getPriorityColor}
+                      getStatusColor={getStatusColor}
+                      getStatusIcon={getStatusIcon}
+                      formatDate={formatDate}
+                      t={t}
+                    />
+                  ))}
                 </div>
-              ))}
-            </div>
+              </SortableContext>
+            </DndContext>
           )}
         </div>
       </div>

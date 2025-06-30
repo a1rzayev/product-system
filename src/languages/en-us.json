@@ -174,7 +174,14 @@
       "fetchError": "Failed to fetch todos",
       "createError": "Failed to create todo",
       "updateError": "Failed to update todo",
-      "deleteError": "Failed to delete todo"
+      "deleteError": "Failed to delete todo",
+      "reorderSuccess": "Todos reordered successfully!",
+      "reorderError": "Failed to reorder todos"
+    },
+    "dragAndDrop": {
+      "dragToReorder": "Drag to reorder",
+      "dropToReorder": "Drop to reorder",
+      "reordering": "Reordering..."
     }
   },
   "products": {
