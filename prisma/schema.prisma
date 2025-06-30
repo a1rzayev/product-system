@@ -28,6 +28,8 @@ model User {
   orders   Order[]
   reviews  Review[]
   cart     CartItem[]
+  createdTodos Todo[] @relation("TodoCreator")
+  assignedTodos Todo[] @relation("TodoAssignee")
 
   @@map("users")
 }
@@ -227,4 +229,24 @@ model CartItem {
 
   @@unique([userId, productId, variantId]) // One cart item per user per product variant
   @@map("cart_items")
+}
+
+// Todo items for admin tasks
+model Todo {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  isCompleted Boolean   @default(false)
+  priority    String    @default("MEDIUM") // LOW, MEDIUM, HIGH
+  dueDate     DateTime?
+  assignedTo  String?
+  createdBy   String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  creator   User   @relation("TodoCreator", fields: [createdBy], references: [id], onDelete: Cascade)
+  assignee  User?  @relation("TodoAssignee", fields: [assignedTo], references: [id], onDelete: SetNull)
+
+  @@map("todos")
 }
