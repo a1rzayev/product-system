@@ -680,21 +680,21 @@ export default function TodoListPage() {
           <h2 className="text-lg font-semibold mb-6 text-black">{t('admin.allTodos')}</h2>
           
           {/* Filters Section */}
-          <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-md font-medium text-gray-700">Filters</h3>
+          <div className="mb-6 p-6 bg-white rounded-lg border border-gray-200 shadow-sm">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-black">Filters</h3>
               <button
                 onClick={clearFilters}
-                className="text-sm text-gray-600 hover:text-gray-800 underline"
+                className="text-sm text-blue-600 hover:text-blue-800 font-medium underline"
               >
                 Clear all filters
               </button>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
               {/* Search Filter */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-black mb-2">
                   Search
                 </label>
                 <input
@@ -702,19 +702,19 @@ export default function TodoListPage() {
                   value={filters.search}
                   onChange={(e) => setFilters({ ...filters, search: e.target.value })}
                   placeholder="Search todos..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white"
                 />
               </div>
 
               {/* Status Filter */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-black mb-2">
                   Status
                 </label>
                 <select
                   value={filters.status}
                   onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white"
                 >
                   <option value="">All Status</option>
                   <option value="UNDONE">⏳ Undone</option>
@@ -725,13 +725,13 @@ export default function TodoListPage() {
 
               {/* Priority Filter */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-black mb-2">
                   Priority
                 </label>
                 <select
                   value={filters.priority}
                   onChange={(e) => setFilters({ ...filters, priority: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white"
                 >
                   <option value="">All Priorities</option>
                   <option value="LOW">🟢 Low</option>
@@ -742,26 +742,26 @@ export default function TodoListPage() {
 
               {/* Due Date Filter */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-black mb-2">
                   Due Date
                 </label>
                 <input
                   type="date"
                   value={filters.dueDate}
                   onChange={(e) => setFilters({ ...filters, dueDate: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white"
                 />
               </div>
 
               {/* Assigned To Filter */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-black mb-2">
                   Assigned To
                 </label>
                 <select
                   value={filters.assignedTo}
                   onChange={(e) => setFilters({ ...filters, assignedTo: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white"
                 >
                   <option value="">All Users</option>
                   {users.map((user) => (
@@ -775,58 +775,58 @@ export default function TodoListPage() {
 
             {/* Active Filters Display */}
             {Object.values(filters).some(filter => filter !== '') && (
-              <div className="mt-4 pt-4 border-t border-gray-200">
-                <div className="flex flex-wrap gap-2">
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                <div className="flex flex-wrap gap-3">
                   {filters.search && (
-                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+                    <span className="inline-flex items-center px-3 py-2 rounded-full text-sm bg-blue-100 text-blue-900 border border-blue-200 font-medium">
                       Search: "{filters.search}"
                       <button
                         onClick={() => setFilters({ ...filters, search: '' })}
-                        className="ml-1 text-blue-600 hover:text-blue-800"
+                        className="ml-2 text-blue-700 hover:text-blue-900 font-bold"
                       >
                         ×
                       </button>
                     </span>
                   )}
                   {filters.status && (
-                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
+                    <span className="inline-flex items-center px-3 py-2 rounded-full text-sm bg-green-100 text-green-900 border border-green-200 font-medium">
                       Status: {filters.status.replace('_', ' ')}
                       <button
                         onClick={() => setFilters({ ...filters, status: '' })}
-                        className="ml-1 text-green-600 hover:text-green-800"
+                        className="ml-2 text-green-700 hover:text-green-900 font-bold"
                       >
                         ×
                       </button>
                     </span>
                   )}
                   {filters.priority && (
-                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-yellow-100 text-yellow-800">
+                    <span className="inline-flex items-center px-3 py-2 rounded-full text-sm bg-yellow-100 text-yellow-900 border border-yellow-200 font-medium">
                       Priority: {filters.priority}
                       <button
                         onClick={() => setFilters({ ...filters, priority: '' })}
-                        className="ml-1 text-yellow-600 hover:text-yellow-800"
+                        className="ml-2 text-yellow-700 hover:text-yellow-900 font-bold"
                       >
                         ×
                       </button>
                     </span>
                   )}
                   {filters.dueDate && (
-                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-purple-100 text-purple-800">
+                    <span className="inline-flex items-center px-3 py-2 rounded-full text-sm bg-purple-100 text-purple-900 border border-purple-200 font-medium">
                       Due: {formatDate(filters.dueDate)}
                       <button
                         onClick={() => setFilters({ ...filters, dueDate: '' })}
-                        className="ml-1 text-purple-600 hover:text-purple-800"
+                        className="ml-2 text-purple-700 hover:text-purple-900 font-bold"
                       >
                         ×
                       </button>
                     </span>
                   )}
                   {filters.assignedTo && (
-                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-orange-100 text-orange-800">
+                    <span className="inline-flex items-center px-3 py-2 rounded-full text-sm bg-orange-100 text-orange-900 border border-orange-200 font-medium">
                       Assigned: {users.find(u => u.id === filters.assignedTo)?.name || 'Unknown'}
                       <button
                         onClick={() => setFilters({ ...filters, assignedTo: '' })}
-                        className="ml-1 text-orange-600 hover:text-orange-800"
+                        className="ml-2 text-orange-700 hover:text-orange-900 font-bold"
                       >
                         ×
                       </button>
@@ -839,23 +839,23 @@ export default function TodoListPage() {
 
           {todos.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500 text-lg mb-2">No todos found</p>
-              <p className="text-gray-400">Create your first todo to get started!</p>
+              <p className="text-black text-lg mb-2 font-medium">No todos found</p>
+              <p className="text-gray-600">Create your first todo to get started!</p>
             </div>
           ) : getFilteredTodos().length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500 text-lg mb-2">No todos match your filters</p>
-              <p className="text-gray-400">Try adjusting your filters or clear them to see all todos</p>
+              <p className="text-black text-lg mb-2 font-medium">No todos match your filters</p>
+              <p className="text-gray-600 mb-4">Try adjusting your filters or clear them to see all todos</p>
               <button
                 onClick={clearFilters}
-                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
               >
                 Clear all filters
               </button>
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="text-sm text-gray-600 mb-4">
+              <div className="text-sm text-black font-medium mb-4">
                 Showing {getFilteredTodos().length} of {todos.length} todos
               </div>
               {getFilteredTodos().map((todo) => (
@@ -1023,22 +1023,22 @@ export default function TodoListPage() {
                                '🟢 Low'}
                             </span>
                             {todo.dueDate && (
-                              <span className="flex items-center text-gray-600">
+                              <span className="flex items-center text-black">
                                 📅 Due: {formatDate(todo.dueDate)}
                               </span>
                             )}
                             {todo.assignee && (
-                              <span className="flex items-center text-gray-600">
+                              <span className="flex items-center text-black">
                                 👤 Assigned to: {todo.assignee.name}
                               </span>
                             )}
-                            <span className="flex items-center text-gray-600">
+                            <span className="flex items-center text-black">
                               ✨ Created by: {todo.creator.name}
                             </span>
                           </div>
                           <div className="mt-3 flex items-center space-x-4">
                             <div className="flex items-center space-x-2">
-                              <label className="text-sm font-medium text-gray-700">Status:</label>
+                              <label className="text-sm font-medium text-black">Status:</label>
                               <select
                                 value={todo.status || 'UNDONE'}
                                 onChange={(e) => handleStatusUpdate(todo.id, e.target.value as any)}
