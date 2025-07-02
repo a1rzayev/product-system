@@ -161,7 +161,9 @@
       "fetchError": "Todo-ları əldə etmək alınmadı",
       "createError": "Todo yaratmaq alınmadı",
       "updateError": "Todo yeniləmək alınmadı",
-      "deleteError": "Todo silmək alınmadı"
+      "deleteError": "Todo silmək alınmadı",
+      "reorderSuccess": "Todo-lar uğurla yenidən sıralandı!",
+      "reorderError": "Todo-ları yenidən sıralamaq alınmadı"
     },
     "validation": {
       "titleRequired": "Başlıq tələb olunur",
@@ -171,6 +173,11 @@
       "dueDatePast": "Bitmə tarixi keçmişdə ola bilməz",
       "assignedToRequired": "Zəhmət olmasa todo-nu kimə təyin etmək istədiyinizi seçin",
       "noOtherAdmins": "Başqa admin tapılmadı. Todo sizə təyin ediləcək."
+    },
+    "dragAndDrop": {
+      "dragToReorder": "Yenidən sıralamaq üçün sürükləyin",
+      "dropToReorder": "Yenidən sıralamaq üçün buraxın",
+      "reordering": "Yenidən sıralanır..."
     }
   },
   "products": {

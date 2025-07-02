@@ -28,9 +28,10 @@ export async function GET() {
           },
         },
       },
-      orderBy: {
-        createdAt: 'desc',
-      },
+      orderBy: [
+        { position: 'asc' },
+        { createdAt: 'desc' },
+      ],
     })
 
     return NextResponse.json(todos)
@@ -57,6 +58,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Title is required' }, { status: 400 })
     }
 
+    // Get the highest position to add new todo at the end
+    const maxPosition = await prisma.todo.aggregate({
+      _max: {
+        position: true,
+      },
+    })
+
+    const newPosition = (maxPosition._max.position || 0) + 1
+
     const todo = await prisma.todo.create({
       data: {
         title,
@@ -66,6 +76,7 @@ export async function POST(request: NextRequest) {
         dueDate: dueDate ? new Date(dueDate) : null,
         assignedTo: assignedTo || session.user.id, // Use provided assignee or default to current user
         createdBy: session.user.id, // Created by current user
+        position: newPosition, // Set position for drag and drop
       },
       include: {
         creator: {
