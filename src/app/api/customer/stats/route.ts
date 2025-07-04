@@ -22,17 +22,25 @@ export async function GET(request: NextRequest) {
       featuredProducts,
       totalOrders
     ] = await Promise.all([
-      // Total products (all products for now, could be filtered by customer later)
-      prisma.product.count(),
-      
-      // Active products
+      // Total products created by this customer
       prisma.product.count({
-        where: { isActive: true }
+        where: { customerId: session.user.id }
       }),
       
-      // Featured products
+      // Active products created by this customer
       prisma.product.count({
-        where: { isFeatured: true }
+        where: { 
+          customerId: session.user.id,
+          isActive: true 
+        }
+      }),
+      
+      // Featured products created by this customer
+      prisma.product.count({
+        where: { 
+          customerId: session.user.id,
+          isFeatured: true 
+        }
       }),
       
       // Total orders (all orders for now, could be filtered by customer later)

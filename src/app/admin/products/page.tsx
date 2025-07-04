@@ -87,6 +87,7 @@ export default function AdminProducts() {
         'Price': product.price,
         'SKU': product.sku,
         'Category': product.category?.name || 'No Category',
+        'Customer': product.customer ? `${product.customer.name || 'Unnamed'} (${product.customer.email})` : 'Admin',
         'Status': product.isActive ? 'Active' : 'Inactive',
         'Featured': product.isFeatured ? 'Yes' : 'No',
         'Slug': product.slug,
@@ -106,6 +107,7 @@ export default function AdminProducts() {
         { wch: 15 }, // Price
         { wch: 20 }, // SKU
         { wch: 20 }, // Category
+        { wch: 35 }, // Customer
         { wch: 15 }, // Status
         { wch: 15 }, // Featured
         { wch: 30 }, // Slug

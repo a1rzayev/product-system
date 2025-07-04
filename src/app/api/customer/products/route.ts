@@ -20,8 +20,11 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50')
     const skip = (page - 1) * limit
 
-    // Get products (for now, all products - could be filtered by customer later)
+    // Get products created by this customer
     const products = await prisma.product.findMany({
+      where: {
+        customerId: session.user.id
+      },
       skip,
       take: limit,
       include: {
@@ -45,8 +48,12 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    // Get total count
-    const total = await prisma.product.count()
+    // Get total count for this customer
+    const total = await prisma.product.count({
+      where: {
+        customerId: session.user.id
+      }
+    })
 
     return NextResponse.json({
       products,

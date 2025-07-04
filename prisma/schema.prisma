@@ -28,6 +28,7 @@ model User {
   orders   Order[]
   reviews  Review[]
   cart     CartItem[]
+  products Product[] @relation("CustomerProducts")
   createdTodos Todo[] @relation("TodoCreator")
   assignedTodos Todo[] @relation("TodoAssignee")
 
@@ -85,11 +86,13 @@ model Product {
   dimensions  String?  // JSON string for SQLite
   notes       String?  // Admin notes/comments
   categoryId  String
+  customerId  String?  // Which customer uploaded this product
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   // Relations
   category     Category        @relation(fields: [categoryId], references: [id])
+  customer     User?           @relation("CustomerProducts", fields: [customerId], references: [id], onDelete: SetNull)
   images       ProductImage[]
   variants     ProductVariant[]
   inventory    Inventory?

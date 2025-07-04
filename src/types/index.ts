@@ -59,9 +59,11 @@ export interface Product {
   }
   notes?: string
   categoryId: string
+  customerId?: string
   createdAt: Date
   updatedAt: Date
   category?: Category
+  customer?: User
   images?: ProductImage[]
   variants?: ProductVariant[]
   inventory?: Inventory

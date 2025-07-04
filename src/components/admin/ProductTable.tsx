@@ -159,6 +159,9 @@ export default function ProductTable({ products, onProductDeleted }: ProductTabl
                 Category
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Customer
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Price
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -205,6 +208,20 @@ export default function ProductTable({ products, onProductDeleted }: ProductTabl
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {product.category?.name || 'No Category'}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {product.customer ? (
+                    <div>
+                      <div className="font-medium text-gray-900">
+                        {product.customer.name || 'Unnamed Customer'}
+                      </div>
+                      <div className="text-gray-500 text-xs">
+                        {product.customer.email}
+                      </div>
+                    </div>
+                  ) : (
+                    <span className="text-gray-400">Admin</span>
+                  )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {formatPrice(product.price)}

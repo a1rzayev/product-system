@@ -108,6 +108,13 @@ export async function GET(request: NextRequest) {
             slug: true
           }
         },
+        customer: {
+          select: {
+            id: true,
+            name: true,
+            email: true
+          }
+        },
         images: {
           orderBy: {
             order: 'asc'
@@ -154,7 +161,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST - Create a new product (admin only)
+// POST - Create a new product (admin and customer)
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -163,7 +170,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
     }
 
-    if (session.user.role !== 'ADMIN') {
+    if (session.user.role !== 'ADMIN' && session.user.role !== 'CUSTOMER') {
       return NextResponse.json({ message: 'Forbidden' }, { status: 403 })
     }
 
@@ -287,6 +294,7 @@ export async function POST(request: NextRequest) {
         dimensions: body.dimensions ? JSON.stringify(body.dimensions) : null,
         notes: body.notes || null,
         categoryId: body.categoryId,
+        customerId: session.user.role === 'CUSTOMER' ? session.user.id : null,
         // Create images if provided
         images: body.images && body.images.length > 0 ? {
           create: body.images.map((image: any, index: number) => ({
