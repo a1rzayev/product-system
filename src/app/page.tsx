@@ -9,15 +9,19 @@ export default function Home() {
   const { data: session, status } = useSession()
   const { t } = useLanguage()
 
-  // Redirect admin users to admin dashboard
+  // Redirect admin and customer users to their respective dashboards
   useEffect(() => {
-    if (status === 'authenticated' && session?.user?.role === 'ADMIN') {
-      window.location.href = '/admin'
+    if (status === 'authenticated' && session?.user) {
+      if (session.user.role === 'ADMIN') {
+        window.location.href = '/admin'
+      } else if (session.user.role === 'CUSTOMER') {
+        window.location.href = '/customer'
+      }
     }
   }, [session, status])
 
-  // Show loading for admin users
-  if (status === 'loading' || (status === 'authenticated' && session?.user?.role === 'ADMIN')) {
+  // Show loading for admin and customer users
+  if (status === 'loading' || (status === 'authenticated' && (session?.user?.role === 'ADMIN' || session?.user?.role === 'CUSTOMER'))) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">

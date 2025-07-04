@@ -27,6 +27,8 @@ export default function Login() {
       console.log('Already authenticated, redirecting...')
       if (session.user.role === 'ADMIN') {
         window.location.href = '/admin'
+      } else if (session.user.role === 'CUSTOMER') {
+        window.location.href = '/customer'
       } else {
         window.location.href = redirectUrl
       }
@@ -76,6 +78,8 @@ export default function Login() {
           // Redirect based on user role or redirect URL
           if (session.user.role === 'ADMIN') {
             window.location.href = '/admin'
+          } else if (session.user.role === 'CUSTOMER') {
+            window.location.href = '/customer'
           } else {
             window.location.href = redirectUrl
           }
