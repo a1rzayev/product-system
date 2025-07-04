@@ -18,6 +18,9 @@ export default function AdminUsersPage() {
     CUSTOMER: 0,
     TOTAL: 0
   })
+  const [editingUser, setEditingUser] = useState<string | null>(null)
+  const [updatingRole, setUpdatingRole] = useState(false)
+  const [updateMessage, setUpdateMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
 
   const fetchUsers = useCallback(async (role?: string) => {
     try {
@@ -178,6 +181,44 @@ export default function AdminUsersPage() {
     )
   }
 
+  const updateUserRole = async (userId: string, newRole: string) => {
+    setUpdatingRole(true)
+    setUpdateMessage(null)
+    
+    try {
+      const response = await fetch(`/api/users/${userId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ role: newRole }),
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        setUpdateMessage({ type: 'success', text: result.message })
+        
+        // Refresh the users list and stats
+        await fetchUsers(selectedRole)
+        await fetchRoleStats()
+        
+        // Clear the editing state
+        setEditingUser(null)
+        
+        // Clear success message after 3 seconds
+        setTimeout(() => setUpdateMessage(null), 3000)
+      } else {
+        const errorData = await response.json()
+        setUpdateMessage({ type: 'error', text: errorData.message || 'Failed to update user role' })
+      }
+    } catch (error) {
+      console.error('Error updating user role:', error)
+      setUpdateMessage({ type: 'error', text: 'Failed to update user role' })
+    } finally {
+      setUpdatingRole(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -199,6 +240,17 @@ export default function AdminUsersPage() {
 
   return (
     <div className="space-y-6">
+      {/* Success/Error Messages */}
+      {updateMessage && (
+        <div className={`px-4 py-3 rounded-lg ${
+          updateMessage.type === 'success' 
+            ? 'bg-green-100 border border-green-400 text-green-700' 
+            : 'bg-red-100 border border-red-400 text-red-700'
+        }`}>
+          {updateMessage.text}
+        </div>
+      )}
+
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{t('users.title')}</h1>
@@ -297,6 +349,9 @@ export default function AdminUsersPage() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Joined
                   </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -325,13 +380,60 @@ export default function AdminUsersPage() {
                       {user.email}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {getRoleBadge(user.role)}
+                      {editingUser === user.id ? (
+                        <div className="flex items-center space-x-2">
+                          <select
+                            value={user.role}
+                            onChange={(e) => {
+                              const newRole = e.target.value
+                              updateUserRole(user.id, newRole)
+                            }}
+                            disabled={updatingRole}
+                            className="px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white disabled:opacity-50"
+                          >
+                            <option value="ADMIN">Admin</option>
+                            <option value="USER">User</option>
+                            <option value="CUSTOMER">Customer</option>
+                          </select>
+                          {updatingRole && (
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="flex items-center space-x-2">
+                          {getRoleBadge(user.role)}
+                          {user.role !== 'ADMIN' && (
+                            <button
+                              onClick={() => setEditingUser(user.id)}
+                              className="text-blue-600 hover:text-blue-800 text-xs"
+                            >
+                              Edit
+                            </button>
+                          )}
+                        </div>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {user._count?.orders || 0}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {new Date(user.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {editingUser === user.id ? (
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={() => setEditingUser(null)}
+                            className="text-gray-600 hover:text-gray-800 text-xs"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="text-gray-400 text-xs">
+                          -
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}
