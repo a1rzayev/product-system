@@ -13,6 +13,7 @@ export default function Login() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [isRedirecting, setIsRedirecting] = useState(false)
+  const [detectedRole, setDetectedRole] = useState<string | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
   const { data: session, status } = useSession()
@@ -53,6 +54,30 @@ export default function Login() {
         </div>
       </div>
     )
+  }
+
+  const detectUserRole = (email: string) => {
+    // Simple role detection based on email patterns
+    // You can customize this logic based on your needs
+    if (email.includes('admin') || email.includes('system')) {
+      return 'ADMIN'
+    } else if (email.includes('customer') || email.includes('seller') || email.includes('vendor')) {
+      return 'CUSTOMER'
+    }
+    return null
+  }
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const email = e.target.value
+    setEmail(email)
+    
+    // Detect role based on email
+    if (email) {
+      const role = detectUserRole(email.toLowerCase())
+      setDetectedRole(role)
+    } else {
+      setDetectedRole(null)
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -119,11 +144,49 @@ export default function Login() {
                 autoComplete="email"
                 required
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={handleEmailChange}
                 className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-black rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder={t('auth.email')}
               />
             </div>
+            
+            {/* Role Detection Display */}
+            {detectedRole && (
+              <div className={`p-3 rounded-md border ${
+                detectedRole === 'ADMIN' 
+                  ? 'bg-red-50 border-red-200 text-red-700' 
+                  : detectedRole === 'CUSTOMER'
+                  ? 'bg-blue-50 border-blue-200 text-blue-700'
+                  : 'bg-gray-50 border-gray-200 text-gray-700'
+              }`}>
+                <div className="flex items-center">
+                  <div className={`w-4 h-4 rounded-full mr-2 ${
+                    detectedRole === 'ADMIN' 
+                      ? 'bg-red-500' 
+                      : detectedRole === 'CUSTOMER'
+                      ? 'bg-blue-500'
+                      : 'bg-gray-500'
+                  }`}></div>
+                  <span className="text-sm font-medium">
+                    {detectedRole === 'ADMIN' 
+                      ? '🔧 Admin Panel Access' 
+                      : detectedRole === 'CUSTOMER'
+                      ? '🛍️ Customer Panel Access'
+                      : '👤 Regular User Access'
+                    }
+                  </span>
+                </div>
+                <p className="text-xs mt-1 opacity-75">
+                  {detectedRole === 'ADMIN' 
+                    ? 'You will be redirected to the admin dashboard after login.'
+                    : detectedRole === 'CUSTOMER'
+                    ? 'You will be redirected to the customer panel after login.'
+                    : 'You will be redirected to the main site after login.'
+                  }
+                </p>
+              </div>
+            )}
+            
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-black mb-1">
                 {t('auth.password')}
@@ -174,7 +237,7 @@ export default function Login() {
             </button>
           </div>
 
-          <div className="text-center">
+          <div className="text-center space-y-3">
             <p className="text-sm text-gray-600">
               {t('auth.dontHaveAccount')}{' '}
               <Link
@@ -184,6 +247,37 @@ export default function Login() {
                 {t('register.createAccount')}
               </Link>
             </p>
+            
+            {/* Role-specific links */}
+            {detectedRole && (
+              <div className="pt-3 border-t border-gray-200">
+                <p className="text-xs text-gray-500 mb-2">Quick Access:</p>
+                <div className="flex justify-center space-x-4">
+                  {detectedRole === 'CUSTOMER' && (
+                    <Link
+                      href="/customer"
+                      className="text-xs text-blue-600 hover:text-blue-500 font-medium"
+                    >
+                      🛍️ Customer Panel
+                    </Link>
+                  )}
+                  {detectedRole === 'ADMIN' && (
+                    <Link
+                      href="/admin"
+                      className="text-xs text-red-600 hover:text-red-500 font-medium"
+                    >
+                      🔧 Admin Panel
+                    </Link>
+                  )}
+                  <Link
+                    href="/"
+                    className="text-xs text-gray-600 hover:text-gray-500 font-medium"
+                  >
+                    🏠 Main Site
+                  </Link>
+                </div>
+              </div>
+            )}
           </div>
         </form>
       </div>
