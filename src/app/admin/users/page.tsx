@@ -11,10 +11,18 @@ export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true)
   const [exporting, setExporting] = useState(false)
   const [totalUsers, setTotalUsers] = useState(0)
+  const [selectedRole, setSelectedRole] = useState<string>('ALL')
+  const [roleStats, setRoleStats] = useState({
+    ADMIN: 0,
+    USER: 0,
+    CUSTOMER: 0,
+    TOTAL: 0
+  })
 
-  const fetchUsers = useCallback(async () => {
+  const fetchUsers = useCallback(async (role?: string) => {
     try {
-      const response = await fetch('/api/users?page=1&limit=50')
+      const roleParam = role && role !== 'ALL' ? `&role=${role}` : ''
+      const response = await fetch(`/api/users?page=1&limit=50${roleParam}`)
       if (!response.ok) {
         throw new Error('Failed to fetch users')
       }
@@ -28,15 +36,46 @@ export default function AdminUsersPage() {
     }
   }, [])
 
+  const fetchRoleStats = useCallback(async () => {
+    try {
+      const [adminResponse, userResponse, customerResponse, totalResponse] = await Promise.all([
+        fetch('/api/users?role=ADMIN&page=1&limit=1'),
+        fetch('/api/users?role=USER&page=1&limit=1'),
+        fetch('/api/users?role=CUSTOMER&page=1&limit=1'),
+        fetch('/api/users?page=1&limit=1')
+      ])
+
+      const [adminData, userData, customerData, totalData] = await Promise.all([
+        adminResponse.json(),
+        userResponse.json(),
+        customerResponse.json(),
+        totalResponse.json()
+      ])
+
+      setRoleStats({
+        ADMIN: adminData.pagination?.total || 0,
+        USER: userData.pagination?.total || 0,
+        CUSTOMER: customerData.pagination?.total || 0,
+        TOTAL: totalData.pagination?.total || 0
+      })
+    } catch (error) {
+      console.error('Error fetching role stats:', error)
+    }
+  }, [])
+
   useEffect(() => {
     fetchUsers()
-  }, [fetchUsers])
+    fetchRoleStats()
+  }, [fetchUsers, fetchRoleStats])
 
   const exportToExcel = async () => {
     setExporting(true)
     try {
+      // Use the current filter for export
+      const roleParam = selectedRole !== 'ALL' ? `&role=${selectedRole}` : ''
+      
       // First, check if we have a large dataset
-      const response = await fetch('/api/users?page=1&limit=1')
+      const response = await fetch(`/api/users?page=1&limit=1${roleParam}`)
       if (!response.ok) {
         throw new Error('Failed to check user count')
       }
@@ -48,7 +87,11 @@ export default function AdminUsersPage() {
       if (totalUsers > 1000) {
         // For large datasets, use the optimized endpoint
         const exportResponse = await fetch('/api/users?action=export-large', {
-          method: 'POST'
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ role: selectedRole !== 'ALL' ? selectedRole : undefined })
         })
         
         if (!exportResponse.ok) {
@@ -63,8 +106,7 @@ export default function AdminUsersPage() {
         const exportResult = await exportResponse.json()
         allUsers = exportResult.data
       } else {
-        // For smaller datasets, use the regular endpoint
-        const response = await fetch('/api/users?page=1&limit=5000')
+        const response = await fetch(`/api/users?page=1&limit=5000${roleParam}`)
         if (!response.ok) {
           throw new Error('Failed to fetch users for export')
         }
@@ -102,9 +144,10 @@ export default function AdminUsersPage() {
       // Add worksheet to workbook
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Users')
 
-      // Generate filename with current date
+      // Generate filename with current date and filter
       const date = new Date().toISOString().split('T')[0]
-      const filename = `users_export_${date}.xlsx`
+      const filterSuffix = selectedRole !== 'ALL' ? `_${selectedRole.toLowerCase()}` : ''
+      const filename = `users_export_${date}${filterSuffix}.xlsx`
 
       // Save the file
       XLSX.writeFile(workbook, filename)
@@ -184,10 +227,54 @@ export default function AdminUsersPage() {
 
       <div className="bg-white shadow rounded-lg">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-medium text-gray-900">{t('users.title')}</h2>
-          <p className="text-sm text-gray-600">
-            {totalUsers} {t('users.title').toLowerCase()} {t('common.total')}
-          </p>
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-lg font-medium text-gray-900">{t('users.title')}</h2>
+              <p className="text-sm text-gray-600">
+                {totalUsers} {t('users.title').toLowerCase()} {t('common.total')}
+              </p>
+            </div>
+            
+            {/* Role Filter */}
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <label className="text-sm font-medium text-gray-700">Filter by Role:</label>
+                <select
+                  value={selectedRole}
+                  onChange={(e) => {
+                    setSelectedRole(e.target.value)
+                    fetchUsers(e.target.value)
+                  }}
+                  className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-black bg-white"
+                >
+                  <option value="ALL">All Users ({roleStats.TOTAL})</option>
+                  <option value="ADMIN">Admins ({roleStats.ADMIN})</option>
+                  <option value="USER">Users ({roleStats.USER})</option>
+                  <option value="CUSTOMER">Customers ({roleStats.CUSTOMER})</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          
+          {/* Role Statistics */}
+          <div className="mt-4 grid grid-cols-4 gap-4">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+              <div className="text-2xl font-bold text-red-600">{roleStats.ADMIN}</div>
+              <div className="text-sm text-red-700">Admins</div>
+            </div>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <div className="text-2xl font-bold text-blue-600">{roleStats.USER}</div>
+              <div className="text-sm text-blue-700">Users</div>
+            </div>
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+              <div className="text-2xl font-bold text-green-600">{roleStats.CUSTOMER}</div>
+              <div className="text-sm text-green-700">Customers</div>
+            </div>
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+              <div className="text-2xl font-bold text-gray-600">{roleStats.TOTAL}</div>
+              <div className="text-sm text-gray-700">Total</div>
+            </div>
+          </div>
         </div>
         
         {users.length > 0 ? (
